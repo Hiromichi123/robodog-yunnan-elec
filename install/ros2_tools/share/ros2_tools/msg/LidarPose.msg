@@ -1,1 +1,0 @@
-/home/zhenzhen/ros2/robodog-yunnan-elec/ros2_tools/msg/LidarPose.msg

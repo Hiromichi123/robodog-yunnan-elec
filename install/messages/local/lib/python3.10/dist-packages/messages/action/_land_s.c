@@ -1,1 +1,0 @@
-/home/zhenzhen/ros2/robodog-yunnan-elec/build/messages/rosidl_generator_py/messages/action/_land_s.c

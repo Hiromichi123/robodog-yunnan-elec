@@ -1,1 +1,0 @@
-/home/zhenzhen/ros2/robodog-yunnan-elec/build/messages/rosidl_cmake/srv/SmartCarActuatorTest_Request.msg

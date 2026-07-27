@@ -1,1 +1,0 @@
-/home/zhenzhen/ros2/robodog-yunnan-elec/build/ros2_tools/rosidl_generator_c/ros2_tools/msg/detail/lidar_pose__functions.h

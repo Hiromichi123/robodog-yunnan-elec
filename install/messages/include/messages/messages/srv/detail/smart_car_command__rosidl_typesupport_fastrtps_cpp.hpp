@@ -1,1 +1,0 @@
-/home/zhenzhen/ros2/robodog-yunnan-elec/build/messages/rosidl_typesupport_fastrtps_cpp/messages/srv/detail/smart_car_command__rosidl_typesupport_fastrtps_cpp.hpp

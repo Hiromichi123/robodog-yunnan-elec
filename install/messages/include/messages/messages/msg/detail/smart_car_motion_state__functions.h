@@ -1,1 +1,0 @@
-/home/zhenzhen/ros2/robodog-yunnan-elec/build/messages/rosidl_generator_c/messages/msg/detail/smart_car_motion_state__functions.h

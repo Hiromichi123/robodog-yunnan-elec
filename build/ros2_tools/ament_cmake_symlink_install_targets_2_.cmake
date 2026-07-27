@@ -1,1 +1,0 @@
-ament_cmake_symlink_install_targets("TARGET_FILES" "/home/zhenzhen/ros2/robodog-yunnan-elec/build/ros2_tools/rosidl_generator_py/ros2_tools/ros2_tools_s__rosidl_typesupport_c.cpython-310-aarch64-linux-gnu.so" "TARGETS" "ros2_tools__rosidl_typesupport_c__pyext" "DESTINATION" "local/lib/python3.10/dist-packages/ros2_tools")

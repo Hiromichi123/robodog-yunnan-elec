@@ -1,6 +1,0 @@
-{
-  "package_name": "ros2_tools",
-  "non_idl_tuples": [
-    "/home/zhenzhen/ros2/robodog-yunnan-elec/ros2_tools:msg/LidarPose.msg"
-  ]
-}

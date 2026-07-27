@@ -1,1 +1,0 @@
-/home/zhenzhen/ros2/robodog-yunnan-elec/build/ros2_tools/rosidl_typesupport_fastrtps_cpp/ros2_tools/msg/detail/lidar_pose__rosidl_typesupport_fastrtps_cpp.hpp

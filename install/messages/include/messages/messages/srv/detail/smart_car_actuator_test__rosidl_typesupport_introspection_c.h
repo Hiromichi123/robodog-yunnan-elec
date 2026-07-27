@@ -1,1 +1,0 @@
-/home/zhenzhen/ros2/robodog-yunnan-elec/build/messages/rosidl_typesupport_introspection_c/messages/srv/detail/smart_car_actuator_test__rosidl_typesupport_introspection_c.h

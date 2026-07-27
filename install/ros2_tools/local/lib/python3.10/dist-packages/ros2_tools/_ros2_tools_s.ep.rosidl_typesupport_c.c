@@ -1,1 +1,0 @@
-/home/zhenzhen/ros2/robodog-yunnan-elec/build/ros2_tools/rosidl_generator_py/ros2_tools/_ros2_tools_s.ep.rosidl_typesupport_c.c

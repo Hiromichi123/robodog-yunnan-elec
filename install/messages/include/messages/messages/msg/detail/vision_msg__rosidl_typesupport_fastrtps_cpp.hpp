@@ -1,1 +1,0 @@
-/home/zhenzhen/ros2/robodog-yunnan-elec/build/messages/rosidl_typesupport_fastrtps_cpp/messages/msg/detail/vision_msg__rosidl_typesupport_fastrtps_cpp.hpp

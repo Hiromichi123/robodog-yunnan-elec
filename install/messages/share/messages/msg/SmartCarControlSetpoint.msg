@@ -1,1 +1,0 @@
-/home/zhenzhen/ros2/robodog-yunnan-elec/messages/msg/SmartCarControlSetpoint.msg

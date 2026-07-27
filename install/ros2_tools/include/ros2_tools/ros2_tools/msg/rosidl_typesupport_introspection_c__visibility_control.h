@@ -1,1 +1,0 @@
-/home/zhenzhen/ros2/robodog-yunnan-elec/build/ros2_tools/rosidl_typesupport_introspection_c/ros2_tools/msg/rosidl_typesupport_introspection_c__visibility_control.h

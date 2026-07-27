@@ -1,1 +1,0 @@
-/home/zhenzhen/ros2/robodog-yunnan-elec/core_2026/launch/hover_ladder.launch.py

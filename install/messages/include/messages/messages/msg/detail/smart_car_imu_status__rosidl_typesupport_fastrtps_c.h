@@ -1,1 +1,0 @@
-/home/zhenzhen/ros2/robodog-yunnan-elec/build/messages/rosidl_typesupport_fastrtps_c/messages/msg/detail/smart_car_imu_status__rosidl_typesupport_fastrtps_c.h
