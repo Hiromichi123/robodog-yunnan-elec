@@ -1,0 +1,129 @@
+cmake_minimum_required(VERSION 3.8)
+project(core_2026)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# ── 依赖 ──────────────────────────────────────────────────────
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(mavros_msgs REQUIRED)
+find_package(ros2_tools REQUIRED)
+find_package(messages REQUIRED)
+
+# ── 源文件 ────────────────────────────────────────────────────
+set(SOURCES
+  src/layer1_hal/drone_hal.cpp
+  src/layer2_control/pid_controller.cpp
+  src/layer2_control/flight_controller.cpp
+  src/layer3_mission/mission_executor.cpp
+  src/layer4_system/drone_system.cpp
+  src/main.cpp
+)
+
+set(CAR_MISSION_SOURCES
+  src/layer3_mission/car_mission_executor.cpp
+)
+
+set(TEST_MAX_CURVATURE_SOURCES
+  src/layer3_mission/test_max_curvature.cpp
+)
+
+# ── 机器狗源文件 ──────────────────────────────────────────
+set(DOG_SOURCES
+  src/layer1_hal/robot_dog_hal.cpp
+  src/layer2_control/pid_controller.cpp
+  src/layer2_control/flight_controller.cpp
+  src/layer3_mission/mission_executor.cpp
+  src/layer3_mission/dog_mission_executor.cpp
+  src/layer4_system/dog_system.cpp
+  src/main_dog.cpp
+)
+
+# ── 可执行文件 ────────────────────────────────────────────────
+add_executable(quad_node ${SOURCES})
+add_executable(car_mission_node ${CAR_MISSION_SOURCES})
+add_executable(test_max_curvature ${TEST_MAX_CURVATURE_SOURCES})
+add_executable(dog_node ${DOG_SOURCES})
+
+# ── 头文件路径 ────────────────────────────────────────────────
+target_include_directories(quad_node PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+  $<INSTALL_INTERFACE:include>
+)
+
+target_include_directories(car_mission_node PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+  $<INSTALL_INTERFACE:include>
+)
+
+target_include_directories(test_max_curvature PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+  $<INSTALL_INTERFACE:include>
+)
+
+target_include_directories(dog_node PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+  $<INSTALL_INTERFACE:include>
+)
+
+# ── 依赖链接 ──────────────────────────────────────────────────
+ament_target_dependencies(quad_node
+  rclcpp
+  geometry_msgs
+  nav_msgs
+  std_msgs
+  mavros_msgs
+  ros2_tools
+  messages
+)
+
+ament_target_dependencies(car_mission_node
+  rclcpp
+  geometry_msgs
+  nav_msgs
+  std_msgs
+  mavros_msgs
+  ros2_tools
+  messages
+)
+
+ament_target_dependencies(test_max_curvature
+  rclcpp
+  geometry_msgs
+  nav_msgs
+  std_msgs
+  mavros_msgs
+  ros2_tools
+  messages
+)
+
+ament_target_dependencies(dog_node
+  rclcpp
+  geometry_msgs
+  nav_msgs
+  std_msgs
+  ros2_tools
+  messages
+)
+
+# ── RPATH 设置 ────────────────────────────────────────────────
+set(CMAKE_INSTALL_RPATH /usr/local/lib)
+
+# ── 安装 ──────────────────────────────────────────────────────
+install(TARGETS quad_node car_mission_node test_max_curvature dog_node DESTINATION lib/${PROJECT_NAME})
+install(DIRECTORY launch/ DESTINATION share/${PROJECT_NAME}/)
+
+ament_package()

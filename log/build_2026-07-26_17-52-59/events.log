@@ -1,0 +1,7 @@
+[0.000000] (-) TimerEvent: {}
+[0.000206] (-) JobUnselected: {'identifier': 'messages'}
+[0.000418] (-) JobUnselected: {'identifier': 'ros2_tools'}
+[0.000809] (core_2026) JobQueued: {'identifier': 'core_2026', 'dependencies': OrderedDict([('ros2_tools', '/home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools')])}
+[0.001021] (core_2026) JobStarted: {'identifier': 'core_2026'}
+[0.035275] (core_2026) JobEnded: {'identifier': 'core_2026', 'rc': 1}
+[0.045857] (-) EventReactorShutdown: {}

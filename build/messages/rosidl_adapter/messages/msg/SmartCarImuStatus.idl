@@ -1,0 +1,43 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from messages/msg/SmartCarImuStatus.msg
+// generated code does not contain a copyright notice
+
+#include "builtin_interfaces/msg/Time.idl"
+
+module messages {
+  module msg {
+    struct SmartCarImuStatus {
+      builtin_interfaces::msg::Time stamp;
+
+      uint32 time_boot_ms;
+
+      uint32 sample_count;
+
+      uint32 overrun_count;
+
+      uint32 error_count;
+
+      int32 gyro_x_mdps;
+
+      int32 gyro_y_mdps;
+
+      int32 gyro_z_mdps;
+
+      float yaw_rate_raw_dps;
+
+      float yaw_rate_dps;
+
+      float gyro_bias_z_dps;
+
+      int16 accel_x_mg;
+
+      int16 accel_y_mg;
+
+      int16 accel_z_mg;
+
+      int16 temperature_c_x100;
+
+      uint8 calibrated;
+    };
+  };
+};

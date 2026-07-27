@@ -1,0 +1,25 @@
+{
+  "package_name": "ros2_tools",
+  "output_dir": "/home/zhenzhen/ros2/robodog-yunnan-elec/build/ros2_tools/rosidl_generator_rs/ros2_tools",
+  "template_dir": "/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs/share/rosidl_generator_rs/cmake/../resource",
+  "idl_tuples": [
+    "/home/zhenzhen/ros2/robodog-yunnan-elec/build/ros2_tools/rosidl_adapter/ros2_tools:msg/LidarPose.idl"
+  ],
+  "ros_interface_files": [
+    "/home/zhenzhen/ros2/robodog-yunnan-elec/build/ros2_tools/rosidl_adapter/ros2_tools/msg/LidarPose.idl"
+  ],
+  "target_dependencies": [
+    "/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs/share/rosidl_generator_rs/cmake/../../../lib/rosidl_generator_rs/rosidl_generator_rs",
+    "/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs/share/rosidl_generator_rs/cmake/../../../local/lib/python3.10/dist-packages/rosidl_generator_rs/__init__.py",
+    "/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs/share/rosidl_generator_rs/cmake/../resource/action.rs.em",
+    "/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs/share/rosidl_generator_rs/cmake/../resource/msg_idiomatic.rs.em",
+    "/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs/share/rosidl_generator_rs/cmake/../resource/msg_rmw.rs.em",
+    "/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs/share/rosidl_generator_rs/cmake/../resource/msg.rs.em",
+    "/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs/share/rosidl_generator_rs/cmake/../resource/srv_idiomatic.rs.em",
+    "/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs/share/rosidl_generator_rs/cmake/../resource/srv_rmw.rs.em",
+    "/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs/share/rosidl_generator_rs/cmake/../resource/srv.rs.em",
+    "/home/zhenzhen/ros2/robodog-yunnan-elec/build/ros2_tools/rosidl_adapter/ros2_tools/msg/LidarPose.idl",
+    "/home/zhenzhen/ros2/robodog-yunnan-elec/build/ros2_tools/rosidl_adapter/ros2_tools/msg/LidarPose.idl"
+  ],
+  "package_version": "0.0.0"
+}

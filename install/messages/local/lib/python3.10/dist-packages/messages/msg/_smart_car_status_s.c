@@ -1,0 +1,1 @@
+/home/zhenzhen/ros2/robodog-yunnan-elec/build/messages/rosidl_generator_py/messages/msg/_smart_car_status_s.c

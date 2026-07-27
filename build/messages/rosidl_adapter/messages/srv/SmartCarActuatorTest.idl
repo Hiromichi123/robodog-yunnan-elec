@@ -1,0 +1,32 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from messages/srv/SmartCarActuatorTest.srv
+// generated code does not contain a copyright notice
+
+
+module messages {
+  module srv {
+    module SmartCarActuatorTest_Request_Constants {
+      const uint16 TEST_SERVO_ANGLE = 1;
+      const uint16 TEST_SERVO_PWM = 2;
+      const uint16 TEST_MOTOR_RPM = 4;
+    };
+    struct SmartCarActuatorTest_Request {
+      uint16 test_mask;
+
+      float servo_angle_deg;
+
+      uint16 servo_pwm_us;
+
+      int16 motor1_rpm;
+
+      int16 motor2_rpm;
+
+      uint16 duration_ms;
+    };
+    struct SmartCarActuatorTest_Response {
+      boolean accepted;
+
+      string message;
+    };
+  };
+};

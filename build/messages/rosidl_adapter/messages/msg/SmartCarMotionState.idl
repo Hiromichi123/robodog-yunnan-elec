@@ -1,0 +1,33 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from messages/msg/SmartCarMotionState.msg
+// generated code does not contain a copyright notice
+
+#include "builtin_interfaces/msg/Time.idl"
+
+module messages {
+  module msg {
+    struct SmartCarMotionState {
+      builtin_interfaces::msg::Time stamp;
+
+      uint32 time_boot_ms;
+
+      float speed_mps;
+
+      float target_speed_mps;
+
+      float yaw_rate_dps;
+
+      float yaw_deg;
+
+      float curvature_meas;
+
+      float curvature_cmd;
+
+      float steering_angle_deg;
+
+      uint16 steering_pwm_us;
+
+      uint8 steering_clamped;
+    };
+  };
+};

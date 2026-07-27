@@ -1,0 +1,106 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-d7511c167d117f255ead.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5
+					]
+				}
+			],
+			"name" : "",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "core_2026",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "car_mission_node::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-car_mission_node-52c6b57f89e07eec5bb8.json",
+					"name" : "car_mission_node",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "core_2026_uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-core_2026_uninstall-9c5a326143b36d25f6c9.json",
+					"name" : "core_2026_uninstall",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "dog_node::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-dog_node-375ef564987373774108.json",
+					"name" : "dog_node",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "quad_node::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-quad_node-c9f0c77b1e550fec0056.json",
+					"name" : "quad_node",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "test_max_curvature::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-test_max_curvature-620ab281f6a43e13ca77.json",
+					"name" : "test_max_curvature",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-uninstall-79f4fd6165dbb2d737bb.json",
+					"name" : "uninstall",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/zhenzhen/ros2/robodog-yunnan-elec/build/core_2026",
+		"source" : "/home/zhenzhen/ros2/robodog-yunnan-elec/core_2026"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}

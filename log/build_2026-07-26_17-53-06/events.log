@@ -1,0 +1,1067 @@
+[0.000000] (-) TimerEvent: {}
+[0.000334] (messages) JobQueued: {'identifier': 'messages', 'dependencies': OrderedDict()}
+[0.000836] (ros2_tools) JobQueued: {'identifier': 'ros2_tools', 'dependencies': OrderedDict()}
+[0.001060] (core_2026) JobQueued: {'identifier': 'core_2026', 'dependencies': OrderedDict([('ros2_tools', '/home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools')])}
+[0.001269] (ros2_tools) JobStarted: {'identifier': 'ros2_tools'}
+[0.019014] (messages) JobStarted: {'identifier': 'messages'}
+[0.033233] (ros2_tools) JobProgress: {'identifier': 'ros2_tools', 'progress': 'cmake'}
+[0.034150] (ros2_tools) Command: {'cmd': ['/usr/bin/cmake', '/home/zhenzhen/ros2/robodog-yunnan-elec/ros2_tools', '-DAMENT_CMAKE_SYMLINK_INSTALL=1', '-DCMAKE_INSTALL_PREFIX=/home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools'], 'cwd': '/home/zhenzhen/ros2/robodog-yunnan-elec/build/ros2_tools', 'env': OrderedDict([('LESSOPEN', '| /usr/bin/lesspipe %s'), ('VSCODE_CWD', '/home/zhenzhen'), ('ANTHROPIC_MODEL', 'deepseek-v4-pro[1m]'), ('VSCODE_ESM_ENTRYPOINT', 'vs/workbench/api/node/extensionHostProcess'), ('AI_AGENT', 'claude-code_2-1-218_agent'), ('USER', 'zhenzhen'), ('SSH_CLIENT', '172.20.10.4 63729 22'), ('CLAUDE_CODE_ENTRYPOINT', 'claude-vscode'), ('VSCODE_NLS_CONFIG', '{"userLocale":"en","osLocale":"en","resolvedLanguage":"en","defaultMessagesFile":"/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/out/nls.messages.json","locale":"en","availableLanguages":{}}'), ('GIT_EDITOR', 'true'), ('VSCODE_HANDLES_UNCAUGHT_ERRORS', 'true'), ('XDG_SESSION_TYPE', 'tty'), ('CLAUDE_AGENT_SDK_VERSION', '0.3.218'), ('SHLVL', '0'), ('LD_LIBRARY_PATH', '/usr/local/lib:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools/lib:/home/zhenzhen/ros2/Quadcopter/install/messages/lib:/home/zhenzhen/ros2/Quadcopter/install/cv_tools/lib:/home/zhenzhen/ros2/ws_livox/install/livox_sdk2/lib:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2/lib:/home/zhenzhen/ros2/mavros/install/mavros_extras/lib:/home/zhenzhen/ros2/mavros/install/mavros/lib:/home/zhenzhen/ros2/mavros/install/mavros_msgs/lib:/home/zhenzhen/ros2/mavros/install/libmavconn/lib:/home/zhenzhen/ros2/mavros/install/geodesy/lib:/home/zhenzhen/ros2/mavros/install/geographic_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/test_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces/lib:/home/zhenzhen/ros2/ros2_rust/install/action_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/std_srvs/lib:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/std_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces/lib:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces/lib:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib'), ('BROWSER', '/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/bin/helpers/browser.sh'), ('MOTD_SHOWN', 'pam'), ('HOME', '/home/zhenzhen'), ('VSCODE_RECONNECTION_GRACE_TIME', '10800000'), ('NVM_BIN', '/home/zhenzhen/.nvm/versions/node/v24.4.1/bin'), ('VSCODE_IPC_HOOK_CLI', '/run/user/1000/vscode-ipc-eb786b2d-084e-4fc7-a5de-a3ace40a9921.sock'), ('NVM_INC', '/home/zhenzhen/.nvm/versions/node/v24.4.1/include/node'), ('JETSON_L4T', '36.4.0'), ('ANTHROPIC_DEFAULT_SONNET_MODEL', 'deepseek-v4-pro[1m]'), ('ROS_PYTHON_VERSION', '3'), ('JETSON_MODEL', 'NVIDIA Jetson Orin NX Engineering Reference Developer Kit'), ('CLAUDE_CODE_CHILD_SESSION', '1'), ('COPILOT_OTEL_FILE_EXPORTER_PATH', '/dev/null'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('GROUND_CAMERA', '/dev/ground'), ('NVM_DIR', '/home/zhenzhen/.nvm'), ('CPLUS_INCLUDE_PATH', '/usr/include/c++/11:/usr/include/aarch64-linux-gnu/c++/11'), ('VSCODE_L10N_BUNDLE_LOCATION', ''), ('COLCON_PREFIX_PATH', '/home/zhenzhen/ros2/Point-LIO/install:/home/zhenzhen/ros2/Quadcopter/install:/home/zhenzhen/ros2/ws_livox/install:/home/zhenzhen/ros2/mavros/install:/home/zhenzhen/ros2/ros2_rust/install'), ('CLAUDE_CODE_EFFORT_LEVEL', 'max'), ('API_TIMEOUT_MS', '3000000'), ('APPLICATION_INSIGHTS_NO_STATSBEAT', 'true'), ('ROS_DISTRO', 'humble'), ('LOGNAME', 'zhenzhen'), ('JETSON_MODULE', 'NVIDIA Jetson Orin NX (8GB ram)'), ('JETSON_SERIAL_NUMBER', '1424423004044'), ('VSCODE_HANDLES_SIGPIPE', 'true'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('XDG_SESSION_CLASS', 'user'), ('ANTHROPIC_BASE_URL', 'https://api.deepseek.com/anthropic'), ('XDG_SESSION_ID', '3'), ('VSCODE_CLI_REQUIRE_TOKEN', '9a5b7942-bcab-4977-9824-9274f356d8bc'), ('ROS_LOCALHOST_ONLY', '0'), ('ANTHROPIC_DEFAULT_OPUS_MODEL', 'deepseek-v4-pro[1m]'), ('MCP_CONNECTION_NONBLOCKING', 'true'), ('PATH', '/home/zhenzhen/.local/bin:/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/bin/remote-cli:/home/zhenzhen/.local/bin:/home/zhenzhen/.nvm/versions/node/v24.4.1/bin:/opt/ros/humble/bin:/home/zhenzhen/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin'), ('VSCODE_AGENT_FOLDER', '/home/zhenzhen/.vscode-server'), ('COREPACK_ENABLE_AUTO_PIN', '0'), ('XDG_RUNTIME_DIR', '/run/user/1000'), ('CLAUDE_EFFORT', 'max'), ('DISPLAY', ':0'), ('CLAUDE_PID', '12605'), ('NoDefaultCurrentDirectoryInExePath', '1'), ('LANG', 'en_US.UTF-8'), ('ANTHROPIC_DEFAULT_HAIKU_MODEL', 'deepseek-v4-pro[1m]'), ('LS_COLORS', ''), ('JETSON_SOC', 'tegra234'), ('ROS_DOMAIN_ID', '25'), ('AMENT_PREFIX_PATH', '/home/zhenzhen/ros2/Point-LIO/install/point_lio:/home/zhenzhen/ros2/Quadcopter/install/yolip:/home/zhenzhen/ros2/Quadcopter/install/core_2026:/home/zhenzhen/ros2/Quadcopter/install/vision_py:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools:/home/zhenzhen/ros2/Quadcopter/install/messages:/home/zhenzhen/ros2/Quadcopter/install/cv_tools:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2:/home/zhenzhen/ros2/mavros/install/mavros_extras:/home/zhenzhen/ros2/mavros/install/mavros:/home/zhenzhen/ros2/mavros/install/mavros_msgs:/home/zhenzhen/ros2/mavros/install/libmavconn:/home/zhenzhen/ros2/mavros/install/geographic_info:/home/zhenzhen/ros2/mavros/install/geodesy:/home/zhenzhen/ros2/mavros/install/geographic_msgs:/home/zhenzhen/ros2/ros2_rust/install/common_interfaces:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_msgs:/home/zhenzhen/ros2/ros2_rust/install/examples_worker_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_pub_sub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_client_service:/home/zhenzhen/ros2/ros2_rust/install/examples_parameter_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_logging_demo:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces:/home/zhenzhen/ros2/ros2_rust/install/action_msgs:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_interface_files:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_srvs:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs_py:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs:/home/zhenzhen/ros2/ros2_rust/install/rust_pubsub:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_msgs:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_message_demo:/home/zhenzhen/ros2/ros2_rust/install/rosidl_runtime_rs:/home/zhenzhen/ros2/ros2_rust/install/rclrs:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_runtime:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_generators:/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs:/opt/ros/humble'), ('SHELL', '/bin/bash'), ('ANTHROPIC_AUTH_TOKEN', 'sk-ea6e7dc596fd4841a53253befa9a8be0'), ('MXC_BIN_DIR', '/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/node_modules/@microsoft/mxc-sdk/bin'), ('ELECTRON_RUN_AS_NODE', '1'), ('CLAUDE_CODE_ENABLE_SDK_FILE_CHECKPOINTING', 'true'), ('CLAUDE_CODE_SESSION_ID', '9324ab2e-d78f-4b26-85f6-eefb89c40ed6'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('CLAUDECODE', '1'), ('JETSON_CUDA_ARCH_BIN', '8.7'), ('PWD', '/home/zhenzhen/ros2/robodog-yunnan-elec/build/ros2_tools'), ('SSH_CONNECTION', '172.20.10.4 63729 172.20.10.2 22'), ('NVM_CD_FLAGS', ''), ('XDG_DATA_DIRS', '/usr/share/gnome:/usr/local/share:/usr/share:/var/lib/snapd/desktop'), ('CLAUDE_CODE_EXECPATH', '/home/zhenzhen/.vscode-server/extensions/anthropic.claude-code-2.1.218-linux-arm64/resources/native-binary/claude'), ('CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC', '1'), ('PYTHONPATH', '/home/zhenzhen/ros2/Quadcopter/install/yolip/lib/python3.10/site-packages:/home/zhenzhen/ros2/Quadcopter/install/vision_py/lib/python3.10/site-packages:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/Quadcopter/install/messages/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/Quadcopter/install/cv_tools/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/mavros/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/mavros_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/geodesy/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/geographic_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/test_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/action_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/std_srvs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs_py/lib/python3.10/site-packages:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/std_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs/local/lib/python3.10/dist-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('CLAUDE_CODE_ENABLE_TASKS', '0'), ('COLCON', '1'), ('CLAUDE_CODE_SUBAGENT_MODEL', 'deepseek-v4-pro[1m]'), ('COPILOT_CLI_ENABLED_FEATURE_FLAGS', 'SHELL_SPAWN_BACKEND'), ('JETSON_JETPACK', '6.1'), ('CMAKE_PREFIX_PATH', '/home/zhenzhen/ros2/Point-LIO/install/point_lio:/home/zhenzhen/ros2/Quadcopter/install/core_2026:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools:/home/zhenzhen/ros2/Quadcopter/install/messages:/home/zhenzhen/ros2/Quadcopter/install/cv_tools:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2:/home/zhenzhen/ros2/mavros/install/mavros_extras:/home/zhenzhen/ros2/mavros/install/mavros:/home/zhenzhen/ros2/mavros/install/mavros_msgs:/home/zhenzhen/ros2/mavros/install/libmavconn:/home/zhenzhen/ros2/mavros/install/geographic_info:/home/zhenzhen/ros2/mavros/install/geodesy:/home/zhenzhen/ros2/mavros/install/geographic_msgs:/home/zhenzhen/ros2/ros2_rust/install/common_interfaces:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_msgs:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces:/home/zhenzhen/ros2/ros2_rust/install/action_msgs:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_interface_files:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_srvs:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_msgs:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_runtime:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_generators:/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs:/home/zhenzhen/ros2/Quadcopter/install/yolip:/home/zhenzhen/ros2/Quadcopter/install/vision_py:/home/zhenzhen/ros2/ros2_rust/install/examples_worker_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_pub_sub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_client_service:/home/zhenzhen/ros2/ros2_rust/install/examples_parameter_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_logging_demo:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs_py:/home/zhenzhen/ros2/ros2_rust/install/rust_pubsub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_message_demo:/home/zhenzhen/ros2/ros2_rust/install/rosidl_runtime_rs:/home/zhenzhen/ros2/ros2_rust/install/rclrs:/opt/ros/humble'), ('JETSON_P_NUMBER', 'p3767-0001')]), 'shell': False}
+[0.038579] (messages) JobProgress: {'identifier': 'messages', 'progress': 'cmake'}
+[0.039496] (messages) Command: {'cmd': ['/usr/bin/cmake', '/home/zhenzhen/ros2/robodog-yunnan-elec/messages', '-DAMENT_CMAKE_SYMLINK_INSTALL=1', '-DCMAKE_INSTALL_PREFIX=/home/zhenzhen/ros2/robodog-yunnan-elec/install/messages'], 'cwd': '/home/zhenzhen/ros2/robodog-yunnan-elec/build/messages', 'env': OrderedDict([('LESSOPEN', '| /usr/bin/lesspipe %s'), ('VSCODE_CWD', '/home/zhenzhen'), ('ANTHROPIC_MODEL', 'deepseek-v4-pro[1m]'), ('VSCODE_ESM_ENTRYPOINT', 'vs/workbench/api/node/extensionHostProcess'), ('AI_AGENT', 'claude-code_2-1-218_agent'), ('USER', 'zhenzhen'), ('SSH_CLIENT', '172.20.10.4 63729 22'), ('CLAUDE_CODE_ENTRYPOINT', 'claude-vscode'), ('VSCODE_NLS_CONFIG', '{"userLocale":"en","osLocale":"en","resolvedLanguage":"en","defaultMessagesFile":"/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/out/nls.messages.json","locale":"en","availableLanguages":{}}'), ('GIT_EDITOR', 'true'), ('VSCODE_HANDLES_UNCAUGHT_ERRORS', 'true'), ('XDG_SESSION_TYPE', 'tty'), ('CLAUDE_AGENT_SDK_VERSION', '0.3.218'), ('SHLVL', '0'), ('LD_LIBRARY_PATH', '/usr/local/lib:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools/lib:/home/zhenzhen/ros2/Quadcopter/install/messages/lib:/home/zhenzhen/ros2/Quadcopter/install/cv_tools/lib:/home/zhenzhen/ros2/ws_livox/install/livox_sdk2/lib:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2/lib:/home/zhenzhen/ros2/mavros/install/mavros_extras/lib:/home/zhenzhen/ros2/mavros/install/mavros/lib:/home/zhenzhen/ros2/mavros/install/mavros_msgs/lib:/home/zhenzhen/ros2/mavros/install/libmavconn/lib:/home/zhenzhen/ros2/mavros/install/geodesy/lib:/home/zhenzhen/ros2/mavros/install/geographic_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/test_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces/lib:/home/zhenzhen/ros2/ros2_rust/install/action_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/std_srvs/lib:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/std_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces/lib:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces/lib:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib'), ('BROWSER', '/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/bin/helpers/browser.sh'), ('MOTD_SHOWN', 'pam'), ('HOME', '/home/zhenzhen'), ('VSCODE_RECONNECTION_GRACE_TIME', '10800000'), ('NVM_BIN', '/home/zhenzhen/.nvm/versions/node/v24.4.1/bin'), ('VSCODE_IPC_HOOK_CLI', '/run/user/1000/vscode-ipc-eb786b2d-084e-4fc7-a5de-a3ace40a9921.sock'), ('NVM_INC', '/home/zhenzhen/.nvm/versions/node/v24.4.1/include/node'), ('JETSON_L4T', '36.4.0'), ('ANTHROPIC_DEFAULT_SONNET_MODEL', 'deepseek-v4-pro[1m]'), ('ROS_PYTHON_VERSION', '3'), ('JETSON_MODEL', 'NVIDIA Jetson Orin NX Engineering Reference Developer Kit'), ('CLAUDE_CODE_CHILD_SESSION', '1'), ('COPILOT_OTEL_FILE_EXPORTER_PATH', '/dev/null'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('GROUND_CAMERA', '/dev/ground'), ('NVM_DIR', '/home/zhenzhen/.nvm'), ('CPLUS_INCLUDE_PATH', '/usr/include/c++/11:/usr/include/aarch64-linux-gnu/c++/11'), ('VSCODE_L10N_BUNDLE_LOCATION', ''), ('COLCON_PREFIX_PATH', '/home/zhenzhen/ros2/Point-LIO/install:/home/zhenzhen/ros2/Quadcopter/install:/home/zhenzhen/ros2/ws_livox/install:/home/zhenzhen/ros2/mavros/install:/home/zhenzhen/ros2/ros2_rust/install'), ('CLAUDE_CODE_EFFORT_LEVEL', 'max'), ('API_TIMEOUT_MS', '3000000'), ('APPLICATION_INSIGHTS_NO_STATSBEAT', 'true'), ('ROS_DISTRO', 'humble'), ('LOGNAME', 'zhenzhen'), ('JETSON_MODULE', 'NVIDIA Jetson Orin NX (8GB ram)'), ('JETSON_SERIAL_NUMBER', '1424423004044'), ('VSCODE_HANDLES_SIGPIPE', 'true'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('XDG_SESSION_CLASS', 'user'), ('ANTHROPIC_BASE_URL', 'https://api.deepseek.com/anthropic'), ('XDG_SESSION_ID', '3'), ('VSCODE_CLI_REQUIRE_TOKEN', '9a5b7942-bcab-4977-9824-9274f356d8bc'), ('ROS_LOCALHOST_ONLY', '0'), ('ANTHROPIC_DEFAULT_OPUS_MODEL', 'deepseek-v4-pro[1m]'), ('MCP_CONNECTION_NONBLOCKING', 'true'), ('PATH', '/home/zhenzhen/.local/bin:/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/bin/remote-cli:/home/zhenzhen/.local/bin:/home/zhenzhen/.nvm/versions/node/v24.4.1/bin:/opt/ros/humble/bin:/home/zhenzhen/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin'), ('VSCODE_AGENT_FOLDER', '/home/zhenzhen/.vscode-server'), ('COREPACK_ENABLE_AUTO_PIN', '0'), ('XDG_RUNTIME_DIR', '/run/user/1000'), ('CLAUDE_EFFORT', 'max'), ('DISPLAY', ':0'), ('CLAUDE_PID', '12605'), ('NoDefaultCurrentDirectoryInExePath', '1'), ('LANG', 'en_US.UTF-8'), ('ANTHROPIC_DEFAULT_HAIKU_MODEL', 'deepseek-v4-pro[1m]'), ('LS_COLORS', ''), ('JETSON_SOC', 'tegra234'), ('ROS_DOMAIN_ID', '25'), ('AMENT_PREFIX_PATH', '/home/zhenzhen/ros2/Point-LIO/install/point_lio:/home/zhenzhen/ros2/Quadcopter/install/yolip:/home/zhenzhen/ros2/Quadcopter/install/core_2026:/home/zhenzhen/ros2/Quadcopter/install/vision_py:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools:/home/zhenzhen/ros2/Quadcopter/install/messages:/home/zhenzhen/ros2/Quadcopter/install/cv_tools:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2:/home/zhenzhen/ros2/mavros/install/mavros_extras:/home/zhenzhen/ros2/mavros/install/mavros:/home/zhenzhen/ros2/mavros/install/mavros_msgs:/home/zhenzhen/ros2/mavros/install/libmavconn:/home/zhenzhen/ros2/mavros/install/geographic_info:/home/zhenzhen/ros2/mavros/install/geodesy:/home/zhenzhen/ros2/mavros/install/geographic_msgs:/home/zhenzhen/ros2/ros2_rust/install/common_interfaces:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_msgs:/home/zhenzhen/ros2/ros2_rust/install/examples_worker_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_pub_sub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_client_service:/home/zhenzhen/ros2/ros2_rust/install/examples_parameter_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_logging_demo:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces:/home/zhenzhen/ros2/ros2_rust/install/action_msgs:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_interface_files:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_srvs:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs_py:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs:/home/zhenzhen/ros2/ros2_rust/install/rust_pubsub:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_msgs:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_message_demo:/home/zhenzhen/ros2/ros2_rust/install/rosidl_runtime_rs:/home/zhenzhen/ros2/ros2_rust/install/rclrs:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_runtime:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_generators:/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs:/opt/ros/humble'), ('SHELL', '/bin/bash'), ('ANTHROPIC_AUTH_TOKEN', 'sk-ea6e7dc596fd4841a53253befa9a8be0'), ('MXC_BIN_DIR', '/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/node_modules/@microsoft/mxc-sdk/bin'), ('ELECTRON_RUN_AS_NODE', '1'), ('CLAUDE_CODE_ENABLE_SDK_FILE_CHECKPOINTING', 'true'), ('CLAUDE_CODE_SESSION_ID', '9324ab2e-d78f-4b26-85f6-eefb89c40ed6'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('CLAUDECODE', '1'), ('JETSON_CUDA_ARCH_BIN', '8.7'), ('PWD', '/home/zhenzhen/ros2/robodog-yunnan-elec/build/messages'), ('SSH_CONNECTION', '172.20.10.4 63729 172.20.10.2 22'), ('NVM_CD_FLAGS', ''), ('XDG_DATA_DIRS', '/usr/share/gnome:/usr/local/share:/usr/share:/var/lib/snapd/desktop'), ('CLAUDE_CODE_EXECPATH', '/home/zhenzhen/.vscode-server/extensions/anthropic.claude-code-2.1.218-linux-arm64/resources/native-binary/claude'), ('CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC', '1'), ('PYTHONPATH', '/home/zhenzhen/ros2/Quadcopter/install/yolip/lib/python3.10/site-packages:/home/zhenzhen/ros2/Quadcopter/install/vision_py/lib/python3.10/site-packages:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/Quadcopter/install/messages/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/Quadcopter/install/cv_tools/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/mavros/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/mavros_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/geodesy/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/geographic_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/test_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/action_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/std_srvs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs_py/lib/python3.10/site-packages:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/std_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs/local/lib/python3.10/dist-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('CLAUDE_CODE_ENABLE_TASKS', '0'), ('COLCON', '1'), ('CLAUDE_CODE_SUBAGENT_MODEL', 'deepseek-v4-pro[1m]'), ('COPILOT_CLI_ENABLED_FEATURE_FLAGS', 'SHELL_SPAWN_BACKEND'), ('JETSON_JETPACK', '6.1'), ('CMAKE_PREFIX_PATH', '/home/zhenzhen/ros2/Point-LIO/install/point_lio:/home/zhenzhen/ros2/Quadcopter/install/core_2026:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools:/home/zhenzhen/ros2/Quadcopter/install/messages:/home/zhenzhen/ros2/Quadcopter/install/cv_tools:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2:/home/zhenzhen/ros2/mavros/install/mavros_extras:/home/zhenzhen/ros2/mavros/install/mavros:/home/zhenzhen/ros2/mavros/install/mavros_msgs:/home/zhenzhen/ros2/mavros/install/libmavconn:/home/zhenzhen/ros2/mavros/install/geographic_info:/home/zhenzhen/ros2/mavros/install/geodesy:/home/zhenzhen/ros2/mavros/install/geographic_msgs:/home/zhenzhen/ros2/ros2_rust/install/common_interfaces:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_msgs:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces:/home/zhenzhen/ros2/ros2_rust/install/action_msgs:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_interface_files:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_srvs:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_msgs:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_runtime:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_generators:/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs:/home/zhenzhen/ros2/Quadcopter/install/yolip:/home/zhenzhen/ros2/Quadcopter/install/vision_py:/home/zhenzhen/ros2/ros2_rust/install/examples_worker_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_pub_sub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_client_service:/home/zhenzhen/ros2/ros2_rust/install/examples_parameter_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_logging_demo:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs_py:/home/zhenzhen/ros2/ros2_rust/install/rust_pubsub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_message_demo:/home/zhenzhen/ros2/ros2_rust/install/rosidl_runtime_rs:/home/zhenzhen/ros2/ros2_rust/install/rclrs:/opt/ros/humble'), ('JETSON_P_NUMBER', 'p3767-0001')]), 'shell': False}
+[0.099266] (-) TimerEvent: {}
+[0.198308] (ros2_tools) StdoutLine: {'line': b'-- The C compiler identification is GNU 11.4.0\n'}
+[0.199032] (messages) StdoutLine: {'line': b'-- The C compiler identification is GNU 11.4.0\n'}
+[0.199429] (-) TimerEvent: {}
+[0.299752] (-) TimerEvent: {}
+[0.315855] (ros2_tools) StdoutLine: {'line': b'-- The CXX compiler identification is GNU 11.4.0\n'}
+[0.317393] (messages) StdoutLine: {'line': b'-- The CXX compiler identification is GNU 11.4.0\n'}
+[0.338233] (ros2_tools) StdoutLine: {'line': b'-- Detecting C compiler ABI info\n'}
+[0.338965] (messages) StdoutLine: {'line': b'-- Detecting C compiler ABI info\n'}
+[0.399927] (-) TimerEvent: {}
+[0.489198] (messages) StdoutLine: {'line': b'-- Detecting C compiler ABI info - done\n'}
+[0.490893] (ros2_tools) StdoutLine: {'line': b'-- Detecting C compiler ABI info - done\n'}
+[0.500039] (-) TimerEvent: {}
+[0.513202] (messages) StdoutLine: {'line': b'-- Check for working C compiler: /usr/bin/cc - skipped\n'}
+[0.513573] (ros2_tools) StdoutLine: {'line': b'-- Check for working C compiler: /usr/bin/cc - skipped\n'}
+[0.514026] (ros2_tools) StdoutLine: {'line': b'-- Detecting C compile features\n'}
+[0.514446] (messages) StdoutLine: {'line': b'-- Detecting C compile features\n'}
+[0.515450] (ros2_tools) StdoutLine: {'line': b'-- Detecting C compile features - done\n'}
+[0.515804] (messages) StdoutLine: {'line': b'-- Detecting C compile features - done\n'}
+[0.522308] (ros2_tools) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info\n'}
+[0.526335] (messages) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info\n'}
+[0.600235] (-) TimerEvent: {}
+[0.695465] (ros2_tools) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info - done\n'}
+[0.700409] (-) TimerEvent: {}
+[0.707460] (ros2_tools) StdoutLine: {'line': b'-- Check for working CXX compiler: /usr/bin/c++ - skipped\n'}
+[0.708036] (ros2_tools) StdoutLine: {'line': b'-- Detecting CXX compile features\n'}
+[0.708491] (ros2_tools) StdoutLine: {'line': b'-- Detecting CXX compile features - done\n'}
+[0.721280] (messages) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info - done\n'}
+[0.724414] (ros2_tools) StdoutLine: {'line': b'-- Found ament_cmake: 1.3.11 (/opt/ros/humble/share/ament_cmake/cmake)\n'}
+[0.743411] (messages) StdoutLine: {'line': b'-- Check for working CXX compiler: /usr/bin/c++ - skipped\n'}
+[0.743969] (messages) StdoutLine: {'line': b'-- Detecting CXX compile features\n'}
+[0.744828] (messages) StdoutLine: {'line': b'-- Detecting CXX compile features - done\n'}
+[0.758111] (messages) StdoutLine: {'line': b'-- Found ament_cmake: 1.3.11 (/opt/ros/humble/share/ament_cmake/cmake)\n'}
+[0.800542] (-) TimerEvent: {}
+[0.900893] (-) TimerEvent: {}
+[1.001254] (-) TimerEvent: {}
+[1.101613] (-) TimerEvent: {}
+[1.121487] (ros2_tools) StdoutLine: {'line': b'-- Found Python3: /usr/bin/python3 (found version "3.10.12") found components: Interpreter \n'}
+[1.163000] (messages) StdoutLine: {'line': b'-- Found Python3: /usr/bin/python3 (found version "3.10.12") found components: Interpreter \n'}
+[1.201771] (-) TimerEvent: {}
+[1.280266] (ros2_tools) StdoutLine: {'line': b'-- Override CMake install command with custom implementation using symlinks instead of copying resources\n'}
+[1.301887] (-) TimerEvent: {}
+[1.319668] (messages) StdoutLine: {'line': b'-- Override CMake install command with custom implementation using symlinks instead of copying resources\n'}
+[1.402100] (-) TimerEvent: {}
+[1.446242] (ros2_tools) StdoutLine: {'line': b'-- Found rclcpp: 16.0.12 (/opt/ros/humble/share/rclcpp/cmake)\n'}
+[1.486096] (messages) StdoutLine: {'line': b'-- Found rclcpp: 16.0.12 (/opt/ros/humble/share/rclcpp/cmake)\n'}
+[1.502245] (-) TimerEvent: {}
+[1.590524] (ros2_tools) StdoutLine: {'line': b'-- Found rosidl_generator_c: 3.1.6 (/opt/ros/humble/share/rosidl_generator_c/cmake)\n'}
+[1.602329] (-) TimerEvent: {}
+[1.611156] (ros2_tools) StdoutLine: {'line': b'-- Found rosidl_adapter: 3.1.6 (/opt/ros/humble/share/rosidl_adapter/cmake)\n'}
+[1.616582] (messages) StdoutLine: {'line': b'-- Found rosidl_generator_c: 3.1.6 (/opt/ros/humble/share/rosidl_generator_c/cmake)\n'}
+[1.635870] (messages) StdoutLine: {'line': b'-- Found rosidl_adapter: 3.1.6 (/opt/ros/humble/share/rosidl_adapter/cmake)\n'}
+[1.638877] (ros2_tools) StdoutLine: {'line': b'-- Found rosidl_generator_cpp: 3.1.6 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)\n'}
+[1.660632] (messages) StdoutLine: {'line': b'-- Found rosidl_generator_cpp: 3.1.6 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)\n'}
+[1.675792] (ros2_tools) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[1.694044] (messages) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[1.702441] (-) TimerEvent: {}
+[1.725541] (ros2_tools) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[1.738500] (messages) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[1.802594] (-) TimerEvent: {}
+[1.877007] (messages) StdoutLine: {'line': b'-- Found rmw_implementation_cmake: 6.1.2 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)\n'}
+[1.877469] (ros2_tools) StdoutLine: {'line': b'-- Found rmw_implementation_cmake: 6.1.2 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)\n'}
+[1.893620] (messages) StdoutLine: {'line': b'-- Found rmw_fastrtps_cpp: 6.2.7 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)\n'}
+[1.894034] (ros2_tools) StdoutLine: {'line': b'-- Found rmw_fastrtps_cpp: 6.2.7 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)\n'}
+[1.902717] (-) TimerEvent: {}
+[2.003020] (-) TimerEvent: {}
+[2.103402] (-) TimerEvent: {}
+[2.134270] (messages) StdoutLine: {'line': b'-- Found OpenSSL: /usr/lib/aarch64-linux-gnu/libcrypto.so (found version "3.0.2")  \n'}
+[2.134955] (ros2_tools) StdoutLine: {'line': b'-- Found OpenSSL: /usr/lib/aarch64-linux-gnu/libcrypto.so (found version "3.0.2")  \n'}
+[2.203578] (-) TimerEvent: {}
+[2.210528] (messages) StdoutLine: {'line': b'-- Found FastRTPS: /opt/ros/humble/include  \n'}
+[2.210952] (ros2_tools) StdoutLine: {'line': b'-- Found FastRTPS: /opt/ros/humble/include  \n'}
+[2.299082] (ros2_tools) StdoutLine: {'line': b"-- Using RMW implementation 'rmw_fastrtps_cpp' as default\n"}
+[2.300509] (messages) StdoutLine: {'line': b"-- Using RMW implementation 'rmw_fastrtps_cpp' as default\n"}
+[2.303630] (-) TimerEvent: {}
+[2.339242] (messages) StdoutLine: {'line': b'-- Looking for pthread.h\n'}
+[2.339591] (ros2_tools) StdoutLine: {'line': b'-- Looking for pthread.h\n'}
+[2.403830] (-) TimerEvent: {}
+[2.478109] (messages) StdoutLine: {'line': b'-- Looking for pthread.h - found\n'}
+[2.478842] (messages) StdoutLine: {'line': b'-- Performing Test CMAKE_HAVE_LIBC_PTHREAD\n'}
+[2.501581] (ros2_tools) StdoutLine: {'line': b'-- Looking for pthread.h - found\n'}
+[2.501989] (ros2_tools) StdoutLine: {'line': b'-- Performing Test CMAKE_HAVE_LIBC_PTHREAD\n'}
+[2.504182] (-) TimerEvent: {}
+[2.604488] (-) TimerEvent: {}
+[2.628805] (messages) StdoutLine: {'line': b'-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success\n'}
+[2.631173] (messages) StdoutLine: {'line': b'-- Found Threads: TRUE  \n'}
+[2.651690] (ros2_tools) StdoutLine: {'line': b'-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success\n'}
+[2.653650] (ros2_tools) StdoutLine: {'line': b'-- Found Threads: TRUE  \n'}
+[2.704663] (-) TimerEvent: {}
+[2.768582] (ros2_tools) StdoutLine: {'line': b'-- Found rosidl_default_generators: 1.2.0 (/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_generators/share/rosidl_default_generators/cmake)\n'}
+[2.768982] (messages) StdoutLine: {'line': b'-- Found rosidl_default_generators: 1.2.0 (/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_generators/share/rosidl_default_generators/cmake)\n'}
+[2.804749] (-) TimerEvent: {}
+[2.815700] (messages) StdoutLine: {'line': b'-- Found sensor_msgs: 4.9.0 (/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs/share/sensor_msgs/cmake)\n'}
+[2.816109] (ros2_tools) StdoutLine: {'line': b'-- Found geometry_msgs: 4.9.0 (/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs/share/geometry_msgs/cmake)\n'}
+[2.847107] (ros2_tools) StdoutLine: {'line': b'-- Found tf2: 0.25.13 (/opt/ros/humble/share/tf2/cmake)\n'}
+[2.880312] (ros2_tools) StdoutLine: {'line': b'-- Found tf2_geometry_msgs: 0.25.13 (/opt/ros/humble/share/tf2_geometry_msgs/cmake)\n'}
+[2.904930] (-) TimerEvent: {}
+[2.937382] (ros2_tools) StdoutLine: {'line': b'-- Found eigen3_cmake_module: 0.1.1 (/opt/ros/humble/share/eigen3_cmake_module/cmake)\n'}
+[2.940053] (ros2_tools) StdoutLine: {'line': b'-- Found Eigen3: TRUE (found version "3.4.0") \n'}
+[2.940316] (ros2_tools) StdoutLine: {'line': b'-- Ensuring Eigen3 include directory is part of orocos-kdl CMake target\n'}
+[3.005072] (-) TimerEvent: {}
+[3.105439] (-) TimerEvent: {}
+[3.164335] (ros2_tools) StdoutLine: {'line': b'-- Found nav_msgs: 4.9.0 (/home/zhenzhen/ros2/ros2_rust/install/nav_msgs/share/nav_msgs/cmake)\n'}
+[3.196313] (ros2_tools) StdoutLine: {'line': b'-- Found sensor_msgs: 4.9.0 (/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs/share/sensor_msgs/cmake)\n'}
+[3.205524] (-) TimerEvent: {}
+[3.242601] (ros2_tools) StdoutLine: {'line': b'-- Found OpenCV: /usr (found version "4.5.4") \n'}
+[3.254614] (ros2_tools) StdoutLine: {'line': b'-- Found cv_bridge: 3.2.1 (/opt/ros/humble/share/cv_bridge/cmake)\n'}
+[3.305690] (-) TimerEvent: {}
+[3.406077] (-) TimerEvent: {}
+[3.506459] (-) TimerEvent: {}
+[3.606789] (-) TimerEvent: {}
+[3.707128] (-) TimerEvent: {}
+[3.807474] (-) TimerEvent: {}
+[3.861279] (ros2_tools) StdoutLine: {'line': b'-- Found ament_cmake_ros: 0.10.0 (/opt/ros/humble/share/ament_cmake_ros/cmake)\n'}
+[3.862057] (messages) StdoutLine: {'line': b'-- Found ament_cmake_ros: 0.10.0 (/opt/ros/humble/share/ament_cmake_ros/cmake)\n'}
+[3.907680] (-) TimerEvent: {}
+[4.008059] (-) TimerEvent: {}
+[4.108676] (-) TimerEvent: {}
+[4.209096] (-) TimerEvent: {}
+[4.309508] (-) TimerEvent: {}
+[4.409905] (-) TimerEvent: {}
+[4.510266] (-) TimerEvent: {}
+[4.610674] (-) TimerEvent: {}
+[4.682232] (ros2_tools) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[4.710801] (-) TimerEvent: {}
+[4.811146] (-) TimerEvent: {}
+[4.913852] (-) TimerEvent: {}
+[4.987381] (ros2_tools) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[5.014022] (-) TimerEvent: {}
+[5.031109] (messages) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[5.114209] (-) TimerEvent: {}
+[5.214645] (-) TimerEvent: {}
+[5.221387] (ros2_tools) StdoutLine: {'line': b'-- Found PythonInterp: /usr/bin/python3 (found suitable version "3.10.12", minimum required is "3.6") \n'}
+[5.245081] (ros2_tools) StdoutLine: {'line': b'-- Found python_cmake_module: 0.10.0 (/opt/ros/humble/share/python_cmake_module/cmake)\n'}
+[5.314849] (-) TimerEvent: {}
+[5.319426] (ros2_tools) StdoutLine: {'line': b'-- Found PythonLibs: /usr/lib/aarch64-linux-gnu/libpython3.10.so (found suitable version "3.10.12", minimum required is "3.5") \n'}
+[5.319982] (ros2_tools) StdoutLine: {'line': b'-- Using PYTHON_EXECUTABLE: /usr/bin/python3\n'}
+[5.320279] (ros2_tools) StdoutLine: {'line': b'-- Using PYTHON_INCLUDE_DIRS: /usr/include/python3.10\n'}
+[5.320590] (ros2_tools) StdoutLine: {'line': b'-- Using PYTHON_LIBRARIES: /usr/lib/aarch64-linux-gnu/libpython3.10.so\n'}
+[5.376220] (ros2_tools) StdoutLine: {'line': b'-- Found PythonExtra: .so  \n'}
+[5.414984] (-) TimerEvent: {}
+[5.459760] (messages) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[5.515178] (-) TimerEvent: {}
+[5.571732] (ros2_tools) StdoutLine: {'line': b'-- Found ament_lint_auto: 0.12.12 (/opt/ros/humble/share/ament_lint_auto/cmake)\n'}
+[5.615316] (-) TimerEvent: {}
+[5.672858] (ros2_tools) StdoutLine: {'line': b"-- Added test 'cppcheck' to perform static code analysis on C / C++ code\n"}
+[5.673781] (ros2_tools) StdoutLine: {'line': b'-- Configured cppcheck include dirs: $<BUILD_INTERFACE:/home/zhenzhen/ros2/robodog-yunnan-elec/ros2_tools/include>\n'}
+[5.673945] (ros2_tools) StdoutLine: {'line': b'-- Configured cppcheck exclude dirs and/or files: \n'}
+[5.676720] (ros2_tools) StdoutLine: {'line': b"-- Added test 'lint_cmake' to check CMake code style\n"}
+[5.679687] (ros2_tools) StdoutLine: {'line': b"-- Added test 'uncrustify' to check C / C++ code style\n"}
+[5.679860] (ros2_tools) StdoutLine: {'line': b'-- Configured uncrustify additional arguments: \n'}
+[5.682177] (ros2_tools) StdoutLine: {'line': b"-- Added test 'xmllint' to check XML markup files\n"}
+[5.691249] (ros2_tools) StdoutLine: {'line': b'-- Configuring done\n'}
+[5.715418] (-) TimerEvent: {}
+[5.760322] (messages) StdoutLine: {'line': b'-- Found PythonInterp: /usr/bin/python3 (found suitable version "3.10.12", minimum required is "3.6") \n'}
+[5.782005] (messages) StdoutLine: {'line': b'-- Found python_cmake_module: 0.10.0 (/opt/ros/humble/share/python_cmake_module/cmake)\n'}
+[5.803421] (ros2_tools) StdoutLine: {'line': b'-- Generating done\n'}
+[5.815531] (-) TimerEvent: {}
+[5.832117] (ros2_tools) StdoutLine: {'line': b'-- Build files have been written to: /home/zhenzhen/ros2/robodog-yunnan-elec/build/ros2_tools\n'}
+[5.869555] (messages) StdoutLine: {'line': b'-- Found PythonLibs: /usr/lib/aarch64-linux-gnu/libpython3.10.so (found suitable version "3.10.12", minimum required is "3.5") \n'}
+[5.870336] (messages) StdoutLine: {'line': b'-- Using PYTHON_EXECUTABLE: /usr/bin/python3\n'}
+[5.871323] (messages) StdoutLine: {'line': b'-- Using PYTHON_INCLUDE_DIRS: /usr/include/python3.10\n'}
+[5.871990] (messages) StdoutLine: {'line': b'-- Using PYTHON_LIBRARIES: /usr/lib/aarch64-linux-gnu/libpython3.10.so\n'}
+[5.872169] (ros2_tools) CommandEnded: {'returncode': 0}
+[5.873159] (ros2_tools) JobProgress: {'identifier': 'ros2_tools', 'progress': 'build'}
+[5.874733] (ros2_tools) Command: {'cmd': ['/usr/bin/cmake', '--build', '/home/zhenzhen/ros2/robodog-yunnan-elec/build/ros2_tools', '--', '-j6', '-l6'], 'cwd': '/home/zhenzhen/ros2/robodog-yunnan-elec/build/ros2_tools', 'env': OrderedDict([('LESSOPEN', '| /usr/bin/lesspipe %s'), ('VSCODE_CWD', '/home/zhenzhen'), ('ANTHROPIC_MODEL', 'deepseek-v4-pro[1m]'), ('VSCODE_ESM_ENTRYPOINT', 'vs/workbench/api/node/extensionHostProcess'), ('AI_AGENT', 'claude-code_2-1-218_agent'), ('USER', 'zhenzhen'), ('SSH_CLIENT', '172.20.10.4 63729 22'), ('CLAUDE_CODE_ENTRYPOINT', 'claude-vscode'), ('VSCODE_NLS_CONFIG', '{"userLocale":"en","osLocale":"en","resolvedLanguage":"en","defaultMessagesFile":"/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/out/nls.messages.json","locale":"en","availableLanguages":{}}'), ('GIT_EDITOR', 'true'), ('VSCODE_HANDLES_UNCAUGHT_ERRORS', 'true'), ('XDG_SESSION_TYPE', 'tty'), ('CLAUDE_AGENT_SDK_VERSION', '0.3.218'), ('SHLVL', '0'), ('LD_LIBRARY_PATH', '/usr/local/lib:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools/lib:/home/zhenzhen/ros2/Quadcopter/install/messages/lib:/home/zhenzhen/ros2/Quadcopter/install/cv_tools/lib:/home/zhenzhen/ros2/ws_livox/install/livox_sdk2/lib:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2/lib:/home/zhenzhen/ros2/mavros/install/mavros_extras/lib:/home/zhenzhen/ros2/mavros/install/mavros/lib:/home/zhenzhen/ros2/mavros/install/mavros_msgs/lib:/home/zhenzhen/ros2/mavros/install/libmavconn/lib:/home/zhenzhen/ros2/mavros/install/geodesy/lib:/home/zhenzhen/ros2/mavros/install/geographic_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/test_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces/lib:/home/zhenzhen/ros2/ros2_rust/install/action_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/std_srvs/lib:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/std_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces/lib:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces/lib:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib'), ('BROWSER', '/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/bin/helpers/browser.sh'), ('MOTD_SHOWN', 'pam'), ('HOME', '/home/zhenzhen'), ('VSCODE_RECONNECTION_GRACE_TIME', '10800000'), ('NVM_BIN', '/home/zhenzhen/.nvm/versions/node/v24.4.1/bin'), ('VSCODE_IPC_HOOK_CLI', '/run/user/1000/vscode-ipc-eb786b2d-084e-4fc7-a5de-a3ace40a9921.sock'), ('NVM_INC', '/home/zhenzhen/.nvm/versions/node/v24.4.1/include/node'), ('JETSON_L4T', '36.4.0'), ('ANTHROPIC_DEFAULT_SONNET_MODEL', 'deepseek-v4-pro[1m]'), ('ROS_PYTHON_VERSION', '3'), ('JETSON_MODEL', 'NVIDIA Jetson Orin NX Engineering Reference Developer Kit'), ('CLAUDE_CODE_CHILD_SESSION', '1'), ('COPILOT_OTEL_FILE_EXPORTER_PATH', '/dev/null'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('GROUND_CAMERA', '/dev/ground'), ('NVM_DIR', '/home/zhenzhen/.nvm'), ('CPLUS_INCLUDE_PATH', '/usr/include/c++/11:/usr/include/aarch64-linux-gnu/c++/11'), ('VSCODE_L10N_BUNDLE_LOCATION', ''), ('COLCON_PREFIX_PATH', '/home/zhenzhen/ros2/Point-LIO/install:/home/zhenzhen/ros2/Quadcopter/install:/home/zhenzhen/ros2/ws_livox/install:/home/zhenzhen/ros2/mavros/install:/home/zhenzhen/ros2/ros2_rust/install'), ('CLAUDE_CODE_EFFORT_LEVEL', 'max'), ('API_TIMEOUT_MS', '3000000'), ('APPLICATION_INSIGHTS_NO_STATSBEAT', 'true'), ('ROS_DISTRO', 'humble'), ('LOGNAME', 'zhenzhen'), ('JETSON_MODULE', 'NVIDIA Jetson Orin NX (8GB ram)'), ('JETSON_SERIAL_NUMBER', '1424423004044'), ('VSCODE_HANDLES_SIGPIPE', 'true'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('XDG_SESSION_CLASS', 'user'), ('ANTHROPIC_BASE_URL', 'https://api.deepseek.com/anthropic'), ('XDG_SESSION_ID', '3'), ('VSCODE_CLI_REQUIRE_TOKEN', '9a5b7942-bcab-4977-9824-9274f356d8bc'), ('ROS_LOCALHOST_ONLY', '0'), ('ANTHROPIC_DEFAULT_OPUS_MODEL', 'deepseek-v4-pro[1m]'), ('MCP_CONNECTION_NONBLOCKING', 'true'), ('PATH', '/home/zhenzhen/.local/bin:/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/bin/remote-cli:/home/zhenzhen/.local/bin:/home/zhenzhen/.nvm/versions/node/v24.4.1/bin:/opt/ros/humble/bin:/home/zhenzhen/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin'), ('VSCODE_AGENT_FOLDER', '/home/zhenzhen/.vscode-server'), ('COREPACK_ENABLE_AUTO_PIN', '0'), ('XDG_RUNTIME_DIR', '/run/user/1000'), ('CLAUDE_EFFORT', 'max'), ('DISPLAY', ':0'), ('CLAUDE_PID', '12605'), ('NoDefaultCurrentDirectoryInExePath', '1'), ('LANG', 'en_US.UTF-8'), ('ANTHROPIC_DEFAULT_HAIKU_MODEL', 'deepseek-v4-pro[1m]'), ('LS_COLORS', ''), ('JETSON_SOC', 'tegra234'), ('ROS_DOMAIN_ID', '25'), ('AMENT_PREFIX_PATH', '/home/zhenzhen/ros2/Point-LIO/install/point_lio:/home/zhenzhen/ros2/Quadcopter/install/yolip:/home/zhenzhen/ros2/Quadcopter/install/core_2026:/home/zhenzhen/ros2/Quadcopter/install/vision_py:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools:/home/zhenzhen/ros2/Quadcopter/install/messages:/home/zhenzhen/ros2/Quadcopter/install/cv_tools:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2:/home/zhenzhen/ros2/mavros/install/mavros_extras:/home/zhenzhen/ros2/mavros/install/mavros:/home/zhenzhen/ros2/mavros/install/mavros_msgs:/home/zhenzhen/ros2/mavros/install/libmavconn:/home/zhenzhen/ros2/mavros/install/geographic_info:/home/zhenzhen/ros2/mavros/install/geodesy:/home/zhenzhen/ros2/mavros/install/geographic_msgs:/home/zhenzhen/ros2/ros2_rust/install/common_interfaces:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_msgs:/home/zhenzhen/ros2/ros2_rust/install/examples_worker_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_pub_sub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_client_service:/home/zhenzhen/ros2/ros2_rust/install/examples_parameter_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_logging_demo:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces:/home/zhenzhen/ros2/ros2_rust/install/action_msgs:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_interface_files:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_srvs:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs_py:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs:/home/zhenzhen/ros2/ros2_rust/install/rust_pubsub:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_msgs:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_message_demo:/home/zhenzhen/ros2/ros2_rust/install/rosidl_runtime_rs:/home/zhenzhen/ros2/ros2_rust/install/rclrs:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_runtime:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_generators:/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs:/opt/ros/humble'), ('SHELL', '/bin/bash'), ('ANTHROPIC_AUTH_TOKEN', 'sk-ea6e7dc596fd4841a53253befa9a8be0'), ('MXC_BIN_DIR', '/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/node_modules/@microsoft/mxc-sdk/bin'), ('ELECTRON_RUN_AS_NODE', '1'), ('CLAUDE_CODE_ENABLE_SDK_FILE_CHECKPOINTING', 'true'), ('CLAUDE_CODE_SESSION_ID', '9324ab2e-d78f-4b26-85f6-eefb89c40ed6'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('CLAUDECODE', '1'), ('JETSON_CUDA_ARCH_BIN', '8.7'), ('PWD', '/home/zhenzhen/ros2/robodog-yunnan-elec/build/ros2_tools'), ('SSH_CONNECTION', '172.20.10.4 63729 172.20.10.2 22'), ('NVM_CD_FLAGS', ''), ('XDG_DATA_DIRS', '/usr/share/gnome:/usr/local/share:/usr/share:/var/lib/snapd/desktop'), ('CLAUDE_CODE_EXECPATH', '/home/zhenzhen/.vscode-server/extensions/anthropic.claude-code-2.1.218-linux-arm64/resources/native-binary/claude'), ('CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC', '1'), ('PYTHONPATH', '/home/zhenzhen/ros2/Quadcopter/install/yolip/lib/python3.10/site-packages:/home/zhenzhen/ros2/Quadcopter/install/vision_py/lib/python3.10/site-packages:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/Quadcopter/install/messages/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/Quadcopter/install/cv_tools/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/mavros/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/mavros_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/geodesy/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/geographic_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/test_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/action_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/std_srvs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs_py/lib/python3.10/site-packages:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/std_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs/local/lib/python3.10/dist-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('CLAUDE_CODE_ENABLE_TASKS', '0'), ('COLCON', '1'), ('CLAUDE_CODE_SUBAGENT_MODEL', 'deepseek-v4-pro[1m]'), ('COPILOT_CLI_ENABLED_FEATURE_FLAGS', 'SHELL_SPAWN_BACKEND'), ('JETSON_JETPACK', '6.1'), ('CMAKE_PREFIX_PATH', '/home/zhenzhen/ros2/Point-LIO/install/point_lio:/home/zhenzhen/ros2/Quadcopter/install/core_2026:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools:/home/zhenzhen/ros2/Quadcopter/install/messages:/home/zhenzhen/ros2/Quadcopter/install/cv_tools:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2:/home/zhenzhen/ros2/mavros/install/mavros_extras:/home/zhenzhen/ros2/mavros/install/mavros:/home/zhenzhen/ros2/mavros/install/mavros_msgs:/home/zhenzhen/ros2/mavros/install/libmavconn:/home/zhenzhen/ros2/mavros/install/geographic_info:/home/zhenzhen/ros2/mavros/install/geodesy:/home/zhenzhen/ros2/mavros/install/geographic_msgs:/home/zhenzhen/ros2/ros2_rust/install/common_interfaces:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_msgs:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces:/home/zhenzhen/ros2/ros2_rust/install/action_msgs:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_interface_files:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_srvs:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_msgs:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_runtime:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_generators:/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs:/home/zhenzhen/ros2/Quadcopter/install/yolip:/home/zhenzhen/ros2/Quadcopter/install/vision_py:/home/zhenzhen/ros2/ros2_rust/install/examples_worker_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_pub_sub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_client_service:/home/zhenzhen/ros2/ros2_rust/install/examples_parameter_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_logging_demo:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs_py:/home/zhenzhen/ros2/ros2_rust/install/rust_pubsub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_message_demo:/home/zhenzhen/ros2/ros2_rust/install/rosidl_runtime_rs:/home/zhenzhen/ros2/ros2_rust/install/rclrs:/opt/ros/humble'), ('JETSON_P_NUMBER', 'p3767-0001')]), 'shell': False}
+[5.915688] (-) TimerEvent: {}
+[5.927777] (messages) StdoutLine: {'line': b'-- Found PythonExtra: .so  \n'}
+[5.987540] (ros2_tools) StdoutLine: {'line': b'[  2%] Generating C code for ROS interfaces\n'}
+[6.015225] (ros2_tools) StdoutLine: {'line': b'[  5%] Building CXX object CMakeFiles/ground_camera_node.dir/src/ground_camera_node.cpp.o\n'}
+[6.015811] (-) TimerEvent: {}
+[6.016977] (ros2_tools) StdoutLine: {'line': b'[  7%] Generating C++ code for ROS interfaces\n'}
+[6.017579] (ros2_tools) StdoutLine: {'line': b'[ 10%] Generating Rust code for ROS interfaces\n'}
+[6.079352] (ros2_tools) StdoutLine: {'line': b'[ 12%] Building CXX object CMakeFiles/lidar_to_px4_bridge.dir/src/lidar_to_px4_bridge.cpp.o\n'}
+[6.081685] (ros2_tools) StdoutLine: {'line': b'[ 12%] Built target ament_cmake_python_symlink_ros2_tools\n'}
+[6.115996] (-) TimerEvent: {}
+[6.170249] (ros2_tools) StdoutLine: {'line': b'[ 15%] Building CXX object CMakeFiles/d435_node.dir/src/d435_node.cpp.o\n'}
+[6.220489] (-) TimerEvent: {}
+[6.232993] (messages) StdoutLine: {'line': b'-- Configuring done\n'}
+[6.320636] (-) TimerEvent: {}
+[6.388168] (messages) StdoutLine: {'line': b'-- Generating done\n'}
+[6.417504] (messages) StdoutLine: {'line': b'-- Build files have been written to: /home/zhenzhen/ros2/robodog-yunnan-elec/build/messages\n'}
+[6.420776] (-) TimerEvent: {}
+[6.466484] (messages) CommandEnded: {'returncode': 0}
+[6.467857] (messages) JobProgress: {'identifier': 'messages', 'progress': 'build'}
+[6.468614] (messages) Command: {'cmd': ['/usr/bin/cmake', '--build', '/home/zhenzhen/ros2/robodog-yunnan-elec/build/messages', '--', '-j6', '-l6'], 'cwd': '/home/zhenzhen/ros2/robodog-yunnan-elec/build/messages', 'env': OrderedDict([('LESSOPEN', '| /usr/bin/lesspipe %s'), ('VSCODE_CWD', '/home/zhenzhen'), ('ANTHROPIC_MODEL', 'deepseek-v4-pro[1m]'), ('VSCODE_ESM_ENTRYPOINT', 'vs/workbench/api/node/extensionHostProcess'), ('AI_AGENT', 'claude-code_2-1-218_agent'), ('USER', 'zhenzhen'), ('SSH_CLIENT', '172.20.10.4 63729 22'), ('CLAUDE_CODE_ENTRYPOINT', 'claude-vscode'), ('VSCODE_NLS_CONFIG', '{"userLocale":"en","osLocale":"en","resolvedLanguage":"en","defaultMessagesFile":"/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/out/nls.messages.json","locale":"en","availableLanguages":{}}'), ('GIT_EDITOR', 'true'), ('VSCODE_HANDLES_UNCAUGHT_ERRORS', 'true'), ('XDG_SESSION_TYPE', 'tty'), ('CLAUDE_AGENT_SDK_VERSION', '0.3.218'), ('SHLVL', '0'), ('LD_LIBRARY_PATH', '/usr/local/lib:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools/lib:/home/zhenzhen/ros2/Quadcopter/install/messages/lib:/home/zhenzhen/ros2/Quadcopter/install/cv_tools/lib:/home/zhenzhen/ros2/ws_livox/install/livox_sdk2/lib:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2/lib:/home/zhenzhen/ros2/mavros/install/mavros_extras/lib:/home/zhenzhen/ros2/mavros/install/mavros/lib:/home/zhenzhen/ros2/mavros/install/mavros_msgs/lib:/home/zhenzhen/ros2/mavros/install/libmavconn/lib:/home/zhenzhen/ros2/mavros/install/geodesy/lib:/home/zhenzhen/ros2/mavros/install/geographic_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/test_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces/lib:/home/zhenzhen/ros2/ros2_rust/install/action_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/std_srvs/lib:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/std_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces/lib:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces/lib:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib'), ('BROWSER', '/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/bin/helpers/browser.sh'), ('MOTD_SHOWN', 'pam'), ('HOME', '/home/zhenzhen'), ('VSCODE_RECONNECTION_GRACE_TIME', '10800000'), ('NVM_BIN', '/home/zhenzhen/.nvm/versions/node/v24.4.1/bin'), ('VSCODE_IPC_HOOK_CLI', '/run/user/1000/vscode-ipc-eb786b2d-084e-4fc7-a5de-a3ace40a9921.sock'), ('NVM_INC', '/home/zhenzhen/.nvm/versions/node/v24.4.1/include/node'), ('JETSON_L4T', '36.4.0'), ('ANTHROPIC_DEFAULT_SONNET_MODEL', 'deepseek-v4-pro[1m]'), ('ROS_PYTHON_VERSION', '3'), ('JETSON_MODEL', 'NVIDIA Jetson Orin NX Engineering Reference Developer Kit'), ('CLAUDE_CODE_CHILD_SESSION', '1'), ('COPILOT_OTEL_FILE_EXPORTER_PATH', '/dev/null'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('GROUND_CAMERA', '/dev/ground'), ('NVM_DIR', '/home/zhenzhen/.nvm'), ('CPLUS_INCLUDE_PATH', '/usr/include/c++/11:/usr/include/aarch64-linux-gnu/c++/11'), ('VSCODE_L10N_BUNDLE_LOCATION', ''), ('COLCON_PREFIX_PATH', '/home/zhenzhen/ros2/Point-LIO/install:/home/zhenzhen/ros2/Quadcopter/install:/home/zhenzhen/ros2/ws_livox/install:/home/zhenzhen/ros2/mavros/install:/home/zhenzhen/ros2/ros2_rust/install'), ('CLAUDE_CODE_EFFORT_LEVEL', 'max'), ('API_TIMEOUT_MS', '3000000'), ('APPLICATION_INSIGHTS_NO_STATSBEAT', 'true'), ('ROS_DISTRO', 'humble'), ('LOGNAME', 'zhenzhen'), ('JETSON_MODULE', 'NVIDIA Jetson Orin NX (8GB ram)'), ('JETSON_SERIAL_NUMBER', '1424423004044'), ('VSCODE_HANDLES_SIGPIPE', 'true'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('XDG_SESSION_CLASS', 'user'), ('ANTHROPIC_BASE_URL', 'https://api.deepseek.com/anthropic'), ('XDG_SESSION_ID', '3'), ('VSCODE_CLI_REQUIRE_TOKEN', '9a5b7942-bcab-4977-9824-9274f356d8bc'), ('ROS_LOCALHOST_ONLY', '0'), ('ANTHROPIC_DEFAULT_OPUS_MODEL', 'deepseek-v4-pro[1m]'), ('MCP_CONNECTION_NONBLOCKING', 'true'), ('PATH', '/home/zhenzhen/.local/bin:/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/bin/remote-cli:/home/zhenzhen/.local/bin:/home/zhenzhen/.nvm/versions/node/v24.4.1/bin:/opt/ros/humble/bin:/home/zhenzhen/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin'), ('VSCODE_AGENT_FOLDER', '/home/zhenzhen/.vscode-server'), ('COREPACK_ENABLE_AUTO_PIN', '0'), ('XDG_RUNTIME_DIR', '/run/user/1000'), ('CLAUDE_EFFORT', 'max'), ('DISPLAY', ':0'), ('CLAUDE_PID', '12605'), ('NoDefaultCurrentDirectoryInExePath', '1'), ('LANG', 'en_US.UTF-8'), ('ANTHROPIC_DEFAULT_HAIKU_MODEL', 'deepseek-v4-pro[1m]'), ('LS_COLORS', ''), ('JETSON_SOC', 'tegra234'), ('ROS_DOMAIN_ID', '25'), ('AMENT_PREFIX_PATH', '/home/zhenzhen/ros2/Point-LIO/install/point_lio:/home/zhenzhen/ros2/Quadcopter/install/yolip:/home/zhenzhen/ros2/Quadcopter/install/core_2026:/home/zhenzhen/ros2/Quadcopter/install/vision_py:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools:/home/zhenzhen/ros2/Quadcopter/install/messages:/home/zhenzhen/ros2/Quadcopter/install/cv_tools:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2:/home/zhenzhen/ros2/mavros/install/mavros_extras:/home/zhenzhen/ros2/mavros/install/mavros:/home/zhenzhen/ros2/mavros/install/mavros_msgs:/home/zhenzhen/ros2/mavros/install/libmavconn:/home/zhenzhen/ros2/mavros/install/geographic_info:/home/zhenzhen/ros2/mavros/install/geodesy:/home/zhenzhen/ros2/mavros/install/geographic_msgs:/home/zhenzhen/ros2/ros2_rust/install/common_interfaces:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_msgs:/home/zhenzhen/ros2/ros2_rust/install/examples_worker_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_pub_sub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_client_service:/home/zhenzhen/ros2/ros2_rust/install/examples_parameter_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_logging_demo:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces:/home/zhenzhen/ros2/ros2_rust/install/action_msgs:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_interface_files:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_srvs:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs_py:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs:/home/zhenzhen/ros2/ros2_rust/install/rust_pubsub:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_msgs:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_message_demo:/home/zhenzhen/ros2/ros2_rust/install/rosidl_runtime_rs:/home/zhenzhen/ros2/ros2_rust/install/rclrs:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_runtime:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_generators:/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs:/opt/ros/humble'), ('SHELL', '/bin/bash'), ('ANTHROPIC_AUTH_TOKEN', 'sk-ea6e7dc596fd4841a53253befa9a8be0'), ('MXC_BIN_DIR', '/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/node_modules/@microsoft/mxc-sdk/bin'), ('ELECTRON_RUN_AS_NODE', '1'), ('CLAUDE_CODE_ENABLE_SDK_FILE_CHECKPOINTING', 'true'), ('CLAUDE_CODE_SESSION_ID', '9324ab2e-d78f-4b26-85f6-eefb89c40ed6'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('CLAUDECODE', '1'), ('JETSON_CUDA_ARCH_BIN', '8.7'), ('PWD', '/home/zhenzhen/ros2/robodog-yunnan-elec/build/messages'), ('SSH_CONNECTION', '172.20.10.4 63729 172.20.10.2 22'), ('NVM_CD_FLAGS', ''), ('XDG_DATA_DIRS', '/usr/share/gnome:/usr/local/share:/usr/share:/var/lib/snapd/desktop'), ('CLAUDE_CODE_EXECPATH', '/home/zhenzhen/.vscode-server/extensions/anthropic.claude-code-2.1.218-linux-arm64/resources/native-binary/claude'), ('CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC', '1'), ('PYTHONPATH', '/home/zhenzhen/ros2/Quadcopter/install/yolip/lib/python3.10/site-packages:/home/zhenzhen/ros2/Quadcopter/install/vision_py/lib/python3.10/site-packages:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/Quadcopter/install/messages/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/Quadcopter/install/cv_tools/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/mavros/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/mavros_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/geodesy/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/geographic_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/test_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/action_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/std_srvs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs_py/lib/python3.10/site-packages:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/std_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs/local/lib/python3.10/dist-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('CLAUDE_CODE_ENABLE_TASKS', '0'), ('COLCON', '1'), ('CLAUDE_CODE_SUBAGENT_MODEL', 'deepseek-v4-pro[1m]'), ('COPILOT_CLI_ENABLED_FEATURE_FLAGS', 'SHELL_SPAWN_BACKEND'), ('JETSON_JETPACK', '6.1'), ('CMAKE_PREFIX_PATH', '/home/zhenzhen/ros2/Point-LIO/install/point_lio:/home/zhenzhen/ros2/Quadcopter/install/core_2026:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools:/home/zhenzhen/ros2/Quadcopter/install/messages:/home/zhenzhen/ros2/Quadcopter/install/cv_tools:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2:/home/zhenzhen/ros2/mavros/install/mavros_extras:/home/zhenzhen/ros2/mavros/install/mavros:/home/zhenzhen/ros2/mavros/install/mavros_msgs:/home/zhenzhen/ros2/mavros/install/libmavconn:/home/zhenzhen/ros2/mavros/install/geographic_info:/home/zhenzhen/ros2/mavros/install/geodesy:/home/zhenzhen/ros2/mavros/install/geographic_msgs:/home/zhenzhen/ros2/ros2_rust/install/common_interfaces:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_msgs:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces:/home/zhenzhen/ros2/ros2_rust/install/action_msgs:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_interface_files:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_srvs:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_msgs:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_runtime:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_generators:/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs:/home/zhenzhen/ros2/Quadcopter/install/yolip:/home/zhenzhen/ros2/Quadcopter/install/vision_py:/home/zhenzhen/ros2/ros2_rust/install/examples_worker_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_pub_sub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_client_service:/home/zhenzhen/ros2/ros2_rust/install/examples_parameter_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_logging_demo:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs_py:/home/zhenzhen/ros2/ros2_rust/install/rust_pubsub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_message_demo:/home/zhenzhen/ros2/ros2_rust/install/rosidl_runtime_rs:/home/zhenzhen/ros2/ros2_rust/install/rclrs:/opt/ros/humble'), ('JETSON_P_NUMBER', 'p3767-0001')]), 'shell': False}
+[6.520947] (-) TimerEvent: {}
+[6.621317] (-) TimerEvent: {}
+[6.693297] (messages) StdoutLine: {'line': b'[  0%] Generating C code for ROS interfaces\n'}
+[6.721517] (-) TimerEvent: {}
+[6.783915] (messages) StdoutLine: {'line': b'[  0%] Generating C++ code for ROS interfaces\n'}
+[6.799759] (messages) StdoutLine: {'line': b'[  1%] Generating Rust code for ROS interfaces\n'}
+[6.803068] (ros2_tools) StdoutLine: {'line': b'[ 15%] Built target ros2_tools__rs\n'}
+[6.821689] (-) TimerEvent: {}
+[6.881919] (messages) StdoutLine: {'line': b'[  1%] Built target ament_cmake_python_symlink_messages\n'}
+[6.921875] (-) TimerEvent: {}
+[7.022405] (-) TimerEvent: {}
+[7.122788] (-) TimerEvent: {}
+[7.162625] (ros2_tools) StdoutLine: {'line': b'[ 17%] Building C object CMakeFiles/ros2_tools__rosidl_generator_c.dir/rosidl_generator_c/ros2_tools/msg/detail/lidar_pose__functions.c.o\n'}
+[7.218318] (ros2_tools) StdoutLine: {'line': b'[ 17%] Built target ros2_tools__cpp\n'}
+[7.222940] (-) TimerEvent: {}
+[7.298385] (ros2_tools) StdoutLine: {'line': b'[ 20%] Generating C++ type support for eProsima Fast-RTPS\n'}
+[7.323104] (-) TimerEvent: {}
+[7.423456] (-) TimerEvent: {}
+[7.478090] (ros2_tools) StdoutLine: {'line': b'[ 22%] Linking C shared library libros2_tools__rosidl_generator_c.so\n'}
+[7.523621] (-) TimerEvent: {}
+[7.623978] (-) TimerEvent: {}
+[7.692101] (ros2_tools) StdoutLine: {'line': b'[ 22%] Built target ros2_tools__rosidl_generator_c\n'}
+[7.724151] (-) TimerEvent: {}
+[7.765888] (ros2_tools) StdoutLine: {'line': b'[ 25%] Generating C++ introspection for ROS interfaces\n'}
+[7.824304] (-) TimerEvent: {}
+[7.901395] (ros2_tools) StdoutLine: {'line': b'running egg_info\n'}
+[7.902595] (ros2_tools) StdoutLine: {'line': b'creating ros2_tools.egg-info\n'}
+[7.903117] (ros2_tools) StdoutLine: {'line': b'writing ros2_tools.egg-info/PKG-INFO\n'}
+[7.903528] (ros2_tools) StdoutLine: {'line': b'writing dependency_links to ros2_tools.egg-info/dependency_links.txt\n'}
+[7.903896] (ros2_tools) StdoutLine: {'line': b'writing top-level names to ros2_tools.egg-info/top_level.txt\n'}
+[7.904316] (ros2_tools) StdoutLine: {'line': b"writing manifest file 'ros2_tools.egg-info/SOURCES.txt'\n"}
+[7.922612] (ros2_tools) StdoutLine: {'line': b"reading manifest file 'ros2_tools.egg-info/SOURCES.txt'\n"}
+[7.923493] (ros2_tools) StdoutLine: {'line': b"writing manifest file 'ros2_tools.egg-info/SOURCES.txt'\n"}
+[7.924403] (-) TimerEvent: {}
+[8.024688] (-) TimerEvent: {}
+[8.125069] (-) TimerEvent: {}
+[8.145367] (messages) StdoutLine: {'line': b'running egg_info\n'}
+[8.152620] (ros2_tools) StdoutLine: {'line': b'[ 25%] Built target ament_cmake_python_build_ros2_tools_egg\n'}
+[8.155158] (messages) StdoutLine: {'line': b'creating messages.egg-info\n'}
+[8.156707] (messages) StdoutLine: {'line': b'writing messages.egg-info/PKG-INFO\n'}
+[8.157898] (messages) StdoutLine: {'line': b'writing dependency_links to messages.egg-info/dependency_links.txt\n'}
+[8.169425] (messages) StdoutLine: {'line': b'writing top-level names to messages.egg-info/top_level.txt\n'}
+[8.170911] (messages) StdoutLine: {'line': b"writing manifest file 'messages.egg-info/SOURCES.txt'\n"}
+[8.177235] (messages) StdoutLine: {'line': b"reading manifest file 'messages.egg-info/SOURCES.txt'\n"}
+[8.181575] (messages) StdoutLine: {'line': b"writing manifest file 'messages.egg-info/SOURCES.txt'\n"}
+[8.225231] (-) TimerEvent: {}
+[8.226523] (ros2_tools) StdoutLine: {'line': b'[ 27%] Generating C++ type support dispatch for ROS interfaces\n'}
+[8.325382] (-) TimerEvent: {}
+[8.368046] (ros2_tools) StdoutLine: {'line': b'[ 30%] Building CXX object CMakeFiles/ros2_tools__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/ros2_tools/msg/detail/dds_fastrtps/lidar_pose__type_support.cpp.o\n'}
+[8.396092] (messages) StdoutLine: {'line': b'[  1%] Built target ament_cmake_python_build_messages_egg\n'}
+[8.425536] (-) TimerEvent: {}
+[8.525897] (-) TimerEvent: {}
+[8.632486] (-) TimerEvent: {}
+[8.732826] (-) TimerEvent: {}
+[8.779885] (ros2_tools) StdoutLine: {'line': b'[ 32%] Building CXX object CMakeFiles/ros2_tools__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/ros2_tools/msg/detail/lidar_pose__type_support.cpp.o\n'}
+[8.832983] (-) TimerEvent: {}
+[8.933394] (-) TimerEvent: {}
+[9.033796] (-) TimerEvent: {}
+[9.040172] (ros2_tools) StdoutLine: {'line': b'[ 35%] Building CXX object CMakeFiles/ros2_tools__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/ros2_tools/msg/lidar_pose__type_support.cpp.o\n'}
+[9.134746] (-) TimerEvent: {}
+[9.240530] (-) TimerEvent: {}
+[9.343893] (-) TimerEvent: {}
+[9.444369] (-) TimerEvent: {}
+[9.544784] (-) TimerEvent: {}
+[9.645179] (-) TimerEvent: {}
+[9.745575] (-) TimerEvent: {}
+[9.815760] (ros2_tools) StdoutLine: {'line': b'[ 37%] Linking CXX shared library libros2_tools__rosidl_typesupport_fastrtps_cpp.so\n'}
+[9.845770] (-) TimerEvent: {}
+[9.935485] (ros2_tools) StdoutLine: {'line': b'[ 40%] Linking CXX shared library libros2_tools__rosidl_typesupport_cpp.so\n'}
+[9.945927] (-) TimerEvent: {}
+[10.037194] (ros2_tools) StdoutLine: {'line': b'[ 42%] Linking CXX shared library libros2_tools__rosidl_typesupport_introspection_cpp.so\n'}
+[10.046123] (-) TimerEvent: {}
+[10.086618] (ros2_tools) StdoutLine: {'line': b'[ 42%] Built target ros2_tools__rosidl_typesupport_cpp\n'}
+[10.146300] (-) TimerEvent: {}
+[10.168909] (ros2_tools) StdoutLine: {'line': b'[ 45%] Generating C type support for eProsima Fast-RTPS\n'}
+[10.176825] (ros2_tools) StdoutLine: {'line': b'[ 45%] Built target ros2_tools__rosidl_typesupport_introspection_cpp\n'}
+[10.235734] (ros2_tools) StdoutLine: {'line': b'[ 45%] Built target ros2_tools__rosidl_typesupport_fastrtps_cpp\n'}
+[10.246492] (-) TimerEvent: {}
+[10.258086] (ros2_tools) StdoutLine: {'line': b'[ 47%] Generating C introspection for ROS interfaces\n'}
+[10.324944] (ros2_tools) StdoutLine: {'line': b'[ 50%] Generating C type support dispatch for ROS interfaces\n'}
+[10.346672] (-) TimerEvent: {}
+[10.447054] (-) TimerEvent: {}
+[10.504296] (messages) StdoutLine: {'line': b'[  1%] Built target messages__rs\n'}
+[10.547243] (-) TimerEvent: {}
+[10.647657] (-) TimerEvent: {}
+[10.748009] (-) TimerEvent: {}
+[10.848432] (-) TimerEvent: {}
+[10.948817] (-) TimerEvent: {}
+[11.052552] (-) TimerEvent: {}
+[11.128021] (ros2_tools) StdoutLine: {'line': b'[ 52%] Building CXX object CMakeFiles/ros2_tools__rosidl_typesupport_c.dir/rosidl_typesupport_c/ros2_tools/msg/lidar_pose__type_support.cpp.o\n'}
+[11.156062] (-) TimerEvent: {}
+[11.241017] (ros2_tools) StdoutLine: {'line': b'[ 55%] Building C object CMakeFiles/ros2_tools__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/ros2_tools/msg/detail/lidar_pose__type_support.c.o\n'}
+[11.241669] (ros2_tools) StdoutLine: {'line': b'[ 57%] Building CXX object CMakeFiles/ros2_tools__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/ros2_tools/msg/detail/lidar_pose__type_support_c.cpp.o\n'}
+[11.256233] (-) TimerEvent: {}
+[11.309798] (ros2_tools) StdoutLine: {'line': b'[ 60%] Linking CXX shared library libros2_tools__rosidl_typesupport_c.so\n'}
+[11.356430] (-) TimerEvent: {}
+[11.386293] (ros2_tools) StdoutLine: {'line': b'[ 62%] Linking C shared library libros2_tools__rosidl_typesupport_introspection_c.so\n'}
+[11.456785] (-) TimerEvent: {}
+[11.509766] (ros2_tools) StdoutLine: {'line': b'[ 62%] Built target ros2_tools__rosidl_typesupport_c\n'}
+[11.543006] (ros2_tools) StdoutLine: {'line': b'[ 62%] Built target ros2_tools__rosidl_typesupport_introspection_c\n'}
+[11.556951] (-) TimerEvent: {}
+[11.654763] (ros2_tools) StdoutLine: {'line': b'[ 65%] Building CXX object CMakeFiles/lidar_data_node.dir/src/lidar_data_node.cpp.o\n'}
+[11.657067] (-) TimerEvent: {}
+[11.757404] (-) TimerEvent: {}
+[11.857780] (-) TimerEvent: {}
+[11.958158] (-) TimerEvent: {}
+[12.058563] (-) TimerEvent: {}
+[12.103613] (ros2_tools) StdoutLine: {'line': b'[ 67%] Linking CXX shared library libros2_tools__rosidl_typesupport_fastrtps_c.so\n'}
+[12.158721] (-) TimerEvent: {}
+[12.259116] (-) TimerEvent: {}
+[12.359540] (-) TimerEvent: {}
+[12.459938] (-) TimerEvent: {}
+[12.507392] (ros2_tools) StdoutLine: {'line': b'[ 67%] Built target ros2_tools__rosidl_typesupport_fastrtps_c\n'}
+[12.560167] (-) TimerEvent: {}
+[12.640754] (ros2_tools) StdoutLine: {'line': b'[ 67%] Built target ros2_tools\n'}
+[12.660376] (-) TimerEvent: {}
+[12.760744] (-) TimerEvent: {}
+[12.788120] (ros2_tools) StdoutLine: {'line': b'[ 70%] Generating Python code for ROS interfaces\n'}
+[12.860903] (-) TimerEvent: {}
+[12.961276] (-) TimerEvent: {}
+[13.061679] (-) TimerEvent: {}
+[13.162070] (-) TimerEvent: {}
+[13.262471] (-) TimerEvent: {}
+[13.362879] (-) TimerEvent: {}
+[13.463291] (-) TimerEvent: {}
+[13.563684] (-) TimerEvent: {}
+[13.664117] (-) TimerEvent: {}
+[13.764534] (-) TimerEvent: {}
+[13.793773] (ros2_tools) StdoutLine: {'line': b'[ 70%] Built target ros2_tools__py\n'}
+[13.864713] (-) TimerEvent: {}
+[13.866135] (ros2_tools) StdoutLine: {'line': b'[ 72%] Building C object CMakeFiles/ros2_tools__rosidl_generator_py.dir/rosidl_generator_py/ros2_tools/msg/_lidar_pose_s.c.o\n'}
+[13.964896] (-) TimerEvent: {}
+[14.065310] (-) TimerEvent: {}
+[14.165735] (-) TimerEvent: {}
+[14.223486] (ros2_tools) StdoutLine: {'line': b'[ 75%] Linking C shared library rosidl_generator_py/ros2_tools/libros2_tools__rosidl_generator_py.so\n'}
+[14.265931] (-) TimerEvent: {}
+[14.366361] (-) TimerEvent: {}
+[14.372813] (ros2_tools) StdoutLine: {'line': b'[ 75%] Built target ros2_tools__rosidl_generator_py\n'}
+[14.466568] (-) TimerEvent: {}
+[14.526266] (ros2_tools) StdoutLine: {'line': b'[ 77%] Building C object CMakeFiles/ros2_tools__rosidl_typesupport_fastrtps_c__pyext.dir/rosidl_generator_py/ros2_tools/_ros2_tools_s.ep.rosidl_typesupport_fastrtps_c.c.o\n'}
+[14.541432] (ros2_tools) StdoutLine: {'line': b'[ 80%] Building C object CMakeFiles/ros2_tools__rosidl_typesupport_introspection_c__pyext.dir/rosidl_generator_py/ros2_tools/_ros2_tools_s.ep.rosidl_typesupport_introspection_c.c.o\n'}
+[14.566780] (-) TimerEvent: {}
+[14.667200] (-) TimerEvent: {}
+[14.767633] (-) TimerEvent: {}
+[14.868055] (-) TimerEvent: {}
+[14.917856] (ros2_tools) StdoutLine: {'line': b'[ 82%] Linking C shared library rosidl_generator_py/ros2_tools/ros2_tools_s__rosidl_typesupport_introspection_c.cpython-310-aarch64-linux-gnu.so\n'}
+[14.968268] (-) TimerEvent: {}
+[14.997479] (ros2_tools) StdoutLine: {'line': b'[ 85%] Linking C shared library rosidl_generator_py/ros2_tools/ros2_tools_s__rosidl_typesupport_fastrtps_c.cpython-310-aarch64-linux-gnu.so\n'}
+[15.052046] (messages) StdoutLine: {'line': b'[  1%] Built target messages__cpp\n'}
+[15.068741] (-) TimerEvent: {}
+[15.103405] (ros2_tools) StdoutLine: {'line': b'[ 85%] Built target ros2_tools__rosidl_typesupport_introspection_c__pyext\n'}
+[15.105918] (messages) StdoutLine: {'line': b'[  2%] Generating C++ type support for eProsima Fast-RTPS\n'}
+[15.159404] (messages) StdoutLine: {'line': b'[  5%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/msg/detail/vision_msg__functions.c.o\n'}
+[15.162579] (messages) StdoutLine: {'line': b'[  6%] Generating C++ type support dispatch for ROS interfaces\n'}
+[15.162977] (messages) StdoutLine: {'line': b'[  4%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/msg/detail/smart_car_control_setpoint__functions.c.o\n'}
+[15.163164] (messages) StdoutLine: {'line': b'[  6%] Generating C++ introspection for ROS interfaces\n'}
+[15.163281] (messages) StdoutLine: {'line': b'[  6%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/msg/detail/vision__functions.c.o\n'}
+[15.168905] (-) TimerEvent: {}
+[15.186224] (ros2_tools) StdoutLine: {'line': b'[ 85%] Built target ros2_tools__rosidl_typesupport_fastrtps_c__pyext\n'}
+[15.269059] (-) TimerEvent: {}
+[15.269536] (ros2_tools) StdoutLine: {'line': b'[ 87%] Building C object CMakeFiles/ros2_tools__rosidl_typesupport_c__pyext.dir/rosidl_generator_py/ros2_tools/_ros2_tools_s.ep.rosidl_typesupport_c.c.o\n'}
+[15.296613] (messages) StdoutLine: {'line': b'[  7%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/msg/detail/smart_car_status__functions.c.o\n'}
+[15.369237] (-) TimerEvent: {}
+[15.429422] (messages) StdoutLine: {'line': b'[  8%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/msg/detail/smart_car_motion_state__functions.c.o\n'}
+[15.462580] (messages) StdoutLine: {'line': b'[  8%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/msg/detail/smart_car_motor_status__functions.c.o\n'}
+[15.469412] (-) TimerEvent: {}
+[15.559885] (messages) StdoutLine: {'line': b'[  9%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/msg/detail/smart_car_imu_status__functions.c.o\n'}
+[15.569589] (-) TimerEvent: {}
+[15.669987] (-) TimerEvent: {}
+[15.701682] (ros2_tools) StdoutLine: {'line': b'[ 90%] Linking C shared library rosidl_generator_py/ros2_tools/ros2_tools_s__rosidl_typesupport_c.cpython-310-aarch64-linux-gnu.so\n'}
+[15.707351] (messages) StdoutLine: {'line': b'[ 10%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/msg/detail/smart_car_calib_status__functions.c.o\n'}
+[15.762282] (messages) StdoutLine: {'line': b'[ 10%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/msg/detail/platform_target__functions.c.o\n'}
+[15.770153] (-) TimerEvent: {}
+[15.870548] (-) TimerEvent: {}
+[15.871135] (messages) StdoutLine: {'line': b'[ 11%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/srv/detail/smart_car_command__functions.c.o\n'}
+[15.906587] (ros2_tools) StdoutLine: {'line': b'[ 90%] Built target ros2_tools__rosidl_typesupport_c__pyext\n'}
+[15.970733] (-) TimerEvent: {}
+[16.007630] (messages) StdoutLine: {'line': b'[ 12%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/srv/detail/smart_car_actuator_test__functions.c.o\n'}
+[16.036797] (messages) StdoutLine: {'line': b'[ 12%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/action/detail/takeoff__functions.c.o\n'}
+[16.070878] (-) TimerEvent: {}
+[16.171275] (-) TimerEvent: {}
+[16.188112] (messages) StdoutLine: {'line': b'[ 13%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/action/detail/go_to_target__functions.c.o\n'}
+[16.271490] (-) TimerEvent: {}
+[16.299661] (messages) StdoutLine: {'line': b'[ 14%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/action/detail/track_velocity__functions.c.o\n'}
+[16.371683] (-) TimerEvent: {}
+[16.472147] (-) TimerEvent: {}
+[16.572588] (-) TimerEvent: {}
+[16.602473] (messages) StdoutLine: {'line': b'[ 14%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/action/detail/land__functions.c.o\n'}
+[16.672731] (-) TimerEvent: {}
+[16.773088] (-) TimerEvent: {}
+[16.873455] (-) TimerEvent: {}
+[16.901950] (messages) StdoutLine: {'line': b'[ 15%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/action/detail/execute_mission__functions.c.o\n'}
+[16.973613] (-) TimerEvent: {}
+[17.073971] (-) TimerEvent: {}
+[17.174369] (-) TimerEvent: {}
+[17.274753] (-) TimerEvent: {}
+[17.375106] (-) TimerEvent: {}
+[17.475508] (-) TimerEvent: {}
+[17.481631] (messages) StdoutLine: {'line': b'[ 16%] Linking C shared library libmessages__rosidl_generator_c.so\n'}
+[17.575717] (-) TimerEvent: {}
+[17.676116] (-) TimerEvent: {}
+[17.688110] (messages) StdoutLine: {'line': b'[ 16%] Built target messages__rosidl_generator_c\n'}
+[17.761509] (messages) StdoutLine: {'line': b'[ 17%] Generating C type support for eProsima Fast-RTPS\n'}
+[17.776286] (-) TimerEvent: {}
+[17.788182] (messages) StdoutLine: {'line': b'[ 18%] Generating C introspection for ROS interfaces\n'}
+[17.793558] (messages) StdoutLine: {'line': b'[ 19%] Generating C type support dispatch for ROS interfaces\n'}
+[17.876488] (-) TimerEvent: {}
+[17.976855] (-) TimerEvent: {}
+[18.077221] (-) TimerEvent: {}
+[18.177597] (-) TimerEvent: {}
+[18.277969] (-) TimerEvent: {}
+[18.378348] (-) TimerEvent: {}
+[18.478660] (-) TimerEvent: {}
+[18.579018] (-) TimerEvent: {}
+[18.679380] (-) TimerEvent: {}
+[18.779753] (-) TimerEvent: {}
+[18.880155] (-) TimerEvent: {}
+[18.980525] (-) TimerEvent: {}
+[19.080882] (-) TimerEvent: {}
+[19.181250] (-) TimerEvent: {}
+[19.281582] (-) TimerEvent: {}
+[19.381969] (-) TimerEvent: {}
+[19.482369] (-) TimerEvent: {}
+[19.582787] (-) TimerEvent: {}
+[19.683178] (-) TimerEvent: {}
+[19.783548] (-) TimerEvent: {}
+[19.883950] (-) TimerEvent: {}
+[19.984317] (-) TimerEvent: {}
+[20.084938] (-) TimerEvent: {}
+[20.185306] (-) TimerEvent: {}
+[20.285672] (-) TimerEvent: {}
+[20.386022] (-) TimerEvent: {}
+[20.449431] (messages) StdoutLine: {'line': b'[ 19%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/msg/vision_msg__type_support.cpp.o\n'}
+[20.486184] (-) TimerEvent: {}
+[20.586549] (-) TimerEvent: {}
+[20.686938] (-) TimerEvent: {}
+[20.787624] (-) TimerEvent: {}
+[20.888016] (-) TimerEvent: {}
+[20.988381] (-) TimerEvent: {}
+[21.088814] (-) TimerEvent: {}
+[21.189198] (-) TimerEvent: {}
+[21.269993] (messages) StdoutLine: {'line': b'[ 20%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/msg/vision__type_support.cpp.o\n'}
+[21.289354] (-) TimerEvent: {}
+[21.389735] (-) TimerEvent: {}
+[21.490098] (-) TimerEvent: {}
+[21.590488] (-) TimerEvent: {}
+[21.690887] (-) TimerEvent: {}
+[21.791263] (-) TimerEvent: {}
+[21.888372] (messages) StdoutLine: {'line': b'[ 20%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/msg/detail/vision_msg__type_support.cpp.o\n'}
+[21.891351] (-) TimerEvent: {}
+[21.991660] (-) TimerEvent: {}
+[22.092085] (-) TimerEvent: {}
+[22.192479] (-) TimerEvent: {}
+[22.203735] (messages) StdoutLine: {'line': b'[ 21%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/msg/smart_car_control_setpoint__type_support.cpp.o\n'}
+[22.292651] (-) TimerEvent: {}
+[22.393017] (-) TimerEvent: {}
+[22.493378] (-) TimerEvent: {}
+[22.593754] (-) TimerEvent: {}
+[22.694138] (-) TimerEvent: {}
+[22.794521] (-) TimerEvent: {}
+[22.894924] (-) TimerEvent: {}
+[22.995318] (-) TimerEvent: {}
+[23.095712] (-) TimerEvent: {}
+[23.196115] (-) TimerEvent: {}
+[23.238061] (messages) StdoutLine: {'line': b'[ 21%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/msg/smart_car_status__type_support.cpp.o\n'}
+[23.296280] (-) TimerEvent: {}
+[23.396658] (-) TimerEvent: {}
+[23.439629] (messages) StdoutLine: {'line': b'[ 21%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/msg/detail/dds_fastrtps/vision_msg__type_support.cpp.o\n'}
+[23.496818] (-) TimerEvent: {}
+[23.553353] (messages) StdoutLine: {'line': b'[ 22%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/msg/detail/vision__type_support.cpp.o\n'}
+[23.597009] (-) TimerEvent: {}
+[23.614754] (messages) StdoutLine: {'line': b'[ 22%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/msg/vision_msg__type_support.cpp.o\n'}
+[23.697177] (-) TimerEvent: {}
+[23.797593] (-) TimerEvent: {}
+[23.798918] (messages) StdoutLine: {'line': b'[ 23%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/msg/vision__type_support.cpp.o\n'}
+[23.897784] (-) TimerEvent: {}
+[23.980124] (messages) StdoutLine: {'line': b'[ 23%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/msg/smart_car_control_setpoint__type_support.cpp.o\n'}
+[23.997970] (-) TimerEvent: {}
+[24.098391] (-) TimerEvent: {}
+[24.198815] (-) TimerEvent: {}
+[24.211630] (messages) StdoutLine: {'line': b'[ 24%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/msg/smart_car_status__type_support.cpp.o\n'}
+[24.298983] (-) TimerEvent: {}
+[24.323871] (messages) StdoutLine: {'line': b'[ 25%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/msg/smart_car_motion_state__type_support.cpp.o\n'}
+[24.399181] (-) TimerEvent: {}
+[24.423931] (messages) StdoutLine: {'line': b'[ 26%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/msg/smart_car_motion_state__type_support.cpp.o\n'}
+[24.501798] (-) TimerEvent: {}
+[24.602246] (-) TimerEvent: {}
+[24.612215] (messages) StdoutLine: {'line': b'[ 26%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/msg/smart_car_motor_status__type_support.cpp.o\n'}
+[24.702451] (-) TimerEvent: {}
+[24.802901] (-) TimerEvent: {}
+[24.831904] (messages) StdoutLine: {'line': b'[ 27%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/msg/smart_car_imu_status__type_support.cpp.o\n'}
+[24.903105] (-) TimerEvent: {}
+[25.003514] (-) TimerEvent: {}
+[25.055317] (messages) StdoutLine: {'line': b'[ 28%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/msg/detail/dds_fastrtps/vision__type_support.cpp.o\n'}
+[25.073915] (messages) StdoutLine: {'line': b'[ 29%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/msg/smart_car_calib_status__type_support.cpp.o\n'}
+[25.103815] (-) TimerEvent: {}
+[25.204245] (-) TimerEvent: {}
+[25.230053] (messages) StdoutLine: {'line': b'[ 30%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/msg/detail/smart_car_control_setpoint__type_support.cpp.o\n'}
+[25.237768] (messages) StdoutLine: {'line': b'[ 31%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/msg/smart_car_motor_status__type_support.cpp.o\n'}
+[25.252448] (messages) StdoutLine: {'line': b'[ 31%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/msg/platform_target__type_support.cpp.o\n'}
+[25.292700] (messages) StdoutLine: {'line': b'[ 31%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/msg/detail/vision_msg__type_support.c.o\n'}
+[25.304505] (-) TimerEvent: {}
+[25.404936] (-) TimerEvent: {}
+[25.464692] (messages) StdoutLine: {'line': b'[ 32%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/srv/smart_car_command__type_support.cpp.o\n'}
+[25.497871] (messages) StdoutLine: {'line': b'[ 33%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/msg/detail/vision__type_support.c.o\n'}
+[25.505112] (-) TimerEvent: {}
+[25.605523] (-) TimerEvent: {}
+[25.621029] (messages) StdoutLine: {'line': b'[ 34%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/srv/smart_car_actuator_test__type_support.cpp.o\n'}
+[25.705735] (-) TimerEvent: {}
+[25.710578] (messages) StdoutLine: {'line': b'[ 34%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/msg/detail/smart_car_control_setpoint__type_support.c.o\n'}
+[25.796089] (messages) StdoutLine: {'line': b'[ 34%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/action/takeoff__type_support.cpp.o\n'}
+[25.805909] (-) TimerEvent: {}
+[25.906347] (-) TimerEvent: {}
+[25.919338] (messages) StdoutLine: {'line': b'[ 35%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/msg/detail/smart_car_status__type_support.c.o\n'}
+[25.962773] (messages) StdoutLine: {'line': b'[ 35%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/msg/detail/vision_msg__type_support_c.cpp.o\n'}
+[26.006560] (-) TimerEvent: {}
+[26.067051] (messages) StdoutLine: {'line': b'[ 36%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/action/go_to_target__type_support.cpp.o\n'}
+[26.106760] (-) TimerEvent: {}
+[26.134052] (messages) StdoutLine: {'line': b'[ 37%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/msg/detail/smart_car_motion_state__type_support.c.o\n'}
+[26.206969] (-) TimerEvent: {}
+[26.278755] (messages) StdoutLine: {'line': b'[ 37%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/msg/smart_car_imu_status__type_support.cpp.o\n'}
+[26.298924] (messages) StdoutLine: {'line': b'[ 37%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/msg/detail/smart_car_motor_status__type_support.c.o\n'}
+[26.307181] (-) TimerEvent: {}
+[26.318930] (messages) StdoutLine: {'line': b'[ 38%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/action/track_velocity__type_support.cpp.o\n'}
+[26.407390] (-) TimerEvent: {}
+[26.452233] (messages) StdoutLine: {'line': b'[ 38%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/msg/detail/smart_car_status__type_support.cpp.o\n'}
+[26.492737] (messages) StdoutLine: {'line': b'[ 39%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/msg/detail/smart_car_imu_status__type_support.c.o\n'}
+[26.507583] (-) TimerEvent: {}
+[26.548289] (messages) StdoutLine: {'line': b'[ 39%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/action/land__type_support.cpp.o\n'}
+[26.607800] (-) TimerEvent: {}
+[26.696509] (messages) StdoutLine: {'line': b'[ 40%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/msg/detail/smart_car_calib_status__type_support.c.o\n'}
+[26.707990] (-) TimerEvent: {}
+[26.808555] (-) TimerEvent: {}
+[26.821695] (messages) StdoutLine: {'line': b'[ 42%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/msg/detail/dds_fastrtps/smart_car_control_setpoint__type_support.cpp.o\n'}
+[26.822127] (messages) StdoutLine: {'line': b'[ 42%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/action/execute_mission__type_support.cpp.o\n'}
+[26.883184] (messages) StdoutLine: {'line': b'[ 42%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/msg/detail/platform_target__type_support.c.o\n'}
+[26.908988] (-) TimerEvent: {}
+[26.973775] (messages) StdoutLine: {'line': b'[ 43%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/msg/smart_car_calib_status__type_support.cpp.o\n'}
+[26.997345] (messages) StdoutLine: {'line': b'[ 44%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/srv/detail/smart_car_command__type_support.c.o\n'}
+[27.009175] (-) TimerEvent: {}
+[27.075341] (messages) StdoutLine: {'line': b'[ 45%] Linking CXX shared library libmessages__rosidl_typesupport_c.so\n'}
+[27.109355] (-) TimerEvent: {}
+[27.127683] (messages) StdoutLine: {'line': b'[ 46%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/srv/detail/smart_car_actuator_test__type_support.c.o\n'}
+[27.209552] (-) TimerEvent: {}
+[27.309988] (-) TimerEvent: {}
+[27.329609] (messages) StdoutLine: {'line': b'[ 46%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/action/detail/takeoff__type_support.c.o\n'}
+[27.345013] (messages) StdoutLine: {'line': b'[ 46%] Built target messages__rosidl_typesupport_c\n'}
+[27.410193] (-) TimerEvent: {}
+[27.437560] (messages) StdoutLine: {'line': b'[ 47%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/msg/platform_target__type_support.cpp.o\n'}
+[27.468737] (messages) StdoutLine: {'line': b'[ 48%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/msg/detail/vision__type_support_c.cpp.o\n'}
+[27.510389] (-) TimerEvent: {}
+[27.581736] (messages) StdoutLine: {'line': b'[ 49%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/action/detail/go_to_target__type_support.c.o\n'}
+[27.610584] (-) TimerEvent: {}
+[27.711001] (-) TimerEvent: {}
+[27.802797] (messages) StdoutLine: {'line': b'[ 50%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/msg/detail/smart_car_motion_state__type_support.cpp.o\n'}
+[27.811212] (-) TimerEvent: {}
+[27.820143] (messages) StdoutLine: {'line': b'[ 51%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/action/detail/track_velocity__type_support.c.o\n'}
+[27.911416] (-) TimerEvent: {}
+[28.011830] (-) TimerEvent: {}
+[28.112246] (-) TimerEvent: {}
+[28.142998] (messages) StdoutLine: {'line': b'[ 51%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/action/detail/land__type_support.c.o\n'}
+[28.162048] (messages) StdoutLine: {'line': b'[ 52%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/msg/detail/smart_car_motor_status__type_support.cpp.o\n'}
+[28.169922] (messages) StdoutLine: {'line': b'[ 52%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/msg/detail/dds_fastrtps/smart_car_status__type_support.cpp.o\n'}
+[28.212477] (-) TimerEvent: {}
+[28.312868] (-) TimerEvent: {}
+[28.347060] (messages) StdoutLine: {'line': b'[ 52%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/srv/smart_car_command__type_support.cpp.o\n'}
+[28.413065] (-) TimerEvent: {}
+[28.455374] (messages) StdoutLine: {'line': b'[ 53%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/action/detail/execute_mission__type_support.c.o\n'}
+[28.513246] (-) TimerEvent: {}
+[28.613665] (-) TimerEvent: {}
+[28.714088] (-) TimerEvent: {}
+[28.756284] (messages) StdoutLine: {'line': b'[ 54%] Linking C shared library libmessages__rosidl_typesupport_introspection_c.so\n'}
+[28.796806] (messages) StdoutLine: {'line': b'[ 54%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/msg/detail/smart_car_control_setpoint__type_support_c.cpp.o\n'}
+[28.814277] (-) TimerEvent: {}
+[28.914714] (-) TimerEvent: {}
+[29.015151] (-) TimerEvent: {}
+[29.044394] (messages) StdoutLine: {'line': b'[ 54%] Built target messages__rosidl_typesupport_introspection_c\n'}
+[29.108045] (messages) StdoutLine: {'line': b'[ 55%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/msg/detail/smart_car_status__type_support_c.cpp.o\n'}
+[29.115353] (-) TimerEvent: {}
+[29.215792] (-) TimerEvent: {}
+[29.295759] (messages) StdoutLine: {'line': b'[ 55%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/msg/detail/smart_car_imu_status__type_support.cpp.o\n'}
+[29.315972] (-) TimerEvent: {}
+[29.416460] (-) TimerEvent: {}
+[29.516859] (-) TimerEvent: {}
+[29.521528] (messages) StdoutLine: {'line': b'[ 56%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/srv/smart_car_actuator_test__type_support.cpp.o\n'}
+[29.589971] (ros2_tools) StdoutLine: {'line': b'[ 92%] Linking CXX executable ground_camera_node\n'}
+[29.611552] (messages) StdoutLine: {'line': b'[ 57%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/msg/detail/dds_fastrtps/smart_car_motion_state__type_support.cpp.o\n'}
+[29.617039] (-) TimerEvent: {}
+[29.706318] (messages) StdoutLine: {'line': b'[ 58%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/msg/detail/smart_car_calib_status__type_support.cpp.o\n'}
+[29.717400] (-) TimerEvent: {}
+[29.817858] (-) TimerEvent: {}
+[29.918314] (-) TimerEvent: {}
+[29.963612] (messages) StdoutLine: {'line': b'[ 59%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/msg/detail/smart_car_motion_state__type_support_c.cpp.o\n'}
+[30.018520] (-) TimerEvent: {}
+[30.118949] (-) TimerEvent: {}
+[30.219365] (-) TimerEvent: {}
+[30.319774] (-) TimerEvent: {}
+[30.420198] (-) TimerEvent: {}
+[30.520630] (-) TimerEvent: {}
+[30.602006] (messages) StdoutLine: {'line': b'[ 60%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/action/takeoff__type_support.cpp.o\n'}
+[30.620812] (-) TimerEvent: {}
+[30.669247] (messages) StdoutLine: {'line': b'[ 60%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/msg/detail/smart_car_motor_status__type_support_c.cpp.o\n'}
+[30.720997] (-) TimerEvent: {}
+[30.723855] (messages) StdoutLine: {'line': b'[ 60%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/action/go_to_target__type_support.cpp.o\n'}
+[30.821195] (-) TimerEvent: {}
+[30.921651] (-) TimerEvent: {}
+[30.924035] (messages) StdoutLine: {'line': b'[ 61%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/msg/detail/platform_target__type_support.cpp.o\n'}
+[31.021859] (-) TimerEvent: {}
+[31.122308] (-) TimerEvent: {}
+[31.222751] (-) TimerEvent: {}
+[31.302790] (messages) StdoutLine: {'line': b'[ 62%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/msg/detail/smart_car_imu_status__type_support_c.cpp.o\n'}
+[31.322929] (-) TimerEvent: {}
+[31.423381] (-) TimerEvent: {}
+[31.443712] (messages) StdoutLine: {'line': b'[ 63%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/msg/detail/dds_fastrtps/smart_car_motor_status__type_support.cpp.o\n'}
+[31.523582] (-) TimerEvent: {}
+[31.624051] (-) TimerEvent: {}
+[31.724511] (-) TimerEvent: {}
+[31.824973] (-) TimerEvent: {}
+[31.925403] (-) TimerEvent: {}
+[31.974613] (ros2_tools) StdoutLine: {'line': b'[ 95%] Linking CXX executable d435_node\n'}
+[32.022896] (messages) StdoutLine: {'line': b'[ 64%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/msg/detail/smart_car_calib_status__type_support_c.cpp.o\n'}
+[32.025555] (-) TimerEvent: {}
+[32.125989] (-) TimerEvent: {}
+[32.175862] (messages) StdoutLine: {'line': b'[ 64%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/srv/detail/smart_car_command__type_support.cpp.o\n'}
+[32.197751] (messages) StdoutLine: {'line': b'[ 64%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/msg/detail/platform_target__type_support_c.cpp.o\n'}
+[32.226192] (-) TimerEvent: {}
+[32.326618] (-) TimerEvent: {}
+[32.427036] (-) TimerEvent: {}
+[32.527463] (-) TimerEvent: {}
+[32.595357] (messages) StdoutLine: {'line': b'[ 65%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/srv/detail/smart_car_command__type_support_c.cpp.o\n'}
+[32.627677] (-) TimerEvent: {}
+[32.727422] (messages) StdoutLine: {'line': b'[ 66%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/action/track_velocity__type_support.cpp.o\n'}
+[32.727830] (-) TimerEvent: {}
+[32.828091] (-) TimerEvent: {}
+[32.928531] (-) TimerEvent: {}
+[33.028931] (-) TimerEvent: {}
+[33.095181] (ros2_tools) StdoutLine: {'line': b'[ 95%] Built target ground_camera_node\n'}
+[33.129134] (-) TimerEvent: {}
+[33.211955] (messages) StdoutLine: {'line': b'[ 66%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/msg/detail/dds_fastrtps/smart_car_imu_status__type_support.cpp.o\n'}
+[33.229318] (-) TimerEvent: {}
+[33.329753] (-) TimerEvent: {}
+[33.422350] (messages) StdoutLine: {'line': b'[ 67%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/srv/detail/smart_car_actuator_test__type_support_c.cpp.o\n'}
+[33.429951] (-) TimerEvent: {}
+[33.467248] (messages) StdoutLine: {'line': b'[ 67%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/action/detail/takeoff__type_support_c.cpp.o\n'}
+[33.530242] (-) TimerEvent: {}
+[33.630677] (-) TimerEvent: {}
+[33.731105] (-) TimerEvent: {}
+[33.755785] (messages) StdoutLine: {'line': b'[ 68%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/srv/detail/smart_car_actuator_test__type_support.cpp.o\n'}
+[33.831300] (-) TimerEvent: {}
+[33.931755] (-) TimerEvent: {}
+[33.982450] (messages) StdoutLine: {'line': b'[ 69%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/action/detail/go_to_target__type_support_c.cpp.o\n'}
+[34.031968] (-) TimerEvent: {}
+[34.132450] (-) TimerEvent: {}
+[34.232867] (-) TimerEvent: {}
+[34.333290] (-) TimerEvent: {}
+[34.433757] (-) TimerEvent: {}
+[34.534191] (-) TimerEvent: {}
+[34.571776] (messages) StdoutLine: {'line': b'[ 70%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/action/detail/track_velocity__type_support_c.cpp.o\n'}
+[34.634414] (-) TimerEvent: {}
+[34.734834] (-) TimerEvent: {}
+[34.761882] (messages) StdoutLine: {'line': b'[ 71%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/action/land__type_support.cpp.o\n'}
+[34.791543] (messages) StdoutLine: {'line': b'[ 71%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/action/detail/land__type_support_c.cpp.o\n'}
+[34.835030] (-) TimerEvent: {}
+[34.876104] (messages) StdoutLine: {'line': b'[ 72%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/msg/detail/dds_fastrtps/smart_car_calib_status__type_support.cpp.o\n'}
+[34.935241] (-) TimerEvent: {}
+[34.937025] (ros2_tools) StdoutLine: {'line': b'[ 95%] Built target d435_node\n'}
+[35.035463] (-) TimerEvent: {}
+[35.118759] (messages) StdoutLine: {'line': b'[ 73%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/action/detail/takeoff__type_support.cpp.o\n'}
+[35.135661] (-) TimerEvent: {}
+[35.236088] (-) TimerEvent: {}
+[35.336531] (-) TimerEvent: {}
+[35.436928] (-) TimerEvent: {}
+[35.527539] (messages) StdoutLine: {'line': b'[ 74%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/msg/detail/dds_fastrtps/platform_target__type_support.cpp.o\n'}
+[35.537120] (-) TimerEvent: {}
+[35.637553] (-) TimerEvent: {}
+[35.737968] (-) TimerEvent: {}
+[35.838399] (-) TimerEvent: {}
+[35.890755] (messages) StdoutLine: {'line': b'[ 74%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/action/execute_mission__type_support.cpp.o\n'}
+[35.897412] (messages) StdoutLine: {'line': b'[ 75%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/action/detail/execute_mission__type_support_c.cpp.o\n'}
+[35.938624] (-) TimerEvent: {}
+[36.039062] (-) TimerEvent: {}
+[36.130221] (messages) StdoutLine: {'line': b'[ 75%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/srv/detail/dds_fastrtps/smart_car_command__type_support.cpp.o\n'}
+[36.139282] (-) TimerEvent: {}
+[36.239699] (-) TimerEvent: {}
+[36.340138] (-) TimerEvent: {}
+[36.418994] (messages) StdoutLine: {'line': b'[ 76%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/srv/detail/dds_fastrtps/smart_car_actuator_test__type_support.cpp.o\n'}
+[36.440323] (-) TimerEvent: {}
+[36.540738] (-) TimerEvent: {}
+[36.641144] (-) TimerEvent: {}
+[36.741555] (-) TimerEvent: {}
+[36.807394] (messages) StdoutLine: {'line': b'[ 77%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/action/detail/dds_fastrtps/takeoff__type_support.cpp.o\n'}
+[36.810284] (messages) StdoutLine: {'line': b'[ 77%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/action/detail/go_to_target__type_support.cpp.o\n'}
+[36.841741] (-) TimerEvent: {}
+[36.942163] (-) TimerEvent: {}
+[37.006092] (messages) StdoutLine: {'line': b'[ 78%] Linking CXX shared library libmessages__rosidl_typesupport_fastrtps_c.so\n'}
+[37.042372] (-) TimerEvent: {}
+[37.142786] (-) TimerEvent: {}
+[37.243227] (-) TimerEvent: {}
+[37.338185] (messages) StdoutLine: {'line': b'[ 78%] Built target messages__rosidl_typesupport_fastrtps_c\n'}
+[37.343437] (-) TimerEvent: {}
+[37.349914] (messages) StdoutLine: {'line': b'[ 78%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/action/detail/dds_fastrtps/go_to_target__type_support.cpp.o\n'}
+[37.386145] (messages) StdoutLine: {'line': b'[ 79%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/action/detail/dds_fastrtps/track_velocity__type_support.cpp.o\n'}
+[37.443629] (-) TimerEvent: {}
+[37.544040] (-) TimerEvent: {}
+[37.558816] (messages) StdoutLine: {'line': b'[ 80%] Linking CXX shared library libmessages__rosidl_typesupport_cpp.so\n'}
+[37.644242] (-) TimerEvent: {}
+[37.746379] (-) TimerEvent: {}
+[37.806668] (messages) StdoutLine: {'line': b'[ 80%] Built target messages__rosidl_typesupport_cpp\n'}
+[37.846602] (-) TimerEvent: {}
+[37.947037] (-) TimerEvent: {}
+[38.047469] (-) TimerEvent: {}
+[38.147890] (-) TimerEvent: {}
+[38.248336] (-) TimerEvent: {}
+[38.348752] (-) TimerEvent: {}
+[38.449154] (-) TimerEvent: {}
+[38.549555] (-) TimerEvent: {}
+[38.649979] (-) TimerEvent: {}
+[38.651162] (messages) StdoutLine: {'line': b'[ 81%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/action/detail/track_velocity__type_support.cpp.o\n'}
+[38.724287] (messages) StdoutLine: {'line': b'[ 82%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/action/detail/land__type_support.cpp.o\n'}
+[38.730302] (messages) StdoutLine: {'line': b'[ 82%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/action/detail/dds_fastrtps/execute_mission__type_support.cpp.o\n'}
+[38.750168] (-) TimerEvent: {}
+[38.803591] (messages) StdoutLine: {'line': b'[ 83%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/action/detail/dds_fastrtps/land__type_support.cpp.o\n'}
+[38.850374] (-) TimerEvent: {}
+[38.859885] (ros2_tools) StdoutLine: {'line': b'[ 97%] Linking CXX executable lidar_to_px4_bridge\n'}
+[38.950587] (-) TimerEvent: {}
+[39.051043] (-) TimerEvent: {}
+[39.151436] (-) TimerEvent: {}
+[39.251851] (-) TimerEvent: {}
+[39.352304] (-) TimerEvent: {}
+[39.452772] (-) TimerEvent: {}
+[39.553209] (-) TimerEvent: {}
+[39.653626] (-) TimerEvent: {}
+[39.754141] (-) TimerEvent: {}
+[39.854542] (-) TimerEvent: {}
+[39.954971] (-) TimerEvent: {}
+[40.055403] (-) TimerEvent: {}
+[40.102324] (messages) StdoutLine: {'line': b'[ 83%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/action/detail/execute_mission__type_support.cpp.o\n'}
+[40.155579] (-) TimerEvent: {}
+[40.185642] (messages) StdoutLine: {'line': b'[ 84%] Linking CXX shared library libmessages__rosidl_typesupport_fastrtps_cpp.so\n'}
+[40.255759] (-) TimerEvent: {}
+[40.281128] (ros2_tools) StdoutLine: {'line': b'[ 97%] Built target lidar_to_px4_bridge\n'}
+[40.355940] (-) TimerEvent: {}
+[40.360952] (messages) StdoutLine: {'line': b'[ 84%] Built target messages__rosidl_typesupport_fastrtps_cpp\n'}
+[40.456116] (-) TimerEvent: {}
+[40.556501] (-) TimerEvent: {}
+[40.656898] (-) TimerEvent: {}
+[40.757291] (-) TimerEvent: {}
+[40.857692] (-) TimerEvent: {}
+[40.958089] (-) TimerEvent: {}
+[41.058493] (-) TimerEvent: {}
+[41.158880] (-) TimerEvent: {}
+[41.220039] (messages) StdoutLine: {'line': b'[ 85%] Linking CXX shared library libmessages__rosidl_typesupport_introspection_cpp.so\n'}
+[41.259043] (-) TimerEvent: {}
+[41.359418] (-) TimerEvent: {}
+[41.390242] (messages) StdoutLine: {'line': b'[ 85%] Built target messages__rosidl_typesupport_introspection_cpp\n'}
+[41.439602] (messages) StdoutLine: {'line': b'[ 85%] Built target messages\n'}
+[41.459603] (-) TimerEvent: {}
+[41.489709] (messages) StdoutLine: {'line': b'[ 86%] Generating Python code for ROS interfaces\n'}
+[41.559746] (-) TimerEvent: {}
+[41.660109] (-) TimerEvent: {}
+[41.760463] (-) TimerEvent: {}
+[41.860831] (-) TimerEvent: {}
+[41.961183] (-) TimerEvent: {}
+[42.061548] (-) TimerEvent: {}
+[42.161901] (-) TimerEvent: {}
+[42.262260] (-) TimerEvent: {}
+[42.362636] (-) TimerEvent: {}
+[42.462996] (-) TimerEvent: {}
+[42.563343] (-) TimerEvent: {}
+[42.663711] (-) TimerEvent: {}
+[42.752377] (ros2_tools) StdoutLine: {'line': b'[100%] Linking CXX executable lidar_data_node\n'}
+[42.763862] (-) TimerEvent: {}
+[42.864221] (-) TimerEvent: {}
+[42.964636] (-) TimerEvent: {}
+[43.065021] (-) TimerEvent: {}
+[43.165439] (-) TimerEvent: {}
+[43.265795] (-) TimerEvent: {}
+[43.366131] (-) TimerEvent: {}
+[43.466481] (-) TimerEvent: {}
+[43.566828] (-) TimerEvent: {}
+[43.609684] (ros2_tools) StdoutLine: {'line': b'[100%] Built target lidar_data_node\n'}
+[43.633914] (ros2_tools) CommandEnded: {'returncode': 0}
+[43.635329] (ros2_tools) JobProgress: {'identifier': 'ros2_tools', 'progress': 'install'}
+[43.656303] (ros2_tools) Command: {'cmd': ['/usr/bin/cmake', '--install', '/home/zhenzhen/ros2/robodog-yunnan-elec/build/ros2_tools'], 'cwd': '/home/zhenzhen/ros2/robodog-yunnan-elec/build/ros2_tools', 'env': OrderedDict([('LESSOPEN', '| /usr/bin/lesspipe %s'), ('VSCODE_CWD', '/home/zhenzhen'), ('ANTHROPIC_MODEL', 'deepseek-v4-pro[1m]'), ('VSCODE_ESM_ENTRYPOINT', 'vs/workbench/api/node/extensionHostProcess'), ('AI_AGENT', 'claude-code_2-1-218_agent'), ('USER', 'zhenzhen'), ('SSH_CLIENT', '172.20.10.4 63729 22'), ('CLAUDE_CODE_ENTRYPOINT', 'claude-vscode'), ('VSCODE_NLS_CONFIG', '{"userLocale":"en","osLocale":"en","resolvedLanguage":"en","defaultMessagesFile":"/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/out/nls.messages.json","locale":"en","availableLanguages":{}}'), ('GIT_EDITOR', 'true'), ('VSCODE_HANDLES_UNCAUGHT_ERRORS', 'true'), ('XDG_SESSION_TYPE', 'tty'), ('CLAUDE_AGENT_SDK_VERSION', '0.3.218'), ('SHLVL', '0'), ('LD_LIBRARY_PATH', '/usr/local/lib:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools/lib:/home/zhenzhen/ros2/Quadcopter/install/messages/lib:/home/zhenzhen/ros2/Quadcopter/install/cv_tools/lib:/home/zhenzhen/ros2/ws_livox/install/livox_sdk2/lib:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2/lib:/home/zhenzhen/ros2/mavros/install/mavros_extras/lib:/home/zhenzhen/ros2/mavros/install/mavros/lib:/home/zhenzhen/ros2/mavros/install/mavros_msgs/lib:/home/zhenzhen/ros2/mavros/install/libmavconn/lib:/home/zhenzhen/ros2/mavros/install/geodesy/lib:/home/zhenzhen/ros2/mavros/install/geographic_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/test_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces/lib:/home/zhenzhen/ros2/ros2_rust/install/action_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/std_srvs/lib:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/std_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces/lib:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces/lib:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib'), ('BROWSER', '/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/bin/helpers/browser.sh'), ('MOTD_SHOWN', 'pam'), ('HOME', '/home/zhenzhen'), ('VSCODE_RECONNECTION_GRACE_TIME', '10800000'), ('NVM_BIN', '/home/zhenzhen/.nvm/versions/node/v24.4.1/bin'), ('VSCODE_IPC_HOOK_CLI', '/run/user/1000/vscode-ipc-eb786b2d-084e-4fc7-a5de-a3ace40a9921.sock'), ('NVM_INC', '/home/zhenzhen/.nvm/versions/node/v24.4.1/include/node'), ('JETSON_L4T', '36.4.0'), ('ANTHROPIC_DEFAULT_SONNET_MODEL', 'deepseek-v4-pro[1m]'), ('ROS_PYTHON_VERSION', '3'), ('JETSON_MODEL', 'NVIDIA Jetson Orin NX Engineering Reference Developer Kit'), ('CLAUDE_CODE_CHILD_SESSION', '1'), ('COPILOT_OTEL_FILE_EXPORTER_PATH', '/dev/null'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('GROUND_CAMERA', '/dev/ground'), ('NVM_DIR', '/home/zhenzhen/.nvm'), ('CPLUS_INCLUDE_PATH', '/usr/include/c++/11:/usr/include/aarch64-linux-gnu/c++/11'), ('VSCODE_L10N_BUNDLE_LOCATION', ''), ('COLCON_PREFIX_PATH', '/home/zhenzhen/ros2/Point-LIO/install:/home/zhenzhen/ros2/Quadcopter/install:/home/zhenzhen/ros2/ws_livox/install:/home/zhenzhen/ros2/mavros/install:/home/zhenzhen/ros2/ros2_rust/install'), ('CLAUDE_CODE_EFFORT_LEVEL', 'max'), ('API_TIMEOUT_MS', '3000000'), ('APPLICATION_INSIGHTS_NO_STATSBEAT', 'true'), ('ROS_DISTRO', 'humble'), ('LOGNAME', 'zhenzhen'), ('JETSON_MODULE', 'NVIDIA Jetson Orin NX (8GB ram)'), ('JETSON_SERIAL_NUMBER', '1424423004044'), ('VSCODE_HANDLES_SIGPIPE', 'true'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('XDG_SESSION_CLASS', 'user'), ('ANTHROPIC_BASE_URL', 'https://api.deepseek.com/anthropic'), ('XDG_SESSION_ID', '3'), ('VSCODE_CLI_REQUIRE_TOKEN', '9a5b7942-bcab-4977-9824-9274f356d8bc'), ('ROS_LOCALHOST_ONLY', '0'), ('ANTHROPIC_DEFAULT_OPUS_MODEL', 'deepseek-v4-pro[1m]'), ('MCP_CONNECTION_NONBLOCKING', 'true'), ('PATH', '/home/zhenzhen/.local/bin:/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/bin/remote-cli:/home/zhenzhen/.local/bin:/home/zhenzhen/.nvm/versions/node/v24.4.1/bin:/opt/ros/humble/bin:/home/zhenzhen/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin'), ('VSCODE_AGENT_FOLDER', '/home/zhenzhen/.vscode-server'), ('COREPACK_ENABLE_AUTO_PIN', '0'), ('XDG_RUNTIME_DIR', '/run/user/1000'), ('CLAUDE_EFFORT', 'max'), ('DISPLAY', ':0'), ('CLAUDE_PID', '12605'), ('NoDefaultCurrentDirectoryInExePath', '1'), ('LANG', 'en_US.UTF-8'), ('ANTHROPIC_DEFAULT_HAIKU_MODEL', 'deepseek-v4-pro[1m]'), ('LS_COLORS', ''), ('JETSON_SOC', 'tegra234'), ('ROS_DOMAIN_ID', '25'), ('AMENT_PREFIX_PATH', '/home/zhenzhen/ros2/Point-LIO/install/point_lio:/home/zhenzhen/ros2/Quadcopter/install/yolip:/home/zhenzhen/ros2/Quadcopter/install/core_2026:/home/zhenzhen/ros2/Quadcopter/install/vision_py:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools:/home/zhenzhen/ros2/Quadcopter/install/messages:/home/zhenzhen/ros2/Quadcopter/install/cv_tools:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2:/home/zhenzhen/ros2/mavros/install/mavros_extras:/home/zhenzhen/ros2/mavros/install/mavros:/home/zhenzhen/ros2/mavros/install/mavros_msgs:/home/zhenzhen/ros2/mavros/install/libmavconn:/home/zhenzhen/ros2/mavros/install/geographic_info:/home/zhenzhen/ros2/mavros/install/geodesy:/home/zhenzhen/ros2/mavros/install/geographic_msgs:/home/zhenzhen/ros2/ros2_rust/install/common_interfaces:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_msgs:/home/zhenzhen/ros2/ros2_rust/install/examples_worker_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_pub_sub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_client_service:/home/zhenzhen/ros2/ros2_rust/install/examples_parameter_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_logging_demo:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces:/home/zhenzhen/ros2/ros2_rust/install/action_msgs:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_interface_files:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_srvs:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs_py:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs:/home/zhenzhen/ros2/ros2_rust/install/rust_pubsub:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_msgs:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_message_demo:/home/zhenzhen/ros2/ros2_rust/install/rosidl_runtime_rs:/home/zhenzhen/ros2/ros2_rust/install/rclrs:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_runtime:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_generators:/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs:/opt/ros/humble'), ('SHELL', '/bin/bash'), ('ANTHROPIC_AUTH_TOKEN', 'sk-ea6e7dc596fd4841a53253befa9a8be0'), ('MXC_BIN_DIR', '/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/node_modules/@microsoft/mxc-sdk/bin'), ('ELECTRON_RUN_AS_NODE', '1'), ('CLAUDE_CODE_ENABLE_SDK_FILE_CHECKPOINTING', 'true'), ('CLAUDE_CODE_SESSION_ID', '9324ab2e-d78f-4b26-85f6-eefb89c40ed6'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('CLAUDECODE', '1'), ('JETSON_CUDA_ARCH_BIN', '8.7'), ('PWD', '/home/zhenzhen/ros2/robodog-yunnan-elec/build/ros2_tools'), ('SSH_CONNECTION', '172.20.10.4 63729 172.20.10.2 22'), ('NVM_CD_FLAGS', ''), ('XDG_DATA_DIRS', '/usr/share/gnome:/usr/local/share:/usr/share:/var/lib/snapd/desktop'), ('CLAUDE_CODE_EXECPATH', '/home/zhenzhen/.vscode-server/extensions/anthropic.claude-code-2.1.218-linux-arm64/resources/native-binary/claude'), ('CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC', '1'), ('PYTHONPATH', '/home/zhenzhen/ros2/Quadcopter/install/yolip/lib/python3.10/site-packages:/home/zhenzhen/ros2/Quadcopter/install/vision_py/lib/python3.10/site-packages:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/Quadcopter/install/messages/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/Quadcopter/install/cv_tools/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/mavros/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/mavros_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/geodesy/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/geographic_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/test_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/action_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/std_srvs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs_py/lib/python3.10/site-packages:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/std_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs/local/lib/python3.10/dist-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('CLAUDE_CODE_ENABLE_TASKS', '0'), ('COLCON', '1'), ('CLAUDE_CODE_SUBAGENT_MODEL', 'deepseek-v4-pro[1m]'), ('COPILOT_CLI_ENABLED_FEATURE_FLAGS', 'SHELL_SPAWN_BACKEND'), ('JETSON_JETPACK', '6.1'), ('CMAKE_PREFIX_PATH', '/home/zhenzhen/ros2/Point-LIO/install/point_lio:/home/zhenzhen/ros2/Quadcopter/install/core_2026:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools:/home/zhenzhen/ros2/Quadcopter/install/messages:/home/zhenzhen/ros2/Quadcopter/install/cv_tools:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2:/home/zhenzhen/ros2/mavros/install/mavros_extras:/home/zhenzhen/ros2/mavros/install/mavros:/home/zhenzhen/ros2/mavros/install/mavros_msgs:/home/zhenzhen/ros2/mavros/install/libmavconn:/home/zhenzhen/ros2/mavros/install/geographic_info:/home/zhenzhen/ros2/mavros/install/geodesy:/home/zhenzhen/ros2/mavros/install/geographic_msgs:/home/zhenzhen/ros2/ros2_rust/install/common_interfaces:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_msgs:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces:/home/zhenzhen/ros2/ros2_rust/install/action_msgs:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_interface_files:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_srvs:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_msgs:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_runtime:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_generators:/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs:/home/zhenzhen/ros2/Quadcopter/install/yolip:/home/zhenzhen/ros2/Quadcopter/install/vision_py:/home/zhenzhen/ros2/ros2_rust/install/examples_worker_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_pub_sub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_client_service:/home/zhenzhen/ros2/ros2_rust/install/examples_parameter_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_logging_demo:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs_py:/home/zhenzhen/ros2/ros2_rust/install/rust_pubsub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_message_demo:/home/zhenzhen/ros2/ros2_rust/install/rosidl_runtime_rs:/home/zhenzhen/ros2/ros2_rust/install/rclrs:/opt/ros/humble'), ('JETSON_P_NUMBER', 'p3767-0001')]), 'shell': False}
+[43.666924] (-) TimerEvent: {}
+[43.674237] (ros2_tools) StdoutLine: {'line': b'-- Install configuration: ""\n'}
+[43.674962] (ros2_tools) StdoutLine: {'line': b'-- Execute custom install script\n'}
+[43.676107] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ament_index/resource_index/rosidl_interfaces/ros2_tools\n'}
+[43.696022] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/include/ros2_tools/ros2_tools/msg/detail/lidar_pose__functions.h\n'}
+[43.714405] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/include/ros2_tools/ros2_tools/msg/detail/lidar_pose__struct.h\n'}
+[43.732753] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/include/ros2_tools/ros2_tools/msg/detail/lidar_pose__type_support.h\n'}
+[43.750522] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/include/ros2_tools/ros2_tools/msg/lidar_pose.h\n'}
+[43.767057] (-) TimerEvent: {}
+[43.768853] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/include/ros2_tools/ros2_tools/msg/rosidl_generator_c__visibility_control.h\n'}
+[43.786878] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/environment/library_path.sh\n'}
+[43.804825] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/environment/library_path.dsv\n'}
+[43.823432] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/include/ros2_tools/ros2_tools/msg/detail/lidar_pose__rosidl_typesupport_fastrtps_c.h\n'}
+[43.841925] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/include/ros2_tools/ros2_tools/msg/rosidl_typesupport_fastrtps_c__visibility_control.h\n'}
+[43.860841] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/include/ros2_tools/ros2_tools/msg/detail/lidar_pose__builder.hpp\n'}
+[43.867128] (-) TimerEvent: {}
+[43.879270] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/include/ros2_tools/ros2_tools/msg/detail/lidar_pose__struct.hpp\n'}
+[43.897771] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/include/ros2_tools/ros2_tools/msg/detail/lidar_pose__traits.hpp\n'}
+[43.915366] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/include/ros2_tools/ros2_tools/msg/detail/lidar_pose__type_support.hpp\n'}
+[43.934415] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/include/ros2_tools/ros2_tools/msg/lidar_pose.hpp\n'}
+[43.953066] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/include/ros2_tools/ros2_tools/msg/rosidl_generator_cpp__visibility_control.hpp\n'}
+[43.967224] (-) TimerEvent: {}
+[43.971910] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/include/ros2_tools/ros2_tools/msg/detail/lidar_pose__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[43.989337] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/include/ros2_tools/ros2_tools/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h\n'}
+[44.007922] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/include/ros2_tools/ros2_tools/msg/detail/lidar_pose__rosidl_typesupport_introspection_c.h\n'}
+[44.026828] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/include/ros2_tools/ros2_tools/msg/rosidl_typesupport_introspection_c__visibility_control.h\n'}
+[44.045945] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/include/ros2_tools/ros2_tools/msg/detail/lidar_pose__rosidl_typesupport_introspection_cpp.hpp\n'}
+[44.064141] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ament_index/resource_index/rust_packages/ros2_tools\n'}
+[44.067302] (-) TimerEvent: {}
+[44.085819] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/rust/Cargo.toml\n'}
+[44.102845] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/rust/build.rs\n'}
+[44.121906] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/rust/src/lib.rs\n'}
+[44.139789] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/rust/src/msg.rs\n'}
+[44.158654] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/environment/pythonpath.sh\n'}
+[44.167435] (-) TimerEvent: {}
+[44.178090] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/environment/pythonpath.dsv\n'}
+[44.196547] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools-0.0.0-py3.10.egg-info/PKG-INFO\n'}
+[44.215629] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools-0.0.0-py3.10.egg-info/SOURCES.txt\n'}
+[44.234196] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools-0.0.0-py3.10.egg-info/dependency_links.txt\n'}
+[44.251855] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools-0.0.0-py3.10.egg-info/top_level.txt\n'}
+[44.267558] (-) TimerEvent: {}
+[44.270926] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools/__init__.py\n'}
+[44.289139] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools/_ros2_tools_s.ep.rosidl_typesupport_c.c\n'}
+[44.307799] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools/_ros2_tools_s.ep.rosidl_typesupport_fastrtps_c.c\n'}
+[44.325731] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools/_ros2_tools_s.ep.rosidl_typesupport_introspection_c.c\n'}
+[44.344241] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools/libros2_tools__rosidl_generator_py.so\n'}
+[44.362957] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools/msg/__init__.py\n'}
+[44.367688] (-) TimerEvent: {}
+[44.381948] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools/msg/_lidar_pose.py\n'}
+[44.401167] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools/msg/_lidar_pose_s.c\n'}
+[44.422233] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools/ros2_tools_s__rosidl_typesupport_c.cpython-310-aarch64-linux-gnu.so\n'}
+[44.442456] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools/ros2_tools_s__rosidl_typesupport_fastrtps_c.cpython-310-aarch64-linux-gnu.so\n'}
+[44.461303] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools/ros2_tools_s__rosidl_typesupport_introspection_c.cpython-310-aarch64-linux-gnu.so\n'}
+[44.467796] (-) TimerEvent: {}
+[44.480375] (ros2_tools) StdoutLine: {'line': b'-- Up-to-date symlink: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools/ros2_tools_s__rosidl_typesupport_fastrtps_c.cpython-310-aarch64-linux-gnu.so\n'}
+[44.480789] (ros2_tools) StdoutLine: {'line': b'-- Up-to-date symlink: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools/ros2_tools_s__rosidl_typesupport_introspection_c.cpython-310-aarch64-linux-gnu.so\n'}
+[44.481068] (ros2_tools) StdoutLine: {'line': b'-- Up-to-date symlink: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools/ros2_tools_s__rosidl_typesupport_c.cpython-310-aarch64-linux-gnu.so\n'}
+[44.481359] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/msg/LidarPose.idl\n'}
+[44.499778] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/msg/LidarPose.msg\n'}
+[44.519464] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/lib/ros2_tools/lidar_data_node\n'}
+[44.538260] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/lib/ros2_tools/lidar_to_px4_bridge\n'}
+[44.558116] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/lib/ros2_tools/ground_camera_node\n'}
+[44.567938] (-) TimerEvent: {}
+[44.577415] (ros2_tools) StdoutLine: {'line': b'-- Up-to-date symlink: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/lib/ros2_tools/lidar_to_px4_bridge\n'}
+[44.577898] (ros2_tools) StdoutLine: {'line': b'-- Up-to-date symlink: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/msg/LidarPose.msg\n'}
+[44.578177] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ament_index/resource_index/package_run_dependencies/ros2_tools\n'}
+[44.596715] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ament_index/resource_index/parent_prefix_path/ros2_tools\n'}
+[44.615173] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/environment/ament_prefix_path.sh\n'}
+[44.633516] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/environment/ament_prefix_path.dsv\n'}
+[44.652430] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/environment/path.sh\n'}
+[44.668085] (-) TimerEvent: {}
+[44.670552] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/environment/path.dsv\n'}
+[44.688704] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/local_setup.bash\n'}
+[44.707270] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/local_setup.sh\n'}
+[44.725596] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/local_setup.zsh\n'}
+[44.743930] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/local_setup.dsv\n'}
+[44.761779] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/package.dsv\n'}
+[44.768180] (-) TimerEvent: {}
+[44.781040] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ament_index/resource_index/packages/ros2_tools\n'}
+[44.799176] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/rosidl_cmake-extras.cmake\n'}
+[44.818674] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/ament_cmake_export_include_directories-extras.cmake\n'}
+[44.838252] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/ament_cmake_export_libraries-extras.cmake\n'}
+[44.858675] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/ament_cmake_export_targets-extras.cmake\n'}
+[44.868376] (-) TimerEvent: {}
+[44.877681] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake\n'}
+[44.896034] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/ament_cmake_export_dependencies-extras.cmake\n'}
+[44.915400] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake\n'}
+[44.934404] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/ros2_toolsConfig.cmake\n'}
+[44.953373] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/ros2_toolsConfig-version.cmake\n'}
+[44.968440] (-) TimerEvent: {}
+[44.971777] (ros2_tools) StdoutLine: {'line': b'-- Symlinking: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/package.xml\n'}
+[44.990004] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/lib/libros2_tools__rosidl_generator_c.so\n'}
+[44.990613] (ros2_tools) StdoutLine: {'line': b'-- Set runtime path of "/home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/lib/libros2_tools__rosidl_generator_c.so" to ""\n'}
+[44.990770] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/lib/libros2_tools__rosidl_typesupport_fastrtps_c.so\n'}
+[44.991057] (ros2_tools) StdoutLine: {'line': b'-- Set runtime path of "/home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/lib/libros2_tools__rosidl_typesupport_fastrtps_c.so" to ""\n'}
+[44.991216] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/lib/libros2_tools__rosidl_typesupport_fastrtps_cpp.so\n'}
+[44.991480] (ros2_tools) StdoutLine: {'line': b'-- Set runtime path of "/home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/lib/libros2_tools__rosidl_typesupport_fastrtps_cpp.so" to ""\n'}
+[44.991682] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/lib/libros2_tools__rosidl_typesupport_introspection_c.so\n'}
+[44.991994] (ros2_tools) StdoutLine: {'line': b'-- Set runtime path of "/home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/lib/libros2_tools__rosidl_typesupport_introspection_c.so" to ""\n'}
+[44.992198] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/lib/libros2_tools__rosidl_typesupport_c.so\n'}
+[44.992527] (ros2_tools) StdoutLine: {'line': b'-- Set runtime path of "/home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/lib/libros2_tools__rosidl_typesupport_c.so" to ""\n'}
+[44.992725] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/lib/libros2_tools__rosidl_typesupport_introspection_cpp.so\n'}
+[44.993076] (ros2_tools) StdoutLine: {'line': b'-- Set runtime path of "/home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/lib/libros2_tools__rosidl_typesupport_introspection_cpp.so" to ""\n'}
+[44.993321] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/lib/libros2_tools__rosidl_typesupport_cpp.so\n'}
+[44.993591] (ros2_tools) StdoutLine: {'line': b'-- Set runtime path of "/home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/lib/libros2_tools__rosidl_typesupport_cpp.so" to ""\n'}
+[45.068583] (-) TimerEvent: {}
+[45.081540] (ros2_tools) StdoutLine: {'line': b"Listing '/home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools'...\n"}
+[45.081928] (ros2_tools) StdoutLine: {'line': b"Compiling '/home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools/__init__.py'...\n"}
+[45.082078] (ros2_tools) StdoutLine: {'line': b"Listing '/home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools/msg'...\n"}
+[45.082198] (ros2_tools) StdoutLine: {'line': b"Compiling '/home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools/msg/__init__.py'...\n"}
+[45.082308] (ros2_tools) StdoutLine: {'line': b"Compiling '/home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages/ros2_tools/msg/_lidar_pose.py'...\n"}
+[45.092140] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/lib/libros2_tools__rosidl_generator_py.so\n'}
+[45.092619] (ros2_tools) StdoutLine: {'line': b'-- Set runtime path of "/home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/lib/libros2_tools__rosidl_generator_py.so" to ""\n'}
+[45.092857] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/export_ros2_tools__rosidl_generator_cExport.cmake\n'}
+[45.093087] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/export_ros2_tools__rosidl_generator_cExport-noconfig.cmake\n'}
+[45.093312] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/export_ros2_tools__rosidl_typesupport_fastrtps_cExport.cmake\n'}
+[45.093555] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/export_ros2_tools__rosidl_typesupport_fastrtps_cExport-noconfig.cmake\n'}
+[45.093794] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/export_ros2_tools__rosidl_generator_cppExport.cmake\n'}
+[45.094015] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/export_ros2_tools__rosidl_typesupport_fastrtps_cppExport.cmake\n'}
+[45.094246] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/export_ros2_tools__rosidl_typesupport_fastrtps_cppExport-noconfig.cmake\n'}
+[45.094466] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/ros2_tools__rosidl_typesupport_introspection_cExport.cmake\n'}
+[45.094666] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/ros2_tools__rosidl_typesupport_introspection_cExport-noconfig.cmake\n'}
+[45.094892] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/ros2_tools__rosidl_typesupport_cExport.cmake\n'}
+[45.095114] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/ros2_tools__rosidl_typesupport_cExport-noconfig.cmake\n'}
+[45.095361] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/ros2_tools__rosidl_typesupport_introspection_cppExport.cmake\n'}
+[45.095623] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/ros2_tools__rosidl_typesupport_introspection_cppExport-noconfig.cmake\n'}
+[45.095855] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/ros2_tools__rosidl_typesupport_cppExport.cmake\n'}
+[45.096079] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/ros2_tools__rosidl_typesupport_cppExport-noconfig.cmake\n'}
+[45.096305] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/export_ros2_tools__rosidl_generator_pyExport.cmake\n'}
+[45.096597] (ros2_tools) StdoutLine: {'line': b'-- Installing: /home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake/export_ros2_tools__rosidl_generator_pyExport-noconfig.cmake\n'}
+[45.100490] (ros2_tools) CommandEnded: {'returncode': 0}
+[45.138792] (ros2_tools) JobEnded: {'identifier': 'ros2_tools', 'rc': 0}
+[45.140765] (core_2026) JobStarted: {'identifier': 'core_2026'}
+[45.164106] (core_2026) JobProgress: {'identifier': 'core_2026', 'progress': 'cmake'}
+[45.166105] (core_2026) Command: {'cmd': ['/usr/bin/cmake', '/home/zhenzhen/ros2/robodog-yunnan-elec/core_2026', '-DAMENT_CMAKE_SYMLINK_INSTALL=1', '-DCMAKE_INSTALL_PREFIX=/home/zhenzhen/ros2/robodog-yunnan-elec/install/core_2026'], 'cwd': '/home/zhenzhen/ros2/robodog-yunnan-elec/build/core_2026', 'env': OrderedDict([('LESSOPEN', '| /usr/bin/lesspipe %s'), ('VSCODE_CWD', '/home/zhenzhen'), ('ANTHROPIC_MODEL', 'deepseek-v4-pro[1m]'), ('VSCODE_ESM_ENTRYPOINT', 'vs/workbench/api/node/extensionHostProcess'), ('AI_AGENT', 'claude-code_2-1-218_agent'), ('USER', 'zhenzhen'), ('SSH_CLIENT', '172.20.10.4 63729 22'), ('CLAUDE_CODE_ENTRYPOINT', 'claude-vscode'), ('VSCODE_NLS_CONFIG', '{"userLocale":"en","osLocale":"en","resolvedLanguage":"en","defaultMessagesFile":"/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/out/nls.messages.json","locale":"en","availableLanguages":{}}'), ('GIT_EDITOR', 'true'), ('VSCODE_HANDLES_UNCAUGHT_ERRORS', 'true'), ('XDG_SESSION_TYPE', 'tty'), ('CLAUDE_AGENT_SDK_VERSION', '0.3.218'), ('SHLVL', '0'), ('LD_LIBRARY_PATH', '/home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/lib:/usr/local/lib:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools/lib:/home/zhenzhen/ros2/Quadcopter/install/messages/lib:/home/zhenzhen/ros2/Quadcopter/install/cv_tools/lib:/home/zhenzhen/ros2/ws_livox/install/livox_sdk2/lib:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2/lib:/home/zhenzhen/ros2/mavros/install/mavros_extras/lib:/home/zhenzhen/ros2/mavros/install/mavros/lib:/home/zhenzhen/ros2/mavros/install/mavros_msgs/lib:/home/zhenzhen/ros2/mavros/install/libmavconn/lib:/home/zhenzhen/ros2/mavros/install/geodesy/lib:/home/zhenzhen/ros2/mavros/install/geographic_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/test_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces/lib:/home/zhenzhen/ros2/ros2_rust/install/action_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/std_srvs/lib:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/std_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces/lib:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces/lib:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs/lib:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib'), ('BROWSER', '/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/bin/helpers/browser.sh'), ('MOTD_SHOWN', 'pam'), ('HOME', '/home/zhenzhen'), ('VSCODE_RECONNECTION_GRACE_TIME', '10800000'), ('NVM_BIN', '/home/zhenzhen/.nvm/versions/node/v24.4.1/bin'), ('VSCODE_IPC_HOOK_CLI', '/run/user/1000/vscode-ipc-eb786b2d-084e-4fc7-a5de-a3ace40a9921.sock'), ('NVM_INC', '/home/zhenzhen/.nvm/versions/node/v24.4.1/include/node'), ('JETSON_L4T', '36.4.0'), ('ANTHROPIC_DEFAULT_SONNET_MODEL', 'deepseek-v4-pro[1m]'), ('ROS_PYTHON_VERSION', '3'), ('JETSON_MODEL', 'NVIDIA Jetson Orin NX Engineering Reference Developer Kit'), ('CLAUDE_CODE_CHILD_SESSION', '1'), ('COPILOT_OTEL_FILE_EXPORTER_PATH', '/dev/null'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('GROUND_CAMERA', '/dev/ground'), ('NVM_DIR', '/home/zhenzhen/.nvm'), ('CPLUS_INCLUDE_PATH', '/usr/include/c++/11:/usr/include/aarch64-linux-gnu/c++/11'), ('VSCODE_L10N_BUNDLE_LOCATION', ''), ('COLCON_PREFIX_PATH', '/home/zhenzhen/ros2/Point-LIO/install:/home/zhenzhen/ros2/Quadcopter/install:/home/zhenzhen/ros2/ws_livox/install:/home/zhenzhen/ros2/mavros/install:/home/zhenzhen/ros2/ros2_rust/install'), ('CLAUDE_CODE_EFFORT_LEVEL', 'max'), ('API_TIMEOUT_MS', '3000000'), ('APPLICATION_INSIGHTS_NO_STATSBEAT', 'true'), ('ROS_DISTRO', 'humble'), ('LOGNAME', 'zhenzhen'), ('JETSON_MODULE', 'NVIDIA Jetson Orin NX (8GB ram)'), ('JETSON_SERIAL_NUMBER', '1424423004044'), ('VSCODE_HANDLES_SIGPIPE', 'true'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('XDG_SESSION_CLASS', 'user'), ('ANTHROPIC_BASE_URL', 'https://api.deepseek.com/anthropic'), ('XDG_SESSION_ID', '3'), ('VSCODE_CLI_REQUIRE_TOKEN', '9a5b7942-bcab-4977-9824-9274f356d8bc'), ('ROS_LOCALHOST_ONLY', '0'), ('ANTHROPIC_DEFAULT_OPUS_MODEL', 'deepseek-v4-pro[1m]'), ('MCP_CONNECTION_NONBLOCKING', 'true'), ('PATH', '/home/zhenzhen/.local/bin:/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/bin/remote-cli:/home/zhenzhen/.local/bin:/home/zhenzhen/.nvm/versions/node/v24.4.1/bin:/opt/ros/humble/bin:/home/zhenzhen/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin'), ('VSCODE_AGENT_FOLDER', '/home/zhenzhen/.vscode-server'), ('COREPACK_ENABLE_AUTO_PIN', '0'), ('XDG_RUNTIME_DIR', '/run/user/1000'), ('CLAUDE_EFFORT', 'max'), ('DISPLAY', ':0'), ('CLAUDE_PID', '12605'), ('NoDefaultCurrentDirectoryInExePath', '1'), ('LANG', 'en_US.UTF-8'), ('ANTHROPIC_DEFAULT_HAIKU_MODEL', 'deepseek-v4-pro[1m]'), ('LS_COLORS', ''), ('JETSON_SOC', 'tegra234'), ('ROS_DOMAIN_ID', '25'), ('AMENT_PREFIX_PATH', '/home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools:/home/zhenzhen/ros2/Point-LIO/install/point_lio:/home/zhenzhen/ros2/Quadcopter/install/yolip:/home/zhenzhen/ros2/Quadcopter/install/core_2026:/home/zhenzhen/ros2/Quadcopter/install/vision_py:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools:/home/zhenzhen/ros2/Quadcopter/install/messages:/home/zhenzhen/ros2/Quadcopter/install/cv_tools:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2:/home/zhenzhen/ros2/mavros/install/mavros_extras:/home/zhenzhen/ros2/mavros/install/mavros:/home/zhenzhen/ros2/mavros/install/mavros_msgs:/home/zhenzhen/ros2/mavros/install/libmavconn:/home/zhenzhen/ros2/mavros/install/geographic_info:/home/zhenzhen/ros2/mavros/install/geodesy:/home/zhenzhen/ros2/mavros/install/geographic_msgs:/home/zhenzhen/ros2/ros2_rust/install/common_interfaces:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_msgs:/home/zhenzhen/ros2/ros2_rust/install/examples_worker_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_pub_sub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_client_service:/home/zhenzhen/ros2/ros2_rust/install/examples_parameter_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_logging_demo:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces:/home/zhenzhen/ros2/ros2_rust/install/action_msgs:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_interface_files:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_srvs:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs_py:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs:/home/zhenzhen/ros2/ros2_rust/install/rust_pubsub:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_msgs:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_message_demo:/home/zhenzhen/ros2/ros2_rust/install/rosidl_runtime_rs:/home/zhenzhen/ros2/ros2_rust/install/rclrs:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_runtime:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_generators:/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs:/opt/ros/humble'), ('SHELL', '/bin/bash'), ('ANTHROPIC_AUTH_TOKEN', 'sk-ea6e7dc596fd4841a53253befa9a8be0'), ('MXC_BIN_DIR', '/home/zhenzhen/.vscode-server/cli/servers/Stable-1b6a188127eeaf9194f945eb6eb89a657e93c54c/server/node_modules/@microsoft/mxc-sdk/bin'), ('ELECTRON_RUN_AS_NODE', '1'), ('CLAUDE_CODE_ENABLE_SDK_FILE_CHECKPOINTING', 'true'), ('CLAUDE_CODE_SESSION_ID', '9324ab2e-d78f-4b26-85f6-eefb89c40ed6'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('CLAUDECODE', '1'), ('JETSON_CUDA_ARCH_BIN', '8.7'), ('PWD', '/home/zhenzhen/ros2/robodog-yunnan-elec/build/core_2026'), ('SSH_CONNECTION', '172.20.10.4 63729 172.20.10.2 22'), ('NVM_CD_FLAGS', ''), ('XDG_DATA_DIRS', '/usr/share/gnome:/usr/local/share:/usr/share:/var/lib/snapd/desktop'), ('CLAUDE_CODE_EXECPATH', '/home/zhenzhen/.vscode-server/extensions/anthropic.claude-code-2.1.218-linux-arm64/resources/native-binary/claude'), ('CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC', '1'), ('PYTHONPATH', '/home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/Quadcopter/install/yolip/lib/python3.10/site-packages:/home/zhenzhen/ros2/Quadcopter/install/vision_py/lib/python3.10/site-packages:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/Quadcopter/install/messages/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/Quadcopter/install/cv_tools/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/mavros/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/mavros_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/geodesy/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/mavros/install/geographic_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/test_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/action_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/std_srvs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs_py/lib/python3.10/site-packages:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/std_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces/local/lib/python3.10/dist-packages:/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs/local/lib/python3.10/dist-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('CLAUDE_CODE_ENABLE_TASKS', '0'), ('COLCON', '1'), ('CLAUDE_CODE_SUBAGENT_MODEL', 'deepseek-v4-pro[1m]'), ('COPILOT_CLI_ENABLED_FEATURE_FLAGS', 'SHELL_SPAWN_BACKEND'), ('JETSON_JETPACK', '6.1'), ('CMAKE_PREFIX_PATH', '/home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools:/home/zhenzhen/ros2/Point-LIO/install/point_lio:/home/zhenzhen/ros2/Quadcopter/install/core_2026:/home/zhenzhen/ros2/Quadcopter/install/ros2_tools:/home/zhenzhen/ros2/Quadcopter/install/messages:/home/zhenzhen/ros2/Quadcopter/install/cv_tools:/home/zhenzhen/ros2/ws_livox/install/livox_ros_driver2:/home/zhenzhen/ros2/mavros/install/mavros_extras:/home/zhenzhen/ros2/mavros/install/mavros:/home/zhenzhen/ros2/mavros/install/mavros_msgs:/home/zhenzhen/ros2/mavros/install/libmavconn:/home/zhenzhen/ros2/mavros/install/geographic_info:/home/zhenzhen/ros2/mavros/install/geodesy:/home/zhenzhen/ros2/mavros/install/geographic_msgs:/home/zhenzhen/ros2/ros2_rust/install/common_interfaces:/home/zhenzhen/ros2/ros2_rust/install/visualization_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_msgs:/home/zhenzhen/ros2/ros2_rust/install/example_interfaces:/home/zhenzhen/ros2/ros2_rust/install/action_msgs:/home/zhenzhen/ros2/ros2_rust/install/unique_identifier_msgs:/home/zhenzhen/ros2/ros2_rust/install/trajectory_msgs:/home/zhenzhen/ros2/ros2_rust/install/test_interface_files:/home/zhenzhen/ros2/ros2_rust/install/stereo_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_srvs:/home/zhenzhen/ros2/ros2_rust/install/shape_msgs:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs:/home/zhenzhen/ros2/ros2_rust/install/nav_msgs:/home/zhenzhen/ros2/ros2_rust/install/diagnostic_msgs:/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs:/home/zhenzhen/ros2/ros2_rust/install/actionlib_msgs:/home/zhenzhen/ros2/ros2_rust/install/std_msgs:/home/zhenzhen/ros2/ros2_rust/install/statistics_msgs:/home/zhenzhen/ros2/ros2_rust/install/rosgraph_msgs:/home/zhenzhen/ros2/ros2_rust/install/rclrs_example_msgs:/home/zhenzhen/ros2/ros2_rust/install/composition_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rcl_interfaces:/home/zhenzhen/ros2/ros2_rust/install/lifecycle_msgs:/home/zhenzhen/ros2/ros2_rust/install/builtin_interfaces:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_runtime:/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_generators:/home/zhenzhen/ros2/ros2_rust/install/rosidl_generator_rs:/home/zhenzhen/ros2/Quadcopter/install/yolip:/home/zhenzhen/ros2/Quadcopter/install/vision_py:/home/zhenzhen/ros2/ros2_rust/install/examples_worker_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_pub_sub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_client_service:/home/zhenzhen/ros2/ros2_rust/install/examples_parameter_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_logging_demo:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs_py:/home/zhenzhen/ros2/ros2_rust/install/rust_pubsub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_message_demo:/home/zhenzhen/ros2/ros2_rust/install/rosidl_runtime_rs:/home/zhenzhen/ros2/ros2_rust/install/rclrs:/opt/ros/humble'), ('JETSON_P_NUMBER', 'p3767-0001')]), 'shell': False}
+[45.168652] (-) TimerEvent: {}
+[45.268904] (-) TimerEvent: {}
+[45.274161] (core_2026) StdoutLine: {'line': b'-- The C compiler identification is GNU 11.4.0\n'}
+[45.369050] (-) TimerEvent: {}
+[45.370729] (core_2026) StdoutLine: {'line': b'-- The CXX compiler identification is GNU 11.4.0\n'}
+[45.383144] (core_2026) StdoutLine: {'line': b'-- Detecting C compiler ABI info\n'}
+[45.469202] (-) TimerEvent: {}
+[45.524817] (core_2026) StdoutLine: {'line': b'-- Detecting C compiler ABI info - done\n'}
+[45.530490] (core_2026) StdoutLine: {'line': b'-- Check for working C compiler: /usr/bin/cc - skipped\n'}
+[45.531080] (core_2026) StdoutLine: {'line': b'-- Detecting C compile features\n'}
+[45.531829] (core_2026) StdoutLine: {'line': b'-- Detecting C compile features - done\n'}
+[45.536729] (core_2026) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info\n'}
+[45.569361] (-) TimerEvent: {}
+[45.669722] (-) TimerEvent: {}
+[45.689599] (core_2026) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info - done\n'}
+[45.700924] (core_2026) StdoutLine: {'line': b'-- Check for working CXX compiler: /usr/bin/c++ - skipped\n'}
+[45.701396] (core_2026) StdoutLine: {'line': b'-- Detecting CXX compile features\n'}
+[45.701835] (core_2026) StdoutLine: {'line': b'-- Detecting CXX compile features - done\n'}
+[45.713090] (core_2026) StdoutLine: {'line': b'-- Found ament_cmake: 1.3.11 (/opt/ros/humble/share/ament_cmake/cmake)\n'}
+[45.770435] (-) TimerEvent: {}
+[45.870809] (-) TimerEvent: {}
+[45.971173] (-) TimerEvent: {}
+[46.071543] (-) TimerEvent: {}
+[46.086526] (core_2026) StdoutLine: {'line': b'-- Found Python3: /usr/bin/python3 (found version "3.10.12") found components: Interpreter \n'}
+[46.171681] (-) TimerEvent: {}
+[46.239614] (core_2026) StdoutLine: {'line': b'-- Override CMake install command with custom implementation using symlinks instead of copying resources\n'}
+[46.271810] (-) TimerEvent: {}
+[46.370031] (core_2026) StdoutLine: {'line': b'-- Found rclcpp: 16.0.12 (/opt/ros/humble/share/rclcpp/cmake)\n'}
+[46.371885] (-) TimerEvent: {}
+[46.472134] (-) TimerEvent: {}
+[46.505752] (core_2026) StdoutLine: {'line': b'-- Found rosidl_generator_c: 3.1.6 (/opt/ros/humble/share/rosidl_generator_c/cmake)\n'}
+[46.525769] (core_2026) StdoutLine: {'line': b'-- Found rosidl_adapter: 3.1.6 (/opt/ros/humble/share/rosidl_adapter/cmake)\n'}
+[46.551221] (core_2026) StdoutLine: {'line': b'-- Found rosidl_generator_cpp: 3.1.6 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)\n'}
+[46.572252] (-) TimerEvent: {}
+[46.585382] (core_2026) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[46.631328] (core_2026) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[46.672383] (-) TimerEvent: {}
+[46.763066] (core_2026) StdoutLine: {'line': b'-- Found rmw_implementation_cmake: 6.1.2 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)\n'}
+[46.772561] (-) TimerEvent: {}
+[46.776884] (core_2026) StdoutLine: {'line': b'-- Found rmw_fastrtps_cpp: 6.2.7 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)\n'}
+[46.872703] (-) TimerEvent: {}
+[46.973044] (-) TimerEvent: {}
+[46.973558] (core_2026) StdoutLine: {'line': b'-- Found OpenSSL: /usr/lib/aarch64-linux-gnu/libcrypto.so (found version "3.0.2")  \n'}
+[47.030776] (core_2026) StdoutLine: {'line': b'-- Found FastRTPS: /opt/ros/humble/include  \n'}
+[47.073182] (-) TimerEvent: {}
+[47.119307] (core_2026) StdoutLine: {'line': b"-- Using RMW implementation 'rmw_fastrtps_cpp' as default\n"}
+[47.153956] (core_2026) StdoutLine: {'line': b'-- Looking for pthread.h\n'}
+[47.173338] (-) TimerEvent: {}
+[47.273685] (-) TimerEvent: {}
+[47.297623] (core_2026) StdoutLine: {'line': b'-- Looking for pthread.h - found\n'}
+[47.298230] (core_2026) StdoutLine: {'line': b'-- Performing Test CMAKE_HAVE_LIBC_PTHREAD\n'}
+[47.373829] (-) TimerEvent: {}
+[47.443648] (core_2026) StdoutLine: {'line': b'-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success\n'}
+[47.445425] (core_2026) StdoutLine: {'line': b'-- Found Threads: TRUE  \n'}
+[47.473935] (-) TimerEvent: {}
+[47.553905] (core_2026) StdoutLine: {'line': b'-- Found geometry_msgs: 4.9.0 (/home/zhenzhen/ros2/ros2_rust/install/geometry_msgs/share/geometry_msgs/cmake)\n'}
+[47.574073] (-) TimerEvent: {}
+[47.576550] (core_2026) StdoutLine: {'line': b'-- Found nav_msgs: 4.9.0 (/home/zhenzhen/ros2/ros2_rust/install/nav_msgs/share/nav_msgs/cmake)\n'}
+[47.604001] (core_2026) StdoutLine: {'line': b'-- Found mavros_msgs: 2.10.0 (/home/zhenzhen/ros2/mavros/install/mavros_msgs/share/mavros_msgs/cmake)\n'}
+[47.674237] (-) TimerEvent: {}
+[47.722305] (core_2026) StdoutLine: {'line': b'-- Found ros2_tools: 0.0.0 (/home/zhenzhen/ros2/robodog-yunnan-elec/install/ros2_tools/share/ros2_tools/cmake)\n'}
+[47.757672] (core_2026) StderrLine: {'line': b'CMake Error at CMakeLists.txt:20 (find_package):\n'}
+[47.758073] (core_2026) StderrLine: {'line': b'  By not providing "Findmessages.cmake" in CMAKE_MODULE_PATH this project has\n'}
+[47.758210] (core_2026) StderrLine: {'line': b'  asked CMake to find a package configuration file provided by "messages",\n'}
+[47.758318] (core_2026) StderrLine: {'line': b'  but CMake did not find one.\n'}
+[47.758423] (core_2026) StderrLine: {'line': b'\n'}
+[47.758523] (core_2026) StderrLine: {'line': b'  Could not find a package configuration file provided by "messages" with any\n'}
+[47.758620] (core_2026) StderrLine: {'line': b'  of the following names:\n'}
+[47.758716] (core_2026) StderrLine: {'line': b'\n'}
+[47.758809] (core_2026) StderrLine: {'line': b'    messagesConfig.cmake\n'}
+[47.758904] (core_2026) StderrLine: {'line': b'    messages-config.cmake\n'}
+[47.758997] (core_2026) StderrLine: {'line': b'\n'}
+[47.759090] (core_2026) StderrLine: {'line': b'  Add the installation prefix of "messages" to CMAKE_PREFIX_PATH or set\n'}
+[47.759186] (core_2026) StderrLine: {'line': b'  "messages_DIR" to a directory containing one of the above files.  If\n'}
+[47.759280] (core_2026) StderrLine: {'line': b'  "messages" provides a separate development package or SDK, be sure it has\n'}
+[47.759373] (core_2026) StderrLine: {'line': b'  been installed.\n'}
+[47.759465] (core_2026) StderrLine: {'line': b'\n'}
+[47.759559] (core_2026) StderrLine: {'line': b'\n'}
+[47.759652] (core_2026) StdoutLine: {'line': b'-- Configuring incomplete, errors occurred!\n'}
+[47.759753] (core_2026) StdoutLine: {'line': b'See also "/home/zhenzhen/ros2/robodog-yunnan-elec/build/core_2026/CMakeFiles/CMakeOutput.log".\n'}
+[47.774407] (-) TimerEvent: {}
+[47.785145] (core_2026) CommandEnded: {'returncode': 1}
+[47.815935] (core_2026) JobEnded: {'identifier': 'core_2026', 'rc': 1}
+[47.874529] (-) TimerEvent: {}
+[47.974878] (-) TimerEvent: {}
+[48.075231] (-) TimerEvent: {}
+[48.175604] (-) TimerEvent: {}
+[48.275956] (-) TimerEvent: {}
+[48.376269] (-) TimerEvent: {}
+[48.476614] (-) TimerEvent: {}
+[48.576943] (-) TimerEvent: {}
+[48.677272] (-) TimerEvent: {}
+[48.777587] (-) TimerEvent: {}
+[48.877909] (-) TimerEvent: {}
+[48.978232] (-) TimerEvent: {}
+[49.078552] (-) TimerEvent: {}
+[49.178884] (-) TimerEvent: {}
+[49.279224] (-) TimerEvent: {}
+[49.379558] (-) TimerEvent: {}
+[49.479949] (-) TimerEvent: {}
+[49.580425] (-) TimerEvent: {}
+[49.680854] (-) TimerEvent: {}
+[49.728709] (messages) StdoutLine: {'line': b'[ 86%] Built target messages__py\n'}
+[49.778863] (messages) StdoutLine: {'line': b'[ 88%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/msg/_smart_car_control_setpoint_s.c.o\n'}
+[49.779283] (messages) StdoutLine: {'line': b'[ 88%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/msg/_vision_msg_s.c.o\n'}
+[49.779453] (messages) StdoutLine: {'line': b'[ 88%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/msg/_vision_s.c.o\n'}
+[49.780957] (-) TimerEvent: {}
+[49.881286] (-) TimerEvent: {}
+[49.975537] (messages) StdoutLine: {'line': b'[ 91%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/msg/_smart_car_motion_state_s.c.o\n'}
+[49.975997] (messages) StdoutLine: {'line': b'[ 91%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/msg/_smart_car_motor_status_s.c.o\n'}
+[49.976434] (messages) StdoutLine: {'line': b'[ 91%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/msg/_smart_car_calib_status_s.c.o\n'}
+[49.981399] (-) TimerEvent: {}
+[50.081848] (-) TimerEvent: {}
+[50.176761] (messages) StdoutLine: {'line': b'[ 93%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/srv/_smart_car_command_s.c.o\n'}
+[50.177161] (messages) StdoutLine: {'line': b'[ 93%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/msg/_platform_target_s.c.o\n'}
+[50.177330] (messages) StdoutLine: {'line': b'[ 93%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/srv/_smart_car_actuator_test_s.c.o\n'}
+[50.181954] (-) TimerEvent: {}
+[50.282294] (-) TimerEvent: {}
+[50.379981] (messages) StdoutLine: {'line': b'[ 94%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/action/_takeoff_s.c.o\n'}
+[50.381557] (messages) StdoutLine: {'line': b'[ 94%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/action/_go_to_target_s.c.o\n'}
+[50.382709] (-) TimerEvent: {}
+[50.392796] (messages) StdoutLine: {'line': b'[ 95%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/action/_track_velocity_s.c.o\n'}
+[50.482914] (-) TimerEvent: {}
+[50.583342] (-) TimerEvent: {}
+[50.675446] (messages) StdoutLine: {'line': b'[ 95%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/msg/_smart_car_imu_status_s.c.o\n'}
+[50.676283] (messages) StdoutLine: {'line': b'[ 96%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/action/_land_s.c.o\n'}
+[50.679502] (messages) StdoutLine: {'line': b'[ 96%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/action/_execute_mission_s.c.o\n'}
+[50.683461] (-) TimerEvent: {}
+[50.696174] (messages) StdoutLine: {'line': b'[ 96%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/msg/_smart_car_status_s.c.o\n'}
+[50.783674] (-) TimerEvent: {}
+[50.884076] (-) TimerEvent: {}
+[50.984469] (-) TimerEvent: {}
+[50.992276] (messages) StdoutLine: {'line': b'[ 97%] Linking C shared library rosidl_generator_py/messages/libmessages__rosidl_generator_py.so\n'}
+[51.084643] (-) TimerEvent: {}
+[51.091840] (messages) StdoutLine: {'line': b'[ 97%] Built target messages__rosidl_generator_py\n'}
+[51.138751] (messages) StdoutLine: {'line': b'[ 97%] Building C object CMakeFiles/messages__rosidl_typesupport_fastrtps_c__pyext.dir/rosidl_generator_py/messages/_messages_s.ep.rosidl_typesupport_fastrtps_c.c.o\n'}
+[51.139182] (messages) StdoutLine: {'line': b'[ 97%] Building C object CMakeFiles/messages__rosidl_typesupport_c__pyext.dir/rosidl_generator_py/messages/_messages_s.ep.rosidl_typesupport_c.c.o\n'}
+[51.139321] (messages) StdoutLine: {'line': b'[ 97%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c__pyext.dir/rosidl_generator_py/messages/_messages_s.ep.rosidl_typesupport_introspection_c.c.o\n'}
+[51.184812] (-) TimerEvent: {}
+[51.285211] (-) TimerEvent: {}
+[51.385621] (-) TimerEvent: {}
+[51.486077] (-) TimerEvent: {}
+[51.586496] (-) TimerEvent: {}
+[51.611693] (messages) StdoutLine: {'line': b'[ 98%] Linking C shared library rosidl_generator_py/messages/messages_s__rosidl_typesupport_fastrtps_c.cpython-310-aarch64-linux-gnu.so\n'}
+[51.613040] (messages) StdoutLine: {'line': b'[ 99%] Linking C shared library rosidl_generator_py/messages/messages_s__rosidl_typesupport_c.cpython-310-aarch64-linux-gnu.so\n'}
+[51.626614] (messages) StdoutLine: {'line': b'[100%] Linking C shared library rosidl_generator_py/messages/messages_s__rosidl_typesupport_introspection_c.cpython-310-aarch64-linux-gnu.so\n'}
+[51.686676] (-) TimerEvent: {}
+[51.717809] (messages) StdoutLine: {'line': b'[100%] Built target messages__rosidl_typesupport_fastrtps_c__pyext\n'}
+[51.718206] (messages) StdoutLine: {'line': b'[100%] Built target messages__rosidl_typesupport_c__pyext\n'}
+[51.734774] (messages) StdoutLine: {'line': b'[100%] Built target messages__rosidl_typesupport_introspection_c__pyext\n'}
+[51.763200] (messages) JobEnded: {'identifier': 'messages', 'rc': 'SIGINT'}
+[51.764763] (-) EventReactorShutdown: {}

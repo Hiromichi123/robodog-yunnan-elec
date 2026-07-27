@@ -1,0 +1,1 @@
+/home/zhenzhen/ros2/robodog-yunnan-elec/build/messages/ament_cmake_environment_hooks/pythonpath.sh

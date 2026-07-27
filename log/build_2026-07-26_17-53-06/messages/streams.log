@@ -1,0 +1,226 @@
+[0.023s] Invoking command in '/home/zhenzhen/ros2/robodog-yunnan-elec/build/messages': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/zhenzhen/ros2/Quadcopter/install/yolip:/home/zhenzhen/ros2/Quadcopter/install/vision_py:/home/zhenzhen/ros2/ros2_rust/install/examples_worker_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_pub_sub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_client_service:/home/zhenzhen/ros2/ros2_rust/install/examples_parameter_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_logging_demo:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs_py:/home/zhenzhen/ros2/ros2_rust/install/rust_pubsub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_message_demo:/home/zhenzhen/ros2/ros2_rust/install/rosidl_runtime_rs:/home/zhenzhen/ros2/ros2_rust/install/rclrs:/opt/ros/humble /usr/bin/cmake /home/zhenzhen/ros2/robodog-yunnan-elec/messages -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/home/zhenzhen/ros2/robodog-yunnan-elec/install/messages
+[0.180s] -- The C compiler identification is GNU 11.4.0
+[0.298s] -- The CXX compiler identification is GNU 11.4.0
+[0.320s] -- Detecting C compiler ABI info
+[0.470s] -- Detecting C compiler ABI info - done
+[0.494s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.495s] -- Detecting C compile features
+[0.497s] -- Detecting C compile features - done
+[0.507s] -- Detecting CXX compiler ABI info
+[0.702s] -- Detecting CXX compiler ABI info - done
+[0.724s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.725s] -- Detecting CXX compile features
+[0.726s] -- Detecting CXX compile features - done
+[0.739s] -- Found ament_cmake: 1.3.11 (/opt/ros/humble/share/ament_cmake/cmake)
+[1.144s] -- Found Python3: /usr/bin/python3 (found version "3.10.12") found components: Interpreter 
+[1.301s] -- Override CMake install command with custom implementation using symlinks instead of copying resources
+[1.467s] -- Found rclcpp: 16.0.12 (/opt/ros/humble/share/rclcpp/cmake)
+[1.597s] -- Found rosidl_generator_c: 3.1.6 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[1.617s] -- Found rosidl_adapter: 3.1.6 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[1.641s] -- Found rosidl_generator_cpp: 3.1.6 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[1.675s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[1.719s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[1.858s] -- Found rmw_implementation_cmake: 6.1.2 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)
+[1.875s] -- Found rmw_fastrtps_cpp: 6.2.7 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)
+[2.115s] -- Found OpenSSL: /usr/lib/aarch64-linux-gnu/libcrypto.so (found version "3.0.2")  
+[2.191s] -- Found FastRTPS: /opt/ros/humble/include  
+[2.281s] -- Using RMW implementation 'rmw_fastrtps_cpp' as default
+[2.320s] -- Looking for pthread.h
+[2.459s] -- Looking for pthread.h - found
+[2.460s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+[2.610s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+[2.612s] -- Found Threads: TRUE  
+[2.750s] -- Found rosidl_default_generators: 1.2.0 (/home/zhenzhen/ros2/ros2_rust/install/rosidl_default_generators/share/rosidl_default_generators/cmake)
+[2.797s] -- Found sensor_msgs: 4.9.0 (/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs/share/sensor_msgs/cmake)
+[3.843s] -- Found ament_cmake_ros: 0.10.0 (/opt/ros/humble/share/ament_cmake_ros/cmake)
+[5.012s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[5.441s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[5.741s] -- Found PythonInterp: /usr/bin/python3 (found suitable version "3.10.12", minimum required is "3.6") 
+[5.763s] -- Found python_cmake_module: 0.10.0 (/opt/ros/humble/share/python_cmake_module/cmake)
+[5.851s] -- Found PythonLibs: /usr/lib/aarch64-linux-gnu/libpython3.10.so (found suitable version "3.10.12", minimum required is "3.5") 
+[5.852s] -- Using PYTHON_EXECUTABLE: /usr/bin/python3
+[5.853s] -- Using PYTHON_INCLUDE_DIRS: /usr/include/python3.10
+[5.853s] -- Using PYTHON_LIBRARIES: /usr/lib/aarch64-linux-gnu/libpython3.10.so
+[5.909s] -- Found PythonExtra: .so  
+[6.214s] -- Configuring done
+[6.369s] -- Generating done
+[6.398s] -- Build files have been written to: /home/zhenzhen/ros2/robodog-yunnan-elec/build/messages
+[6.448s] Invoked command in '/home/zhenzhen/ros2/robodog-yunnan-elec/build/messages' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/zhenzhen/ros2/Quadcopter/install/yolip:/home/zhenzhen/ros2/Quadcopter/install/vision_py:/home/zhenzhen/ros2/ros2_rust/install/examples_worker_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_pub_sub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_client_service:/home/zhenzhen/ros2/ros2_rust/install/examples_parameter_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_logging_demo:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs_py:/home/zhenzhen/ros2/ros2_rust/install/rust_pubsub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_message_demo:/home/zhenzhen/ros2/ros2_rust/install/rosidl_runtime_rs:/home/zhenzhen/ros2/ros2_rust/install/rclrs:/opt/ros/humble /usr/bin/cmake /home/zhenzhen/ros2/robodog-yunnan-elec/messages -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/home/zhenzhen/ros2/robodog-yunnan-elec/install/messages
+[6.454s] Invoking command in '/home/zhenzhen/ros2/robodog-yunnan-elec/build/messages': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/zhenzhen/ros2/Quadcopter/install/yolip:/home/zhenzhen/ros2/Quadcopter/install/vision_py:/home/zhenzhen/ros2/ros2_rust/install/examples_worker_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_pub_sub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_minimal_client_service:/home/zhenzhen/ros2/ros2_rust/install/examples_parameter_demo:/home/zhenzhen/ros2/ros2_rust/install/examples_logging_demo:/home/zhenzhen/ros2/ros2_rust/install/sensor_msgs_py:/home/zhenzhen/ros2/ros2_rust/install/rust_pubsub:/home/zhenzhen/ros2/ros2_rust/install/examples_rclrs_message_demo:/home/zhenzhen/ros2/ros2_rust/install/rosidl_runtime_rs:/home/zhenzhen/ros2/ros2_rust/install/rclrs:/opt/ros/humble /usr/bin/cmake --build /home/zhenzhen/ros2/robodog-yunnan-elec/build/messages -- -j6 -l6
+[6.674s] [  0%] Generating C code for ROS interfaces
+[6.765s] [  0%] Generating C++ code for ROS interfaces
+[6.781s] [  1%] Generating Rust code for ROS interfaces
+[6.863s] [  1%] Built target ament_cmake_python_symlink_messages
+[8.126s] running egg_info
+[8.136s] creating messages.egg-info
+[8.138s] writing messages.egg-info/PKG-INFO
+[8.139s] writing dependency_links to messages.egg-info/dependency_links.txt
+[8.150s] writing top-level names to messages.egg-info/top_level.txt
+[8.152s] writing manifest file 'messages.egg-info/SOURCES.txt'
+[8.158s] reading manifest file 'messages.egg-info/SOURCES.txt'
+[8.162s] writing manifest file 'messages.egg-info/SOURCES.txt'
+[8.377s] [  1%] Built target ament_cmake_python_build_messages_egg
+[10.485s] [  1%] Built target messages__rs
+[15.033s] [  1%] Built target messages__cpp
+[15.087s] [  2%] Generating C++ type support for eProsima Fast-RTPS
+[15.140s] [  5%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/msg/detail/vision_msg__functions.c.o
+[15.143s] [  6%] Generating C++ type support dispatch for ROS interfaces
+[15.144s] [  4%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/msg/detail/smart_car_control_setpoint__functions.c.o
+[15.144s] [  6%] Generating C++ introspection for ROS interfaces
+[15.144s] [  6%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/msg/detail/vision__functions.c.o
+[15.278s] [  7%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/msg/detail/smart_car_status__functions.c.o
+[15.410s] [  8%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/msg/detail/smart_car_motion_state__functions.c.o
+[15.443s] [  8%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/msg/detail/smart_car_motor_status__functions.c.o
+[15.541s] [  9%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/msg/detail/smart_car_imu_status__functions.c.o
+[15.688s] [ 10%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/msg/detail/smart_car_calib_status__functions.c.o
+[15.743s] [ 10%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/msg/detail/platform_target__functions.c.o
+[15.852s] [ 11%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/srv/detail/smart_car_command__functions.c.o
+[15.989s] [ 12%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/srv/detail/smart_car_actuator_test__functions.c.o
+[16.018s] [ 12%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/action/detail/takeoff__functions.c.o
+[16.169s] [ 13%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/action/detail/go_to_target__functions.c.o
+[16.281s] [ 14%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/action/detail/track_velocity__functions.c.o
+[16.583s] [ 14%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/action/detail/land__functions.c.o
+[16.883s] [ 15%] Building C object CMakeFiles/messages__rosidl_generator_c.dir/rosidl_generator_c/messages/action/detail/execute_mission__functions.c.o
+[17.463s] [ 16%] Linking C shared library libmessages__rosidl_generator_c.so
+[17.669s] [ 16%] Built target messages__rosidl_generator_c
+[17.742s] [ 17%] Generating C type support for eProsima Fast-RTPS
+[17.769s] [ 18%] Generating C introspection for ROS interfaces
+[17.774s] [ 19%] Generating C type support dispatch for ROS interfaces
+[20.430s] [ 19%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/msg/vision_msg__type_support.cpp.o
+[21.251s] [ 20%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/msg/vision__type_support.cpp.o
+[21.869s] [ 20%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/msg/detail/vision_msg__type_support.cpp.o
+[22.185s] [ 21%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/msg/smart_car_control_setpoint__type_support.cpp.o
+[23.219s] [ 21%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/msg/smart_car_status__type_support.cpp.o
+[23.421s] [ 21%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/msg/detail/dds_fastrtps/vision_msg__type_support.cpp.o
+[23.534s] [ 22%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/msg/detail/vision__type_support.cpp.o
+[23.596s] [ 22%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/msg/vision_msg__type_support.cpp.o
+[23.780s] [ 23%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/msg/vision__type_support.cpp.o
+[23.961s] [ 23%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/msg/smart_car_control_setpoint__type_support.cpp.o
+[24.193s] [ 24%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/msg/smart_car_status__type_support.cpp.o
+[24.305s] [ 25%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/msg/smart_car_motion_state__type_support.cpp.o
+[24.405s] [ 26%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/msg/smart_car_motion_state__type_support.cpp.o
+[24.593s] [ 26%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/msg/smart_car_motor_status__type_support.cpp.o
+[24.813s] [ 27%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/msg/smart_car_imu_status__type_support.cpp.o
+[25.036s] [ 28%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/msg/detail/dds_fastrtps/vision__type_support.cpp.o
+[25.055s] [ 29%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/msg/smart_car_calib_status__type_support.cpp.o
+[25.211s] [ 30%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/msg/detail/smart_car_control_setpoint__type_support.cpp.o
+[25.219s] [ 31%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/msg/smart_car_motor_status__type_support.cpp.o
+[25.233s] [ 31%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/msg/platform_target__type_support.cpp.o
+[25.274s] [ 31%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/msg/detail/vision_msg__type_support.c.o
+[25.446s] [ 32%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/srv/smart_car_command__type_support.cpp.o
+[25.479s] [ 33%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/msg/detail/vision__type_support.c.o
+[25.602s] [ 34%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/srv/smart_car_actuator_test__type_support.cpp.o
+[25.692s] [ 34%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/msg/detail/smart_car_control_setpoint__type_support.c.o
+[25.777s] [ 34%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/action/takeoff__type_support.cpp.o
+[25.900s] [ 35%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/msg/detail/smart_car_status__type_support.c.o
+[25.944s] [ 35%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/msg/detail/vision_msg__type_support_c.cpp.o
+[26.048s] [ 36%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/action/go_to_target__type_support.cpp.o
+[26.115s] [ 37%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/msg/detail/smart_car_motion_state__type_support.c.o
+[26.260s] [ 37%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/msg/smart_car_imu_status__type_support.cpp.o
+[26.280s] [ 37%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/msg/detail/smart_car_motor_status__type_support.c.o
+[26.300s] [ 38%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/action/track_velocity__type_support.cpp.o
+[26.433s] [ 38%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/msg/detail/smart_car_status__type_support.cpp.o
+[26.474s] [ 39%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/msg/detail/smart_car_imu_status__type_support.c.o
+[26.529s] [ 39%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/action/land__type_support.cpp.o
+[26.677s] [ 40%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/msg/detail/smart_car_calib_status__type_support.c.o
+[26.803s] [ 42%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/msg/detail/dds_fastrtps/smart_car_control_setpoint__type_support.cpp.o
+[26.803s] [ 42%] Building CXX object CMakeFiles/messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/messages/action/execute_mission__type_support.cpp.o
+[26.864s] [ 42%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/msg/detail/platform_target__type_support.c.o
+[26.955s] [ 43%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/msg/smart_car_calib_status__type_support.cpp.o
+[26.978s] [ 44%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/srv/detail/smart_car_command__type_support.c.o
+[27.056s] [ 45%] Linking CXX shared library libmessages__rosidl_typesupport_c.so
+[27.109s] [ 46%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/srv/detail/smart_car_actuator_test__type_support.c.o
+[27.311s] [ 46%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/action/detail/takeoff__type_support.c.o
+[27.326s] [ 46%] Built target messages__rosidl_typesupport_c
+[27.418s] [ 47%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/msg/platform_target__type_support.cpp.o
+[27.450s] [ 48%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/msg/detail/vision__type_support_c.cpp.o
+[27.563s] [ 49%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/action/detail/go_to_target__type_support.c.o
+[27.784s] [ 50%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/msg/detail/smart_car_motion_state__type_support.cpp.o
+[27.801s] [ 51%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/action/detail/track_velocity__type_support.c.o
+[28.124s] [ 51%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/action/detail/land__type_support.c.o
+[28.143s] [ 52%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/msg/detail/smart_car_motor_status__type_support.cpp.o
+[28.151s] [ 52%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/msg/detail/dds_fastrtps/smart_car_status__type_support.cpp.o
+[28.328s] [ 52%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/srv/smart_car_command__type_support.cpp.o
+[28.436s] [ 53%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/messages/action/detail/execute_mission__type_support.c.o
+[28.737s] [ 54%] Linking C shared library libmessages__rosidl_typesupport_introspection_c.so
+[28.778s] [ 54%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/msg/detail/smart_car_control_setpoint__type_support_c.cpp.o
+[29.025s] [ 54%] Built target messages__rosidl_typesupport_introspection_c
+[29.089s] [ 55%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/msg/detail/smart_car_status__type_support_c.cpp.o
+[29.277s] [ 55%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/msg/detail/smart_car_imu_status__type_support.cpp.o
+[29.502s] [ 56%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/srv/smart_car_actuator_test__type_support.cpp.o
+[29.593s] [ 57%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/msg/detail/dds_fastrtps/smart_car_motion_state__type_support.cpp.o
+[29.687s] [ 58%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/msg/detail/smart_car_calib_status__type_support.cpp.o
+[29.945s] [ 59%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/msg/detail/smart_car_motion_state__type_support_c.cpp.o
+[30.583s] [ 60%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/action/takeoff__type_support.cpp.o
+[30.650s] [ 60%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/msg/detail/smart_car_motor_status__type_support_c.cpp.o
+[30.705s] [ 60%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/action/go_to_target__type_support.cpp.o
+[30.905s] [ 61%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/msg/detail/platform_target__type_support.cpp.o
+[31.284s] [ 62%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/msg/detail/smart_car_imu_status__type_support_c.cpp.o
+[31.425s] [ 63%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/msg/detail/dds_fastrtps/smart_car_motor_status__type_support.cpp.o
+[32.004s] [ 64%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/msg/detail/smart_car_calib_status__type_support_c.cpp.o
+[32.157s] [ 64%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/srv/detail/smart_car_command__type_support.cpp.o
+[32.179s] [ 64%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/msg/detail/platform_target__type_support_c.cpp.o
+[32.576s] [ 65%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/srv/detail/smart_car_command__type_support_c.cpp.o
+[32.708s] [ 66%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/action/track_velocity__type_support.cpp.o
+[33.193s] [ 66%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/msg/detail/dds_fastrtps/smart_car_imu_status__type_support.cpp.o
+[33.403s] [ 67%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/srv/detail/smart_car_actuator_test__type_support_c.cpp.o
+[33.448s] [ 67%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/action/detail/takeoff__type_support_c.cpp.o
+[33.737s] [ 68%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/srv/detail/smart_car_actuator_test__type_support.cpp.o
+[33.963s] [ 69%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/action/detail/go_to_target__type_support_c.cpp.o
+[34.553s] [ 70%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/action/detail/track_velocity__type_support_c.cpp.o
+[34.743s] [ 71%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/action/land__type_support.cpp.o
+[34.772s] [ 71%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/action/detail/land__type_support_c.cpp.o
+[34.857s] [ 72%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/msg/detail/dds_fastrtps/smart_car_calib_status__type_support.cpp.o
+[35.100s] [ 73%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/action/detail/takeoff__type_support.cpp.o
+[35.509s] [ 74%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/msg/detail/dds_fastrtps/platform_target__type_support.cpp.o
+[35.872s] [ 74%] Building CXX object CMakeFiles/messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/messages/action/execute_mission__type_support.cpp.o
+[35.878s] [ 75%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/messages/action/detail/execute_mission__type_support_c.cpp.o
+[36.111s] [ 75%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/srv/detail/dds_fastrtps/smart_car_command__type_support.cpp.o
+[36.400s] [ 76%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/srv/detail/dds_fastrtps/smart_car_actuator_test__type_support.cpp.o
+[36.788s] [ 77%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/action/detail/dds_fastrtps/takeoff__type_support.cpp.o
+[36.791s] [ 77%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/action/detail/go_to_target__type_support.cpp.o
+[36.987s] [ 78%] Linking CXX shared library libmessages__rosidl_typesupport_fastrtps_c.so
+[37.319s] [ 78%] Built target messages__rosidl_typesupport_fastrtps_c
+[37.331s] [ 78%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/action/detail/dds_fastrtps/go_to_target__type_support.cpp.o
+[37.367s] [ 79%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/action/detail/dds_fastrtps/track_velocity__type_support.cpp.o
+[37.540s] [ 80%] Linking CXX shared library libmessages__rosidl_typesupport_cpp.so
+[37.788s] [ 80%] Built target messages__rosidl_typesupport_cpp
+[38.632s] [ 81%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/action/detail/track_velocity__type_support.cpp.o
+[38.705s] [ 82%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/action/detail/land__type_support.cpp.o
+[38.711s] [ 82%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/action/detail/dds_fastrtps/execute_mission__type_support.cpp.o
+[38.785s] [ 83%] Building CXX object CMakeFiles/messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/messages/action/detail/dds_fastrtps/land__type_support.cpp.o
+[40.083s] [ 83%] Building CXX object CMakeFiles/messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/messages/action/detail/execute_mission__type_support.cpp.o
+[40.167s] [ 84%] Linking CXX shared library libmessages__rosidl_typesupport_fastrtps_cpp.so
+[40.342s] [ 84%] Built target messages__rosidl_typesupport_fastrtps_cpp
+[41.201s] [ 85%] Linking CXX shared library libmessages__rosidl_typesupport_introspection_cpp.so
+[41.371s] [ 85%] Built target messages__rosidl_typesupport_introspection_cpp
+[41.421s] [ 85%] Built target messages
+[41.471s] [ 86%] Generating Python code for ROS interfaces
+[49.710s] [ 86%] Built target messages__py
+[49.760s] [ 88%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/msg/_smart_car_control_setpoint_s.c.o
+[49.760s] [ 88%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/msg/_vision_msg_s.c.o
+[49.760s] [ 88%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/msg/_vision_s.c.o
+[49.956s] [ 91%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/msg/_smart_car_motion_state_s.c.o
+[49.957s] [ 91%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/msg/_smart_car_motor_status_s.c.o
+[49.958s] [ 91%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/msg/_smart_car_calib_status_s.c.o
+[50.158s] [ 93%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/srv/_smart_car_command_s.c.o
+[50.158s] [ 93%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/msg/_platform_target_s.c.o
+[50.158s] [ 93%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/srv/_smart_car_actuator_test_s.c.o
+[50.361s] [ 94%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/action/_takeoff_s.c.o
+[50.362s] [ 94%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/action/_go_to_target_s.c.o
+[50.374s] [ 95%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/action/_track_velocity_s.c.o
+[50.656s] [ 95%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/msg/_smart_car_imu_status_s.c.o
+[50.657s] [ 96%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/action/_land_s.c.o
+[50.660s] [ 96%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/action/_execute_mission_s.c.o
+[50.677s] [ 96%] Building C object CMakeFiles/messages__rosidl_generator_py.dir/rosidl_generator_py/messages/msg/_smart_car_status_s.c.o
+[50.973s] [ 97%] Linking C shared library rosidl_generator_py/messages/libmessages__rosidl_generator_py.so
+[51.073s] [ 97%] Built target messages__rosidl_generator_py
+[51.120s] [ 97%] Building C object CMakeFiles/messages__rosidl_typesupport_fastrtps_c__pyext.dir/rosidl_generator_py/messages/_messages_s.ep.rosidl_typesupport_fastrtps_c.c.o
+[51.120s] [ 97%] Building C object CMakeFiles/messages__rosidl_typesupport_c__pyext.dir/rosidl_generator_py/messages/_messages_s.ep.rosidl_typesupport_c.c.o
+[51.120s] [ 97%] Building C object CMakeFiles/messages__rosidl_typesupport_introspection_c__pyext.dir/rosidl_generator_py/messages/_messages_s.ep.rosidl_typesupport_introspection_c.c.o
+[51.593s] [ 98%] Linking C shared library rosidl_generator_py/messages/messages_s__rosidl_typesupport_fastrtps_c.cpython-310-aarch64-linux-gnu.so
+[51.594s] [ 99%] Linking C shared library rosidl_generator_py/messages/messages_s__rosidl_typesupport_c.cpython-310-aarch64-linux-gnu.so
+[51.608s] [100%] Linking C shared library rosidl_generator_py/messages/messages_s__rosidl_typesupport_introspection_c.cpython-310-aarch64-linux-gnu.so
+[51.699s] [100%] Built target messages__rosidl_typesupport_fastrtps_c__pyext
+[51.699s] [100%] Built target messages__rosidl_typesupport_c__pyext
+[51.716s] [100%] Built target messages__rosidl_typesupport_introspection_c__pyext

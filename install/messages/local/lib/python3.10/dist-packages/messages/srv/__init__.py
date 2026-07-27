@@ -1,0 +1,1 @@
+/home/zhenzhen/ros2/robodog-yunnan-elec/build/messages/rosidl_generator_py/messages/srv/__init__.py
