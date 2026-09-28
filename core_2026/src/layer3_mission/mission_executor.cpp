@@ -17,21 +17,31 @@ MissionExecutor::MissionExecutor(
     , cmd_(cmd)
     , logger_(logger)
     , default_altitude_(default_altitude)
-    , takeoff_target_(0.0f, 0.0f, kHoverAltitude, 0.0f)
+    // 顺序按**声明序**（hover_target_ 在 hpp 里先声明）—— 否则 -Wreorder。
+    // 实际初始化顺序本来就跟声明序走，这里只是把写法摆正。
     , hover_target_(0.0f, 0.0f, kHoverAltitude, 0.0f)
+    , takeoff_target_(0.0f, 0.0f, kHoverAltitude, 0.0f)
 {}
 
 // 主循环
 void MissionExecutor::run() {
     RCLCPP_INFO(logger_, "[Mission] 任务开始: 原地起飞 → 1.70m持续发布悬停目标50s → 降落");
-    while (rclcpp::ok() && current_state_ != State::DONE) {
+    while (rclcpp::ok()
+           && current_state_ != State::DONE
+           && current_state_ != State::FAULT) {
         switch (current_state_) {
             case State::TAKEOFF:     on_takeoff();     break;
             case State::HOVER:       on_hover();       break;
             case State::LAND:        on_land();        break;
             case State::DONE:        break;
+            case State::FAULT:       break;
             default:                 break;
         }
+    }
+    if (current_state_ == State::FAULT) {
+        // 派生类在转 FAULT 之前已经做了安全处置（狗执行器是 passive 卸力）
+        RCLCPP_ERROR(logger_, "[Mission] 任务中止（FAULT）");
+        return;
     }
     RCLCPP_INFO(logger_, "[Mission] 任务完成");
 }

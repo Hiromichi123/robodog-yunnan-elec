@@ -12,7 +12,7 @@
  * @brief 机器狗系统编排层
  *
  * 参考 DroneSystem，适配四足机器人:
- * - pre_flight: 站起 (getup FSM)
+ * - pre_flight: 站起 (getup FSM)，本版会**等到命令真的完成**才返回
  * - 使用 FlightController (地面 PID 参数)
  * - MissionExecutor (不变！通过接口适配)
  */
@@ -24,7 +24,8 @@ public:
     void run();
 
 private:
-    void pre_flight_checks();
+    /** @return true = 预检通过（狗已确认站立）；false = 失败，调用方不应执行任务 */
+    [[nodiscard]] bool pre_flight_checks();
 
     std::shared_ptr<RobotDogHAL>        hal_;
     std::unique_ptr<FlightController>   fc_;

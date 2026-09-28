@@ -32,7 +32,19 @@ def generate_launch_description():
         package="tf2_ros",
         executable="static_transform_publisher",
         name="base_to_livox_tf",
-        arguments=["0", "0", "0", "0", "0", "0", "1", "base_link", "livox_frame"]
+            # 雷达安装变换：**前向倒装 45°**、杆臂正前 0.3m。
+    # 四元数 (0, -0.923880, 0, 0.382683) = 绕 y 轴 −135°（= 180° + 45°）。
+    # 注意：这只影响 TF 树；位姿的实质修正见 ros2_tools/lidar_data_node.cpp。
+        arguments=["0.3", "0", "0", "0", "-0.923880", "0", "0.382683", "base_link", "livox_frame"]
+    )
+
+    # Point-LIO 的 odom.child_frame_id 是 "body"，实机上与 livox_frame 同体同朝向，
+    # 这里把它也挂到 base_link 下，避免 TF 树里出现悬空帧。
+    tf_body = Node(
+        package="tf2_ros",
+        executable="static_transform_publisher",
+        name="base_to_body_tf",
+        arguments=["0.3", "0", "0", "0", "-0.923880", "0", "0.382683", "base_link", "body"]
     )
 
     slam = TimerAction(
@@ -82,7 +94,8 @@ def generate_launch_description():
         ),
         mavros,             # ros2 run mavros mavros_node --ros-args -p fcu_url:=serial:///dev/ttyACM0:57600 -p tgt_system:=1 -p tgt_component:=1 -p fcu_protocol:=v2.0
         livox_ros_driver,   # ros2 launch livox_ros_driver2 msg_MID360_launch.py
-        tf,                 # ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 1 base_link livox_frame
+        tf,                 # 安装变换: 0.3 0 0  0 -0.923880 0 0.382683  base_link livox_frame
+        tf_body,            # 同上，挂在 body 上（Point-LIO odom 的 child_frame_id）
         slam,               # ros2 launch point_lio point_lio.launch.py rviz:=False
         *ros2_tools_nodes,  # ros2 run ros2_tools lidar_data_node --ros-args -p use_simulation:=False -p simulation_odom_topic:=/absolute_pose -p real_robot_odom_topic:=/aft_mapped_to_init
                             # ros2 run ros2_tools lidar_to_px4_bridge

@@ -33,7 +33,10 @@ protected:
         TAKEOFF,
         HOVER,
         LAND,
-        DONE
+        DONE,
+        // 任务失败。派生类负责在置这个状态之前把狗置于安全姿态
+        // （狗执行器是发 passive 卸力），run() 见到它就退出。
+        FAULT
     };
 
     // ===== 状态方法组（虚函数，子类可覆写） =====

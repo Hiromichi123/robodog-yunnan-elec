@@ -16,9 +16,20 @@
   <depend>geometry_msgs</depend>
   <depend>nav_msgs</depend>
   <depend>std_msgs</depend>
-  <depend>mavros_msgs</depend>
   <depend>ros2_tools</depend>
-  <depend>vision_py</depend>
+  <!-- 上游漏声明：CMakeLists 里 find_package(messages REQUIRED) 且 dog_node 链接它，
+       没有这条 colcon 不会把 messages 排在 core_2026 之前，会导致 configure 失败 -->
+  <depend>messages</depend>
+
+  <!-- mavros_msgs：只被 quad_node / car_mission_node / test_max_curvature（无人机、
+       小车）需要，dog_node 不链接。CMakeLists 里已改为 find_package(QUIET) 可选；
+       此处同样不再声明，否则在没装 mavros 的机器上 colcon 依赖解析会失败。
+       如需构建无人机/小车目标，把下面这行取消注释并安装 mavros_msgs：
+  <depend>mavros_msgs</depend>
+  -->
+
+  <!-- vision_py：上游声明的依赖，但整个仓库里不存在这个包、也没有任何代码引用它。
+       已删除，否则 colcon/rosdep 解析依赖时会失败。 -->
 
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
