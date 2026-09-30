@@ -81,7 +81,6 @@ public:
      */
     [[nodiscard]] int wait_for_command_code(double timeout_sec, bool verbose = true);
 
-    void set_navigation_mode(bool enable);
     [[nodiscard]] std::string get_current_fsm_state() const;
     [[nodiscard]] bool wait_for_fsm_state(const std::string& target, double timeout_sec);
 
@@ -124,10 +123,32 @@ public:
      */
     [[nodiscard]] bool wait_for_enter(const std::string& prompt);
 
+    /** 急停专用：把主线程正在等的命令伪造成终态，让它立刻返回（见 .cpp）。 */
+    void cancel_pending_command();
+
+    /**
+     * 失败/中止时的唯一安全动作：回趴下（getdown 平滑趴下，不用 passive 卸力）。
+     *   RLLocomotion → 发 getdown 并等确认
+     *   GetDown/Passive → 已经趴着，不发命令，直接算成功
+     *   GetUp（起立动画中）→ 等 1s 重试，最多 3 次
+     *   状态读不到 / 别的情况 → 不发命令，返回 false（需人工处置）
+     * @param settle_s 稳定延迟；<0 = 用 transition_settle_s_（失败路径的默认）
+     */
+    [[nodiscard]] bool safe_go_down(double settle_s = -1.0);
+
+    /** 最近一次位姿到货的时刻（time 为 0 = 从没收到过）。闭环判新鲜度用。 */
+    [[nodiscard]] rclcpp::Time get_state_stamp() const;
+
+    /** 手柄是否抢走了控制权（小脑行为：抢走后所有指令被忽略）。 */
+    [[nodiscard]] bool is_gamepad_override() const;
+
+    /** 网页驱动模式：true = 等 /dog/mission 上的任务，而不是跑固定流程。 */
+    [[nodiscard]] bool get_wait_for_mission() const { return wait_for_mission_; }
+
     // ---- 任务参数（给 mission 层用，做成参数便于现场调）----
     [[nodiscard]] double get_stand_timeout_s() const      { return stand_timeout_s_; }
     [[nodiscard]] double get_locomotion_timeout_s() const { return locomotion_timeout_s_; }
-    [[nodiscard]] double get_passive_timeout_s() const    { return passive_timeout_s_; }
+    [[nodiscard]] double get_getdown_timeout_s() const    { return getdown_timeout_s_; }
     /** 前进时长；<= 0 表示跳过前进（用于"只起立进RL再趴下"的验证） */
     [[nodiscard]] double get_forward_duration_s() const   { return forward_duration_s_; }
     [[nodiscard]] double get_forward_vx() const           { return forward_vx_; }
@@ -162,7 +183,9 @@ private:
     mutable std::mutex state_mutex_;
     DroneState         state_{};
     bool               has_state_{false};
+    rclcpp::Time       state_stamp_{0, 0, RCL_ROS_TIME};  // 位姿到货时刻
     std::string        current_fsm_state_{"Unknown"};
+    bool               gamepad_override_{false};          // 手柄是否抢了控制权
 
     // 命令生命周期（回调和等待分别在 spin 线程与主线程，必须加锁）
     mutable std::mutex cmd_mutex_;
@@ -174,7 +197,7 @@ private:
     // 任务参数
     double stand_timeout_s_{8.0};
     double locomotion_timeout_s_{8.0};
-    double passive_timeout_s_{8.0};
+    double getdown_timeout_s_{8.0};
     double forward_duration_s_{3.5};
     double forward_vx_{0.1};
 
@@ -184,6 +207,9 @@ private:
 
     // 人工闸门：每次切换前是否等回车（照 ~/dog_step_test.py）
     bool   confirm_transitions_{true};
+
+    // 网页驱动模式：等 /dog/mission 上的任务 JSON，而不是跑固定流程
+    bool   wait_for_mission_{false};
 
     // 状态切换把关参数
     double check_stand_timeout_s_{5.0};

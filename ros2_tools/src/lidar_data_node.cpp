@@ -26,11 +26,11 @@ public:
         this->declare_parameter<std::string>("simulation_odom_topic", "/absolute_pose");
         this->declare_parameter<std::string>("real_robot_odom_topic", "/aft_mapped_to_init");
         // ── 雷达安装变换（车体系 -> 雷达系）──────────────────────────
-        // 实机：雷达朝前下方 45°、位于 base_link 正前 0.3m。
+        // 实机：雷达朝前下方 45°、位于 base_link 正前 0.286m（实测 286mm）。
         // Point-LIO 输出的位姿是雷达(body)系的，这里换算到车体系，
         // 否则静止时 pitch 会读到 45°，且 yaw 是关于倾斜轴的、不等于车体朝向。
         this->declare_parameter<bool>("apply_mount_transform", true);
-        this->declare_parameter<double>("mount_x", 0.3);
+        this->declare_parameter<double>("mount_x", 0.286);
         this->declare_parameter<double>("mount_y", 0.0);
         this->declare_parameter<double>("mount_z", 0.0);
         this->declare_parameter<double>("mount_roll", 0.0);
@@ -157,7 +157,7 @@ public:
 private:
     bool using_gazebo_; // 仿真开关
     bool   apply_mount_ = true;   // 是否把位姿从雷达系换算到车体系
-    double mount_x_ = 0.3, mount_y_ = 0.0, mount_z_ = 0.0;
+    double mount_x_ = 0.286, mount_y_ = 0.0, mount_z_ = 0.0;
     double mount_roll_ = 0.0, mount_pitch_ = -3.0 * M_PI / 4.0, mount_yaw_ = 0.0;
     
     rclcpp::Publisher<ros2_tools::msg::LidarPose>::SharedPtr lidar_pub;

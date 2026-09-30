@@ -39,7 +39,7 @@ void MissionExecutor::run() {
         }
     }
     if (current_state_ == State::FAULT) {
-        // 派生类在转 FAULT 之前已经做了安全处置（狗执行器是 passive 卸力）
+        // 派生类在转 FAULT 之前已经做了安全处置（狗执行器是 getdown 回趴下）
         RCLCPP_ERROR(logger_, "[Mission] 任务中止（FAULT）");
         return;
     }

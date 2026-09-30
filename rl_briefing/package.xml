@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>rl_briefing</name>
+  <version>0.1.0</version>
+  <description>作业交底语音播报（C++/ALSA）。订阅 /rl_briefing/play，播 ~/briefing_audio/&lt;场景&gt;.wav，状态回 /rl_briefing/status。2026-09-29 自小脑 rl_sar-w2_recovered_v3 移植到大脑（改用板载 codec、补逗号连播）。</description>
+  <maintainer email="fmeng@example.com">fmeng</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

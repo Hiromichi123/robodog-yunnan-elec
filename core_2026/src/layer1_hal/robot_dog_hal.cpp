@@ -76,7 +76,9 @@ RobotDogHAL::RobotDogHAL() : Node("robot_dog_hal_node") {
     // locomotion 要等起身插值跑完（percent_getup>=1）才能进，所以都要留余量。
     this->declare_parameter<double>("stand_timeout_s",      8.0);
     this->declare_parameter<double>("locomotion_timeout_s", 8.0);
-    this->declare_parameter<double>("passive_timeout_s",    8.0);
+    // 趴下（getdown）等终态的超时。原来叫 passive_timeout_s —— 2026-09-29 起
+    // 上层不再发 passive（卸力不可靠，失败一律 getdown 回趴下），跟着改名。
+    this->declare_parameter<double>("getdown_timeout_s",    8.0);
     // 前进时长；设为 0 就跳过前进 —— 用于"只起立→进RL→趴下"的验证
     this->declare_parameter<double>("forward_duration_s",   3.5);
     this->declare_parameter<double>("forward_vx",           0.1);
@@ -91,7 +93,7 @@ RobotDogHAL::RobotDogHAL() : Node("robot_dog_hal_node") {
     // （1s 预起身 + 2s 起身），所以实际是 DONE 后再等约 7s。这是"状态码确认"
     // 之外的第二道保险，给狗留够真的站稳的时间，之后才允许进 RL。
     this->declare_parameter<double>("stand_settle_s",       10.0);
-    // 其他状态切换（locomotion / passive）的默认稳定延迟
+    // 其他状态切换（locomotion / getdown）的默认稳定延迟
     this->declare_parameter<double>("transition_settle_s",  1.0);
     // 前置判断：等当前 FSM 状态变成期望值的超时。状态由桥 2Hz 的 status 轮询
     // 驱动，启动时还是 "Unknown"，必须给时间到货，不能瞬时比较。
@@ -103,6 +105,15 @@ RobotDogHAL::RobotDogHAL() : Node("robot_dog_hal_node") {
     // 必须显式关掉才会自动往下走。
     this->declare_parameter<bool>("confirm_transitions", true);
 
+    // ── 网页驱动模式（2026-09-29 新增）──────────────────────────────
+    // true = 起来后**不跑**固定流程，改等 /dog/mission 上的任务 JSON，解析后按
+    //        步骤执行；预检（check_stand / 起立）变成任务里的步骤，由操作员在
+    //        网页上显式拼进去 —— 网页上看到的就是狗真正会做的全部动作。
+    // false（默认）= 现有行为一字不改：固定流程 + 终端回车闸门。
+    // 注意：这条为真时终端闸门就没意义了，要配 -p confirm_transitions:=false，
+    //       因为"确认"改由任务 JSON 的 confirm 字段驱动（见 dog_plan_executor）。
+    this->declare_parameter<bool>("wait_for_mission", false);
+
     const std::string cmd_vel_topic     = this->get_parameter("cmd_vel_topic").as_string();
     const std::string fsm_command_topic = this->get_parameter("fsm_command_topic").as_string();
     const std::string dog_state_topic   = this->get_parameter("dog_state_topic").as_string();
@@ -113,7 +124,7 @@ RobotDogHAL::RobotDogHAL() : Node("robot_dog_hal_node") {
 
     stand_timeout_s_      = this->get_parameter("stand_timeout_s").as_double();
     locomotion_timeout_s_ = this->get_parameter("locomotion_timeout_s").as_double();
-    passive_timeout_s_    = this->get_parameter("passive_timeout_s").as_double();
+    getdown_timeout_s_    = this->get_parameter("getdown_timeout_s").as_double();
     forward_duration_s_   = this->get_parameter("forward_duration_s").as_double();
     forward_vx_           = this->get_parameter("forward_vx").as_double();
     check_stand_timeout_s_  = this->get_parameter("check_stand_timeout_s").as_double();
@@ -122,6 +133,7 @@ RobotDogHAL::RobotDogHAL() : Node("robot_dog_hal_node") {
     precondition_timeout_s_ = this->get_parameter("precondition_timeout_s").as_double();
     fsm_confirm_timeout_s_  = this->get_parameter("fsm_confirm_timeout_s").as_double();
     confirm_transitions_    = this->get_parameter("confirm_transitions").as_bool();
+    wait_for_mission_       = this->get_parameter("wait_for_mission").as_bool();
 
     // 发布速度命令到桥
     cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>(
@@ -162,10 +174,11 @@ RobotDogHAL::RobotDogHAL() : Node("robot_dog_hal_node") {
 
     RCLCPP_INFO(this->get_logger(),
                 "[RobotDogHAL] 硬件抽象层初始化完成 | cmd_vel=%s fsm_cmd=%s state=%s "
-                "cmd_state=%s lidar=%s | 前进时长=%.1fs",
+                "cmd_state=%s lidar=%s | 前进时长=%.1fs | 网页任务模式=%s",
                 cmd_vel_topic.c_str(), fsm_command_topic.c_str(),
                 dog_state_topic.c_str(), cmd_state_topic.c_str(),
-                lidar_pose_topic.c_str(), forward_duration_s_);
+                lidar_pose_topic.c_str(), forward_duration_s_,
+                wait_for_mission_ ? "开" : "关");
 }
 
 // ===== IStateProvider =====
@@ -177,6 +190,16 @@ DroneState RobotDogHAL::get_state() const {
 bool RobotDogHAL::has_state() const {
     std::lock_guard<std::mutex> lock(state_mutex_);
     return has_state_;
+}
+
+rclcpp::Time RobotDogHAL::get_state_stamp() const {
+    std::lock_guard<std::mutex> lock(state_mutex_);
+    return state_stamp_;
+}
+
+bool RobotDogHAL::is_gamepad_override() const {
+    std::lock_guard<std::mutex> lock(state_mutex_);
+    return gamepad_override_;
 }
 
 // ===== ICommandPublisher =====
@@ -292,13 +315,74 @@ int RobotDogHAL::wait_for_command_code(double timeout_sec, bool verbose) {
     return -1;
 }
 
-void RobotDogHAL::set_navigation_mode(bool enable) {
-    request_fsm_transition(enable ? "locomotion" : "passive");
+void RobotDogHAL::cancel_pending_command() {
+    // 只用于**急停**：把正在等的那条命令伪造成终态 REJECTED(4)，让卡在
+    // wait_for_command_code 里的主线程立刻返回。
+    // 为什么需要它：中止请求由 spin 线程在回调里置位，但主线程可能正阻塞在
+    // 某条命令的等待上（最长 8s）。不打断的话，操作员按下停止要好几秒后狗
+    // 才有反应 —— 那几秒里它还在动。
+    std::lock_guard<std::mutex> lock(cmd_mutex_);
+    if (pending_cmd_.empty()) return;
+    pending_code_  = 4;
+    pending_phase_ = "ABORTED";
+}
+
+bool RobotDogHAL::safe_go_down(double settle_s) {
+    // 失败/中止时的**唯一**安全动作：回趴下用 getdown（平滑 2s 插值）。
+    // 2026-09-29 用户定：passive 的卸力不可靠，不再用它（它会 kp=0 让狗靠
+    // 重力砸下去）。
+    //
+    // 为什么要看状态再决定发不发：
+    //   - 已经 Passive（趴着）时发 getdown，FSM 会拒（本来就没站着），报出来
+    //     只会让人误以为"安全动作失败了"。
+    //   - 起立动画跑到一半（GetUp）时 getdown 同样会被拒，得等它站稳再来。
+    const double retry_gap_s = 1.0;
+    const int    max_attempts = 3;
+
+    for (int attempt = 1; attempt <= max_attempts; ++attempt) {
+        const std::string st = get_current_fsm_state();
+
+        if (st == "RLFSMStatePassive" || st == "RLFSMStateGetDown") {
+            RCLCPP_WARN(this->get_logger(),
+                        "[安全趴下] 狗当前是 %s —— 已经趴着/正在趴，无需再发命令",
+                        st.c_str());
+            return true;
+        }
+        if (st == "RLFSMStateRLLocomotion") {
+            RCLCPP_WARN(this->get_logger(), "[安全趴下] 发 getdown（平滑趴下）");
+            return transition_to("getdown",
+                                 "RLFSMStateGetDown|RLFSMStatePassive", "",
+                                 settle_s < 0.0 ? transition_settle_s_ : settle_s);
+        }
+        if (st == "RLFSMStateGetUp") {
+            RCLCPP_WARN(this->get_logger(),
+                        "[安全趴下] 狗正在起立（%s），这会儿 getdown 会被 FSM 拒 —— "
+                        "等 %.1fs 再试（第 %d/%d 次）",
+                        st.c_str(), retry_gap_s, attempt, max_attempts);
+            rclcpp::Rate rate(20);
+            const auto t0 = this->now();
+            while (rclcpp::ok() && (this->now() - t0).seconds() < retry_gap_s) {
+                rate.sleep();
+            }
+            continue;
+        }
+
+        // Unknown / 别的状态：不瞎发命令 —— 状态不可信时发什么都是赌
+        RCLCPP_ERROR(this->get_logger(),
+                     "[安全趴下] 当前 FSM 状态不可用（%s）—— 不发 getdown，"
+                     "需要人工确认后处置", st.c_str());
+        return false;
+    }
+
+    RCLCPP_ERROR(this->get_logger(),
+                 "[安全趴下] 重试 %d 次仍未成功 —— 需要人工确认后处置", max_attempts);
+    return false;
 }
 
 // ===== 回调 =====
 void RobotDogHAL::lidar_cb(const ros2_tools::msg::LidarPose::SharedPtr msg) {
     std::lock_guard<std::mutex> lock(state_mutex_);
+    state_stamp_ = this->now();   // 闭环控制靠它判"这份位姿还能不能信"
     state_.x   = msg->x;
     state_.y   = msg->y;
     state_.z   = msg->z;
@@ -328,8 +412,20 @@ void RobotDogHAL::dog_state_cb(const std_msgs::msg::String::SharedPtr msg) {
     }
     if (st.empty()) return;   // 这条反馈里没有状态字段，别把已有状态冲掉
 
+    // 手柄一动就抢走控制权（小脑行为），此后所有指令被忽略。闭环控制必须知道
+    // 这件事，否则表现是"一直超时、而狗根本不听"——很难查。同一句里带着它。
+    bool gamepad = false;
+    bool has_gamepad = false;
+    const std::string gp_key = "gamepad_override=";
+    const size_t gp = s.find(gp_key);
+    if (gp != std::string::npos) {
+        has_gamepad = true;
+        gamepad = (s.compare(gp + gp_key.size(), 4, "true") == 0);
+    }
+
     std::lock_guard<std::mutex> lock(state_mutex_);
     current_fsm_state_ = st;
+    if (has_gamepad) gamepad_override_ = gamepad;
 }
 
 void RobotDogHAL::cmd_state_cb(const std_msgs::msg::String::SharedPtr msg) {
@@ -400,12 +496,14 @@ bool RobotDogHAL::wait_for_fsm_state(const std::string& target, double timeout_s
 double RobotDogHAL::timeout_for_cmd(const std::string& cmd) const {
     if (cmd == "getup" || cmd == "stand" || cmd == "up")         return stand_timeout_s_;
     if (cmd == "locomotion" || cmd == "rl" || cmd == "walk")     return locomotion_timeout_s_;
-    if (cmd == "passive" || cmd == "stop" || cmd == "safe_stop") return passive_timeout_s_;
     // getdown 也是"趴下"，而且要多留出 2s 插值动画的时间
     if (cmd == "getdown" || cmd == "down" || cmd == "lie" || cmd == "sit")
-        return passive_timeout_s_;
+        return getdown_timeout_s_;
     if (cmd == "check_stand" || cmd == "stand_check" || cmd == "check")
         return check_stand_timeout_s_;
+    // vel_stop 在控制器里 target 是 null：收到即完成（0→2），不该等满 8s。
+    // 不单独给值的话会掉到下面的兜底 —— 闭环运动收尾时每一步白等 8 秒。
+    if (cmd == "vel_stop" || cmd == "hold") return 3.0;
     return stand_timeout_s_;   // 未知命令：给最宽的那个兜底
 }
 

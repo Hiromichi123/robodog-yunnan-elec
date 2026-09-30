@@ -64,6 +64,9 @@ set(DOG_SOURCES
   src/layer2_control/flight_controller.cpp
   src/layer3_mission/mission_executor.cpp
   src/layer3_mission/dog_mission_executor.cpp
+  src/layer3_mission/mission_plan.cpp
+  src/layer3_mission/mission_channel.cpp
+  src/layer3_mission/dog_plan_executor.cpp
   src/layer4_system/dog_system.cpp
   src/main_dog.cpp
 )
@@ -85,6 +88,24 @@ ament_target_dependencies(dog_node
   ros2_tools
   messages
 )
+
+# ── 任务书解析自测（不需要 ROS、不需要硬件）────────────────────
+# 任务 JSON 是网页与狗之间的契约，而本包之前一个测试都没有。这个目标只链
+# nlohmann + 标准库，所以**故意放在 mavros_msgs 那个 if 外面** ——
+# test_max_curvature 就在里面，于是它在本机根本编不出来，别学它。
+# 跑法：~/ros2_ws/build.sh --packages-select core_2026
+#       ~/ros2_ws/build/core_2026/mission_plan_selftest
+add_executable(mission_plan_selftest
+  src/layer3_mission/mission_plan.cpp
+  test/mission_plan_selftest.cpp
+)
+target_include_directories(mission_plan_selftest PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+  # nlohmann 在 conda 环境的 include 里。dog_node 是经 rclcpp 的 ament
+  # include 间接拿到的，这个目标不依赖 ROS，得自己写清楚。
+  $ENV{CONDA_PREFIX}/include
+)
+# 不 install：这是开发自测工具，不是运行时组件。
 
 # ── 无人机 / 小车目标（需要 mavros_msgs，缺则整块跳过）──────────
 if(mavros_msgs_FOUND)

@@ -18,14 +18,14 @@ DogMissionExecutor::DogMissionExecutor(
     , dog_hal_(dog_hal)
 {}
 
-void DogMissionExecutor::fail_and_disarm(const std::string& reason) {
-    RCLCPP_ERROR(logger_, "[FAULT] %s —— 发 passive 卸力并中止任务", reason.c_str());
-    // 安全路径：require_state 留空，**绝不能被前置判断挡住**。
-    // 状态码仍然确认（expect_state=RLFSMStatePassive），确认不了也照样进 FAULT。
-    if (!dog_hal_.transition_to("passive", "RLFSMStatePassive", "",
-                                dog_hal_.get_transition_settle_s())) {
+void DogMissionExecutor::fail_and_go_down(const std::string& reason) {
+    RCLCPP_ERROR(logger_, "[FAULT] %s —— 停速 + getdown 回趴下并中止任务",
+                 reason.c_str());
+    // 安全路径：safe_go_down 内部不发任何"被前置判断挡住"的命令，
+    // 已经趴着/正在趴时它直接算成功 —— 绝不能被闸门拦住。
+    if (!dog_hal_.safe_go_down()) {
         RCLCPP_ERROR(logger_,
-            "[FAULT] passive 也没等到确认 —— 狗可能已经卸力，或链路已断");
+            "[FAULT] 趴下未确认 —— 狗的状态需要人工确认后处置（不自动卸力）");
     }
     current_state_ = State::FAULT;
 }
@@ -37,7 +37,7 @@ void DogMissionExecutor::on_takeoff() {
     //   确认：FSM 状态码真的变成 RLFSMStateRLLocomotion（"同时状态码改变"）
     //   延迟：默认 1s（进 RL 也是状态切换，但不需要起立那样的长稳定期）
     if (!dog_hal_.wait_for_enter("已站起。按回车进入 RL 运动模式")) {
-        fail_and_disarm("操作员放弃（进入 RL 前）");
+        fail_and_go_down("操作员放弃（进入 RL 前）");
         return;
     }
 
@@ -45,7 +45,7 @@ void DogMissionExecutor::on_takeoff() {
     if (!dog_hal_.transition_to("locomotion", "RLFSMStateRLLocomotion",
                                 "RLFSMStateGetUp",
                                 dog_hal_.get_transition_settle_s())) {
-        fail_and_disarm("进入 RL 运动模式失败");
+        fail_and_go_down("进入 RL 运动模式失败");
         return;
     }
 
@@ -54,7 +54,7 @@ void DogMissionExecutor::on_takeoff() {
     //   cmd_vel 分支；但 CmdvelCallback 本来就同时把 cmd_vel 写进 control.x/y/yaw，
     //   关着 navigation_mode 一样能驱动。它唯一多出的那层「小脑侧 cmd_vel 超时归零」
     //   保护，桥自己的 cmd_vel_timeout_s=0.5 看门狗已经在 ROS 层覆盖了。
-    //   而 getdown/passive 命令本身就会清 control.*，所以也不需要额外的清速度步骤。
+    //   而 getdown 命令本身就会清 control.*，所以也不需要额外的清速度步骤。
 
     const auto s = state_.get_state();
     hover_anchor_x_   = s.x;
@@ -78,7 +78,7 @@ void DogMissionExecutor::on_hover() {
                       "确认前方空旷后按回车",
                       vx, dur, vx * dur * 100.0);
         if (!dog_hal_.wait_for_enter(gate_msg)) {
-            fail_and_disarm("操作员放弃（前进前）");
+            fail_and_go_down("操作员放弃（前进前）");
             return;
         }
         RCLCPP_INFO(logger_, "[HOVER] 前进 vx=%.2f m/s × %.1fs ≈ %.2f m",
@@ -106,10 +106,10 @@ void DogMissionExecutor::on_land() {
         return;
     }
 
-    // 用 getdown 而不是 passive：
-    //   passive → P 键 → 直接跳 Passive，kp=0 卸力，狗靠重力砸下去（急停语义）
-    //   getdown → 数字9 → GetDown，2s 平滑插值趴下（正常趴下语义）
-    // 任务正常收尾要的是后者。急停路径（fail_and_disarm / 预检失败）仍用 passive。
+    // 全流程只有一种"回趴下"方式：getdown（数字9 → GetDown，2s 平滑插值）。
+    // 2026-09-29 用户定：passive（P 键 → 直接跳 Passive，kp=0 卸力）的卸力
+    // 不可靠，已从整条链路移除 —— 失败路径、预检失败、急停，一律走这里或
+    // RobotDogHAL::safe_go_down()。
     //
     // 目标状态写两个：RLFSMStateGetDown 是过渡态，动画跑完会自动转 Passive，
     // 只等前者会擦肩而过、误报超时（协议文档 §6）。
