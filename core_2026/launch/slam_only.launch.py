@@ -1,9 +1,10 @@
 """起「链路」：雷达 + SLAM + 小脑桥 + web 地面站入口，**不起 dog_node**。
 
 为什么桥放进来、dog_node 不放：
-    桥只是转发（WebSocket ↔ /rl_real/*），没有任何运动风险；但漏起它会很坑 ——
-    /rl_real/* 整套话题根本不存在，dog_node 发出去的命令没有订阅者，只能白等
-    5s 超时（2026-09-28 实测踩过）。所以把它和链路绑在一起，少一个会忘的步骤。
+    桥只做通信适配，没有任何运动风险；但漏起它会很坑 —— dog_node 的命令与
+    预检依赖它（旧桥时代 /rl_real/* 话题根本不存在；新协议下则缺 feedback 的
+    state= 文本），只能白等 5s 超时（2026-09-28 实测踩过）。所以把它和链路
+    绑在一起，少一个会忘的步骤。
     dog_node 不一样：一过预检就让狗站起来，必须是**一次明确的手动动作**，
     所以仍单独起。保留 `slam_only` 这个名字就是因为这个区分还在。
     同理并入的还有 6/7 两项（rosbridge + 建图录制）—— 也都是零运动风险，
@@ -27,9 +28,14 @@
                            —— 第 7 项的建图点云取自 /cloud_registered_body；
                            那个话题不开，建图开关按下去就没数据。
     4. lidar_data_node     里程计 → /lidar_data，并把位姿从雷达系换算到车体系
-    5. dog_ws_bridge       小脑 WebSocket(:8088) ↔ /rl_real/* 的桥。
-                           **dog_node 必须等它起来**，否则 /rl_real/command 等
-                           话题不存在，命令发出去没有订阅者。
+    5. dog_ros2_bridge     ROS2 原生协议适配层（bridge:=ros2，默认）。
+                           小脑 v4 已把 /rl_real/* 整套协议原生搬上 ROS2
+                           （含 cmd_state 生命周期与 2Hz heartbeat），DDS 直连；
+                           本层只补三件事：2Hz status 轮询（dog_node 预检要的
+                           feedback state= 文本）、heartbeat_alive 派生、
+                           cmd_vel 断流补零。**dog_node 必须等它起来。**
+                           bridge:=ws 回退旧 WebSocket 桥（已弃用）；
+                           bridge:=none 不起（调试）；两个桥不能同起。
     6. rosbridge_websocket 浏览器进 ROS 的入口（:9090）。网页 ~/web 靠它连上来
                            （由 ~/webserver.sh 起静态服务，浏览器开
                             http://192.168.8.137:8080/，ROS 地址填
@@ -62,7 +68,8 @@
     ros2 launch core_2026 slam_only.launch.py
     ros2 launch core_2026 slam_only.launch.py rviz:=true
     ros2 launch core_2026 slam_only.launch.py real_robot_odom_topic:=/Odometry
-    ros2 launch core_2026 slam_only.launch.py url:=ws://192.168.8.236:8088/ws
+    ros2 launch core_2026 slam_only.launch.py bridge:=ws    # 回退旧 WebSocket 桥(已弃用)
+    ros2 launch core_2026 slam_only.launch.py bridge:=none  # 不起桥(调试)
     ros2 launch core_2026 slam_only.launch.py rosbridge_port:=9091 maps_dir:=/tmp/m
 """
 
@@ -71,6 +78,7 @@ import os
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, TimerAction
+from launch.conditions import LaunchConfigurationEquals
 from launch.launch_description_sources import (
     AnyLaunchDescriptionSource,
     PythonLaunchDescriptionSource,
@@ -132,13 +140,19 @@ def generate_launch_description():
             description='Point-LIO 延迟启动秒数，等雷达驱动就绪'),
         DeclareLaunchArgument(
             'rviz', default_value='false', description='是否开 rviz'),
-        # ── 传给小脑桥（dog_ws_bridge）的参数 ──
+        # ── 小脑通信桥（bridge:=ros2 默认 / ws 回退 / none 不起）──
+        DeclareLaunchArgument(
+            'bridge', default_value='ros2',
+            description='小脑通信桥: ros2=ROS2 原生协议适配层(默认) | '
+                        'ws=旧 WebSocket 桥(已弃用) | none=不起'),
+        # 以下 url 仅 bridge:=ws 时传给旧桥；dog_ros2_bridge 与小脑 DDS 直连，没有 url
         DeclareLaunchArgument(
             'url', default_value='ws://192.168.8.236:8088/ws',
-            description='小脑 WebSocket 地址'),
+            description='小脑 WebSocket 地址（仅 bridge:=ws 用）'),
         DeclareLaunchArgument(
             'status_poll_hz', default_value='2.0',
-            description='桥轮询 FSM 状态的频率；dog_node 的前置判断靠它刷新'),
+            description='桥轮询 FSM 状态的频率；dog_node 的前置判断靠它刷新'
+                        '（两种桥都吃这个参数）'),
         # ── 传给 web 侧（rosbridge + 建图录制）的参数 ──
         DeclareLaunchArgument(
             'rosbridge_port', default_value='9090',
@@ -271,10 +285,24 @@ def generate_launch_description():
         }],
     )
 
-    # ── 5. 小脑桥 ────────────────────────────────────────────────────
+    # ── 5. 小脑通信桥（bridge:=ros2|ws|none，默认 ros2）───────────────
     # 直接 include 桥自己的 launch，桥的参数只在那一处维护，避免两边漂移。
-    # 它立刻起（不延迟）：dog_node 是人工在之后单独起的，顺序天然满足。
+    # 两个桥**互斥**：原生通道与旧桥转发的 heartbeat/cmd_state 同起会双份
+    # （实测叠加到 4.7Hz），所以用 launch 条件只起一个。
+    # 立刻起（不延迟）：dog_node 是人工在之后单独起的，顺序天然满足。
     bridge = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            PathJoinSubstitution([
+                FindPackageShare('dog_ros2_bridge'), 'launch', 'dog_ros2_bridge.launch.py'
+            ])
+        ]),
+        launch_arguments={
+            'status_poll_hz': LaunchConfiguration('status_poll_hz'),
+        }.items(),
+        condition=LaunchConfigurationEquals('bridge', 'ros2'),
+    )
+    # 旧 WebSocket 桥（已弃用，回退用）
+    bridge_ws = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
             PathJoinSubstitution([
                 FindPackageShare('dog_ws_bridge'), 'launch', 'dog_bridge.launch.py'
@@ -284,6 +312,7 @@ def generate_launch_description():
             'url': LaunchConfiguration('url'),
             'status_poll_hz': LaunchConfiguration('status_poll_hz'),
         }.items(),
+        condition=LaunchConfigurationEquals('bridge', 'ws'),
     )
 
     # ── 6. rosbridge:浏览器进 ROS 的入口 ─────────────────────────────
@@ -348,6 +377,7 @@ def generate_launch_description():
         slam,
         lidar_data_node,
         bridge,
+        bridge_ws,
         rosbridge,
         recorder,
         briefing,
