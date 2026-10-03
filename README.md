@@ -1,257 +1,114 @@
-# RoboDog Yunnan-Elec 机器狗全自动控制系统
+# robodog-yunnan-elec —— JXG 轮足狗的大脑端控制仓库
 
-## 项目概述
+跑在**算法大脑**（NanoPi M5，`nanopi-m5` / 192.168.8.137）上的 ROS2 源码，
+是工作区 `~/ros2_ws/src/` 里的主体：编译用 `~/ros2_ws/build.sh`，跑命令用 `~/rosrun.sh`。
 
-基于 `core_2026` 架构实现 XKAI 四足机器狗的全自动控制，集成 LiDAR SLAM 定位、Nav2 导航避障、ego-planner 轨迹规划，支持手柄遥控和 ROS2 自主控制双模式。
+> 本 README 2026-10-03 按当前实况重写。旧版是移植前的原项目文档（xkai 狗 + Nav2 +
+> ego-planner + ROS2 Humble 时代），留在 git 历史里；其中描述的流程在本板**不再使用**
+> （对应遗留 launch 见 §8）。
 
-## 硬件架构
+## 1. 板上环境
+
+- 板：NanoPi M5，Armbian 26.8.1 / Debian 13 aarch64；用户 `jinjiao`
+- ROS：RoboStack 提供的**原生 ROS 2 Jazzy**（micromamba 环境 `ros`，**不是 docker**）
+- 工作区：`~/ros2_ws`（`--merge-install`）；环境/网络细节见 `~/ros2_ws/README.md`
+- 跑命令的唯一正确姿势：`~/rosrun.sh '<命令>'`（封装 micromamba run + source setup.bash）
+- 小脑：192.168.8.236（`rl_real_JXG` v4，运控 + 电机）。大脑与小脑
+  **ROS2 原生 DDS 直连**，`/rl_real/*` 是两边的主接口；小脑上旧的 WebSocket
+  `:8088` 仍保留（浏览器 console 页直连它）
+
+## 2. 本仓库有什么
+
+| 目录 | 内容 |
+|---|---|
+| `core_2026/` | 狗端控制核心。`dog_node` = HAL（robot_dog_hal）+ 控制 + 任务执行（layer3_mission）+ 编排（layer4_system）；`mission_plan_selftest` 是任务 JSON 契约自测 |
+| `ros2_tools/` | `lidar_data_node`（里程计 → `/lidar_data`，含雷达安装变换）、`lidar_to_px4_bridge`、地面相机 / D435 节点 |
+| `rl_briefing/` | 作业交底语音播报（ALSA）。wav 放 `~/briefing_audio/`（可替换资源，**不随仓库**），见其 README |
+| `messages/` | 原项目的自定义消息（SmartCar* / Vision* / PlatformTarget），当前狗链路不用 |
+| `docs/` | 协议文档：`MISSION_PROTOCOL.md`（网页 ↔ 狗 任务编排契约） |
+| `tools/` | 干跑与调试：`dog_dryrun_fake.py`（假小脑）、`mission_pubstr.py`（CLI 发文本）、`mission_samples/`（样例任务 JSON） |
+
+不在本仓库、但同工作区一起跑的：`dog_ros2_bridge`（小脑桥适配层）、`dog_ws_bridge`
+（旧 WebSocket 桥，已弃用）、`lidar_recorder`（建图录制）、`dog_nav_demo`（闭环示例）、
+第三方 `Point-LIO` / `livox_ros_driver2`。
+
+## 3. 链路拓扑
 
 ```
-LiDAR (MID360) → PointLIO → Odometry → lidar_data_node → LidarPose
-                                                              ↓
-[Xbox/PS4手柄] → rl_real_xkai ← /cmd_vel ← nav2 / ego-planner ← 目标点
-                   ↓  ↑            ↓  ↑
-              /dog/fsm_command   /dog/state (FSM反馈)
-                   ↓  ↑
-              dog_node (core_2026)
+Livox MID360 ──livox_ros_driver2──▶ Point-LIO ──/aft_mapped_to_init──▶ lidar_data_node
+                                                  └─/cloud_registered_body    │ /lidar_data (ros2_tools/LidarPose)
+                                                                              ▼
+ 小脑 192.168.8.236 ◀──/rl_real/*（cmd_vel·command·feedback·cmd_state·heartbeat，DDS 直连）──▶ dog_node
+       ▲                                                                              │
+       └ 浏览器 console 页(WebSocket :8088)                    rosbridge :9090 ◀── 网页「任务编排」(~/web)
 ```
 
-## 目录结构
+- `dog_ros2_bridge`（**不在本仓库**）只补小脑侧没有的三件事：2Hz `status` 轮询
+  （dog_node 预检要的 feedback `state=` 文本）、`heartbeat_alive` 派生、`cmd_vel` 断流补零。
+  `slam_only.launch.py` 的 `bridge:=ros2`（默认）| `ws`（回退旧桥）| `none`（调试）切换；
+  **两个桥不能同起**（心跳会叠加）。
+- 雷达安装变换（杆臂 0.286m、前向倒装 45°）配在三个地方，改要同步：
+  `core_launch.py` 与 `slam_only.launch.py` 的静态 TF、`ros2_tools/lidar_data_node.cpp`
+  的参数（`apply_mount_transform`）。
 
-```
-~/ros2/
-├── rl_sar-w/                          # 机器狗底层控制
-│   ├── cmake_build/bin/rl_real_xkai   # 机器狗主程序
-│   └── policy/XKAIw/                  # 策略配置与RL模型
-│       ├── base.yaml                  # 基础配置 (16 DOF)
-│       └── himloco/                   # himloco RL 模型
-├── robodog-yunnan-elec/               # core_2026 控制核心
-│   └── core_2026/
-│       ├── src/layer1_hal/robot_dog_hal.*  # 机器狗 HAL
-│       ├── src/layer3_mission/dog_mission_executor.*  # 任务执行器
-│       ├── src/layer4_system/dog_system.*  # 系统编排
-│       └── launch/dog_mission.launch.py    # 启动文件
-├── Point-LIO/                         # LiDAR SLAM
-├── nav2/                              # Nav2 导航避障
-└── ego-planner-swarm/                 # ego-planner 轨迹规划
-```
+## 4. 起法
 
----
-
-## 一、编译
-
-### 1.1 机器狗底层
+链路（雷达 + SLAM + 桥 + rosbridge + 建图录制 + 播报，**不含 dog_node**）：
 
 ```bash
-cd ~/ros2/rl_sar-w/cmake_build
-
-# 配置（需 ROS2 humble 环境）
-cmake /home/zhenzhen/ros2/rl_sar-w/src/rl_sar -DUSE_CMAKE=ON
-
-# 编译
-make -j$(nproc) rl_real_xkai
+~/start_slam.sh                # 即 ros2 launch core_2026 slam_only.launch.py
+~/start_slam.sh rviz:=true     # 带 rviz 看地图
 ```
 
-### 1.2 core_2026 控制核心
+`dog_node` **必须是一次明确的手动动作**（一过预检就会让狗站起来），两种模式：
 
 ```bash
-cd ~/ros2/robodog-yunnan-elec
-colcon build --symlink-install
+# 网页驱动（任务编排）：起来后等 /dog/mission，预检变成任务里的步骤
+~/rosrun.sh 'ros2 launch core_2026 dog_web.launch.py'
+
+# 固定流程（原样保留）：预检 → 起立 → 前进N秒 → 趴下，终端回车闸门
+~/rosrun.sh 'ros2 run core_2026 dog_node --ros-args -p forward_duration_s:=0.0'
 ```
 
----
+行为要点（2026-09 实机验证）：
 
-## 二、启动机器狗
+- dog_node 的每个状态切换过**四道关**：前置状态 → 小脑终态码 → 状态码确认 → 分级延迟
+  （getup 10s、其余 1s）。非法切换被拦下并上报，不会盲发。
+- `passive` 已全链路移除：趴下一律 `getdown`（2s 平滑）。小脑的 ROS 接口
+  2026-10-01 起直接 `REJECTED` passive（手柄 P 键与内置 Web 调试台还保留）。
+- `dog_web.launch.py` 里 `confirm_transitions:=false` 是**把终端闸门换成网页闸门**，
+  不是拆掉闸门 —— 非 tty 环境（launch/systemd/重定向）不走它会按安全策略直接中止。
 
-### 2.1 纯手柄遥控
+## 5. 任务编排（网页 → 狗）
+
+协议、字段、错误码：`docs/MISSION_PROTOCOL.md`（**两边共同遵守的契约，改一边必须同步另一边**）。
+网页端代码在 `~/web`；命令生命周期状态码 + 2Hz 心跳（console 页用）见 web 仓库
+`docs/CMD_STATE_PROTOCOL.md`。
+
+## 6. 干跑（不接狗，全流程可验）
+
+`tools/dog_dryrun_fake.py` 头部有四步配方：假小脑 + `fake_pose` + `lidar_data_node` +
+dog_node（所有 `/rl_real/*` remap 到 `/dryrun/*`，绝不碰真狗那一路）。
+样例任务 JSON 在 `tools/mission_samples/`。
+
+## 7. 编译与自测
 
 ```bash
-cd ~/ros2/rl_sar-w/cmake_build
-source ~/ros2/robodog-yunnan-elec/install/setup.bash
-./bin/rl_real_xkai wheel
+~/ros2_ws/build.sh --packages-select core_2026    # launch 文件改了也要重编（ros2 launch 读 install 副本）
+~/ros2_ws/build/core_2026/mission_plan_selftest   # 任务 JSON 契约自测（59 项，不需要 ROS/硬件）
 ```
 
-| 手柄操作 | 功能 |
-|----------|------|
-| **A 键** (PS4: ✕) | 站立 (Passive → GetUp) |
-| **LB + 上键** | 进入 RL 运动模式 (GetUp → RLLocomotion) |
-| **B 键** (PS4: ○) | 趴下 |
-| **P 键** (键盘) / **LB + X** | 回到 Passive |
-| 左摇杆 ↑↓ | 前进/后退 |
-| 左摇杆 ←→ | 左右平移 |
-| 右摇杆 ←→ | 转向 |
-| **LB + RB** | 紧急退出 |
+## 8. 遗留文件（原项目，本板不用）
 
-### 2.2 ROS2 自动控制
+`core_2026/launch/core_launch.py`（mavros 无人机）、`car_mission.launch.py`（巡线车），
+以及被开关关掉的条件编译目标 `quad_node` / `car_mission_node` / `test_max_curvature` ——
+都是移植前的原项目，保留仅供对照。`messages/` 里大部分消息同源；狗链路实际只用
+`ros2_tools/LidarPose`。
 
-```bash
-# 终端1: 启动机器狗底层
-cd ~/ros2/rl_sar-w/cmake_build
-source ~/ros2/robodog-yunnan-elec/install/setup.bash
-./bin/rl_real_xkai wheel
+## 相关文档
 
-# 终端2: 一键启动全系统
-source ~/ros2/robodog-yunnan-elec/install/setup.bash
-ros2 launch core_2026 dog_mission.launch.py
-```
-
-`dog_mission.launch.py` 启动的节点：
-
-| 节点 | 功能 |
-|------|------|
-| `livox_ros_driver2` | MID360 激光雷达驱动 |
-| `tf2_ros static_transform` | base_link → livox_frame 变换 |
-| `point_lio` | 激光 SLAM 定位（延迟5秒启动） |
-| `lidar_data_node` | Odometry → LidarPose 转换 |
-| `dog_node` | core_2026 机器狗 HAL + 任务编排 |
-
-### 2.3 任务流程
-
-```text
-TAKEOFF → "getup" (A键) → sleep(4s) 等待站起
-       → "locomotion" (LB+上键) → sleep(1s) 进入运动模式
-       → HOVER
-HOVER  → vx=0.3m/s × 3.5s (前进约1米)
-       → LAND
-LAND   → "passive" (P键) → sleep(2s) 趴下
-       → DONE
-```
-
----
-
-## 三、Nav2 自主导航避障
-
-### 3.1 架构
-
-```
-PointLIO Odometry → odom_republisher → /odom (nav2输入)
-LiDAR PointCloud → /livox/lidar → nav2 costmap (障碍物检测)
-nav2 planner → /cmd_vel → rl_real_xkai → 机器狗运动
-```
-
-Nav2 输出的 `/cmd_vel` 直接通过 `ros2_cmd_active_` 机制注入 `control.x/y/yaw`，无需 `navigation_mode`。
-
-**手柄与自动控制自动切换**：收到 `/cmd_vel` 后自动切换为 ROS2 控制，手柄摇杆有输入后自动切回手柄。500ms 无 `/cmd_vel` 消息则自动恢复手柄。
-
-### 3.2 启动 Nav2
-
-```bash
-# 确保机器狗底层 + LiDAR + SLAM 已运行（见2.2节）
-
-# 启动 Nav2
-ros2 launch /home/zhenzhen/ros2/nav2/drone_nav2.launch.py
-
-# RViz 可视化（可选）
-ros2 launch /home/zhenzhen/ros2/nav2/drone_rviz.launch.py
-
-# 发布导航目标点
-python3 /home/zhenzhen/ros2/nav2/goal_publisher.py <x> <y> <z> [yaw]
-# 示例：前进2米，右转1米
-python3 /home/zhenzhen/ros2/nav2/goal_publisher.py 2.0 1.0 0.0 0.0
-```
-
-### 3.3 关键参数 (nav2_drone_params.yaml)
-
-| 参数 | 值 | 说明 |
-|------|-----|------|
-| 最大线速度 | 1.0 m/s | 可调整 |
-| 障碍物检测范围 | 8.0m | LiDAR 最大距离 |
-| 局部代价地图分辨率 | 0.1m | |
-| 全局代价地图分辨率 | 0.2m | |
-| 机器人半径 | 0.5m | 膨胀半径 |
-
----
-
-## 四、ego-planner 轨迹规划
-
-ego-planner 生成无碰撞的平滑轨迹，输出 position/velocity 指令。
-
-### 4.1 启动 ego-planner
-
-```bash
-# 确保机器狗底层 + LiDAR + SLAM 已运行
-
-source ~/ros2/ego-planner-swarm/install/setup.bash
-ros2 launch ego_planner run_in_sim.launch.py
-```
-
-### 4.2 与机器狗集成
-
-ego-planner 输出轨迹点 → 需要转换为 `/cmd_vel` 发送给机器狗。有两种方式：
-
-**方式 A：速度 PID 跟随**（推荐）
-```bash
-# ego-planner 轨迹 → dog_node 的 FlightController::fly_by_path()
-# 通过 ICommandPublisher::publish_velocity() 转换为 /cmd_vel
-```
-
-**方式 B：直接话题桥接**
-```bash
-# ego-planner 输出 /planning/pos_cmd (PoseStamped)
-# → 自定义桥接节点 → /cmd_vel (Twist)
-```
-
----
-
-## 五、开发指南
-
-### 5.1 自定义任务
-
-编辑 `~/ros2/robodog-yunnan-elec/core_2026/src/layer3_mission/dog_mission_executor.cpp`：
-
-```cpp
-void DogMissionExecutor::on_hover() {
-    // 示例：走正方形
-    Velocity fwd(0.3f, 0.0f, 0.0f, 0.0f);
-    Velocity turn(0.0f, 0.0f, 0.0f, 0.5f);
-
-    for (int i = 0; i < 4; i++) {
-        fc_.fly_by_vel_duration(fwd, 3.0f);   // 前进1m
-        fc_.fly_by_vel_duration(turn, 1.5f);  // 转90°
-    }
-    current_state_ = State::LAND;
-}
-```
-
-### 5.2 自定义 FSM 指令
-
-`/dog/fsm_command` 支持的值：
-
-| 指令 | FSM 动作 |
-|------|----------|
-| `getup` / `stand` | 站立 (Gamepad::A) |
-| `passive` / `sit` | 趴下 (Keyboard::P) |
-| `locomotion` / `walk` | 进入RL运动 (Gamepad::RB_DPadUp) |
-
-### 5.3 ROS2 Topic 接口
-
-| Topic | 类型 | 方向 | 说明 |
-|-------|------|------|------|
-| `/cmd_vel` | `geometry_msgs/Twist` | → 机器狗 | 速度指令 (vx, vy, vyaw) |
-| `/dog/fsm_command` | `std_msgs/String` | → 机器狗 | FSM 状态切换 |
-| `/dog/state` | `std_msgs/String` | ← 机器狗 | FSM 状态反馈 |
-| `lidar_data` | `ros2_tools/LidarPose` | ← SLAM | 定位数据 |
-
----
-
-## 六、故障排除
-
-### 机器狗不动
-1. 检查 CAN 串口 `/dev/ttycan1~4` 是否都有反馈
-2. 确认电机已使能（`[MOTOR]` 输出中 `kp > 0`）
-3. 轮子电机 `kp=0` 是正常设计（速度模式），确认 `real_tau` 是否有值
-
-### Nav2 目标点无法到达
-1. 检查 TF 变换树：`ros2 run tf2_tools view_frames`
-2. 确认 LiDAR 点云发布在 `/livox/lidar`
-3. 检查 `/odom` 话题是否有数据
-
-### 手柄不响应
-1. 确认 `ros2_cmd_active_=0`（诊断输出每秒显示）
-2. 检查 `/cmd_vel` 是否有其他发布者：`ros2 topic info /cmd_vel`
-3. 确认手柄已连接：启动日志应显示 `[Xbox] 手柄已连接成功`
-
-### 编译问题
-- `rclcpp/rclcpp.hpp not found`: 确保 ROS2 humble 环境已 source
-- `messages not found`: 先 `colcon build --packages-select messages ros2_tools`
-- `USE_ROS2 not defined`: 检查 CMakeLists.txt 中 `USE_ROS2 USE_ROS` 定义
+- `~/ros2_ws/README.md` —— 工作区环境、编译参数与网络（雷达口）细节
+- `docs/MISSION_PROTOCOL.md` —— 任务编排契约（本仓库）
+- `~/web/README.md` + `~/web/docs/CMD_STATE_PROTOCOL.md` —— 网页端与命令生命周期协议
+- `~/ros2_ws/src/dog_ros2_bridge/README.md` —— 小脑桥适配层（工作区包，不在本仓库）
+- `rl_briefing/README.md` —— 语音播报包

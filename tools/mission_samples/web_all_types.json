@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "name": "巡检A",
+  "confirm": "each",
+  "steps": [
+    {
+      "type": "getup",
+      "settle_s": 10
+    },
+    {
+      "type": "check_stand",
+      "timeout_s": 5
+    },
+    {
+      "type": "locomotion"
+    },
+    {
+      "type": "move",
+      "vx": 0.25,
+      "vy": 0,
+      "wz": 0,
+      "duration_s": 3
+    },
+    {
+      "type": "getdown",
+      "settle_s": 1
+    },
+    {
+      "type": "check_stand",
+      "timeout_s": 5
+    },
+    {
+      "type": "getup",
+      "settle_s": 10
+    },
+    {
+      "type": "locomotion"
+    },
+    {
+      "type": "move",
+      "vx": 0.1,
+      "vy": 0,
+      "wz": 0,
+      "duration_s": 3
+    },
+    {
+      "type": "goto",
+      "x": 1,
+      "y": 0,
+      "yaw": 0,
+      "goto_timeout_s": 60
+    },
+    {
+      "type": "wait",
+      "duration_s": 5
+    },
+    {
+      "type": "getdown",
+      "settle_s": 1
+    }
+  ]
+}
