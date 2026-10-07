@@ -206,7 +206,18 @@ bool RobotDogHAL::is_gamepad_override() const {
 void RobotDogHAL::publish_velocity(Velocity& velocity) {
     auto msg = geometry_msgs::msg::Twist();
     msg.linear.x  = velocity.get_vx();
-    msg.linear.y  = velocity.get_vy();
+    // ── 构型决定（2026-10-03）：轮足横向(vy)精度不足、运动中微调不可靠 ——
+    // **常规速度通道不发 y**。Velocity 的 y 字段、任务层的平移参数都保留着
+    // （以后要用）；将来真需要横向移动时，在那个场景的专属方法里另写显式
+    // vy 发布，不要从这条常规通道恢复透传。横向偏差由 goto 的航向式控制律
+    // 消化（见 dog_plan_executor.cpp 的 do_goto）。
+    const float vy_cmd = velocity.get_vy();
+    if (vy_cmd < -1e-3f || vy_cmd > 1e-3f) {
+        RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                             "命令含 vy=%.3f，本构型常规通道禁 y，已按 0 发送",
+                             static_cast<double>(vy_cmd));
+    }
+    msg.linear.y  = 0.0f;
     msg.angular.z = velocity.get_vyaw();
     // vz/vpitch/vroll ignored for ground robot
     cmd_vel_pub_->publish(msg);

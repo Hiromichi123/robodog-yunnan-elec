@@ -246,3 +246,7 @@ echo confirm > /tmp/c.json
 4. **`check_stand` 通过 ≠ getup 一定能成**：小脑的 Passive→GetUp 门控读的是
    `motors_ready_for_stand`，它只在开机/`zero_motor` 时重算。起立被静默拒绝时，
    先发一次 `zero_motor <id>` 或重启控制器。
+5. **构型收敛（2026-10-03）：`goto` 只用 x + yaw 控制** —— 先对准航向再前进，
+   移动中的横向偏差靠转向消化，**不依赖 vy**（轮足横向精度不足）。狗端 HAL 层
+   统一禁 y：命令里带 vy 会被归零并发限流告警。任务 `move` 步骤的 `vy` 参数
+   **保留但当前不生效**；以后需要横向移动时，在该场景的专属方法里显式发布。

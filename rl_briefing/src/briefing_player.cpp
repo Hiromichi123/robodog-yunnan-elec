@@ -191,8 +191,10 @@ public:
         // 2Hz 空闲心跳：网页靠它判断"播报节点在不在"（状态只在事件时发的话，
         // 页面点下去没声音就无从判断：是节点没起、还是喇叭没插）。
         // 播放中的进度由 play_sequence 自己发（playing: X (2/3)），心跳不掺和。
+        // 心跳**不打日志**（log_it=false，2026-10-03）：状态照发，终端不再每 0.5s
+        // 刷一条 "[status] idle" —— 那只是给网页看的心跳，不是给人看的事件。
         heartbeat_ = create_wall_timer(std::chrono::milliseconds(500), [this]() {
-            if (!playing_.load()) publish_status("idle");
+            if (!playing_.load()) publish_status("idle", /*log_it=*/false);
         });
 
         RCLCPP_INFO(get_logger(),
@@ -209,11 +211,14 @@ public:
     }
 
 private:
-    void publish_status(const std::string& s) {
+    void publish_status(const std::string& s, bool log_it = true) {
         auto m = std_msgs::msg::String();
         m.data = s;
         status_pub_->publish(m);
-        RCLCPP_INFO(get_logger(), "[status] %s", s.c_str());
+        // 事件路径（play/done/error…）默认打日志；2Hz 空闲心跳传 false 静音
+        if (log_it) {
+            RCLCPP_INFO(get_logger(), "[status] %s", s.c_str());
+        }
     }
 
     void on_command(const std::string& raw) {

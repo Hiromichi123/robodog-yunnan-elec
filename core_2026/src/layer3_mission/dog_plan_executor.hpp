@@ -47,7 +47,12 @@ public:
     void request_abort();
 
 private:
-    enum class Outcome { Ok, Skipped, Failed };
+    // Ok                 = 正常完成
+    // Failed             = 失败：统一处置 = 停速 + getdown 回趴下
+    // FailedKeepStanding = 失败，但**狗已就地停住、要留在 RL 站立位**，不要 getdown。
+    //                      目前只有 goto 超时用它：台架上反复试任务时不必每次
+    //                      重新起立。代价是没人处置它就一直在那站着（不自动卸力）。
+    enum class Outcome { Ok, Skipped, Failed, FailedKeepStanding };
 
     /** 确认闸门的三种结局。 */
     enum class Gate { Continue, AbortMission, SkipStep };
@@ -76,7 +81,11 @@ private:
     void stop_motion();
     /** 位姿够不够新鲜（闭环控制的前提）。 */
     [[nodiscard]] bool pose_is_fresh(double max_age_s) const;
-    /** 失败/中止的统一处置：停速 + 回趴下，并如实上报结果。 */
+    /**
+     * 失败/中止的统一处置：停速 + 回趴下，并如实上报结果。
+     * **只用于 Outcome::Failed**；FailedKeepStanding 那条路不走这里
+     * （见 execute()：只压零速、保持站立）。
+     */
     void go_down_and_report(const std::string& reason);
     /** 丢掉积压的指令 —— 上一轮任务残留的 confirm 不能批准下一轮的闸门。 */
     void drain_cmds();

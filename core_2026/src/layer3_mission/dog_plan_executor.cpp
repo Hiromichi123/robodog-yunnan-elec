@@ -11,16 +11,22 @@ namespace mission {
 
 namespace {
 
-// ── goto 闭环参数 ────────────────────────────────────────────────────────
-// 照抄 dog_nav_demo/dog_nav_demo/goto_goal.py 的实测值 —— 那套已经在真机上跑通
-// （README 场景 B），不要凭感觉调，要调也在现场对着实测改。
-constexpr double kGotoKpXy        = 0.55;
-constexpr double kGotoKpYaw       = 0.75;
+// ── goto 闭环参数（航向式控制律，2026-10-03 构型收敛）─────────────────────
+// 轮足横向(vy)精度不足、运动中微调不可靠 → 横向偏差不靠 vy，靠**航向**消化：
+//   ① 对准：bearing 误差大 → 原地转（"消除航向误差再移动"）；
+//   ② 前进：bearing 微调 —— 横向偏差随目标方位角变化被 yaw 连续吃掉；
+//   ③ 收尾：位置进容差后平移停，原地转到步内目标航向。
+// 全程不构造 vy（HAL 层也统一禁 y，见 robot_dog_hal.cpp）。
+// 增益沿用 dog_nav_demo/goto_goal.py 的实测值量级，要调在现场对着实测改。
+constexpr double kGotoKpVx        = 0.55;   // 距离→vx（原 kp_xy 的量级）
+constexpr double kGotoKpYaw       = 0.75;   // 航向误差→wz（bearing 与终值航向共用）
 constexpr double kGotoMaxVx       = 0.25;   // m/s
-constexpr double kGotoMaxVy       = 0.18;   // m/s
 constexpr double kGotoMaxYawRate  = 0.45;   // rad/s
+constexpr double kGotoAlignThresh = 0.35;   // rad，bearing 误差超它就原地转、不前进
 constexpr double kGotoTolXy       = 0.20;   // m，到位判据
 constexpr double kGotoTolYaw      = 0.15;   // rad
+// 原双轴 P 的两个参数已退役，数值留档供以后"显式横向"场景参考：
+//   kGotoKpXy=0.55（横向同增益）、kGotoMaxVy=0.18 m/s（横向限幅）
 constexpr double kPoseTimeoutS = 1.0;   // 位姿多久没更新就停
 constexpr int    kStopFrames  = 5;      // 到位后连发几帧零速再 vel_stop
 constexpr double kControlHz   = 20.0;
@@ -77,6 +83,7 @@ void DogPlanExecutor::execute(const MissionPlan& plan) {
 
     std::size_t completed = 0;
     bool failed = false;
+    bool failed_keep_standing = false;   // 失败，但狗已停住、要留在站立位（不 getdown）
 
     for (std::size_t i = 0; i < total; ++i) {
         if (abort_) break;
@@ -101,6 +108,7 @@ void DogPlanExecutor::execute(const MissionPlan& plan) {
 
         if (abort_) break;
         if (out == Outcome::Failed) { failed = true; break; }
+        if (out == Outcome::FailedKeepStanding) { failed_keep_standing = true; break; }
         ++completed;
     }
 
@@ -113,11 +121,20 @@ void DogPlanExecutor::execute(const MissionPlan& plan) {
                     plan.name.c_str(), completed, total);
         return;
     }
-    if (failed) {
-        go_down_and_report(last_error_);
+    if (failed || failed_keep_standing) {
+        if (failed_keep_standing) {
+            // 已经就地停住的失败（goto 超时）：**只压零速，不 getdown** ——
+            // 狗留在 RL 站立状态等人工处置。压零速这一步是防守性的：
+            // 返回前那一步自己也压过，这里再压一次保证"不管哪个步骤返回
+            // 这个结果，速度一定是 0"。
+            publish_zero_velocity();
+        } else {
+            go_down_and_report(last_error_);
+        }
         push("failed", -1, total, "", last_error_, "", false);
-        RCLCPP_ERROR(logger_, "[任务] 「%s」失败于 %zu/%zu 步：%s",
-                     plan.name.c_str(), completed + 1, total, last_error_.c_str());
+        RCLCPP_ERROR(logger_, "[任务] 「%s」失败于 %zu/%zu 步：%s%s",
+                     plan.name.c_str(), completed + 1, total, last_error_.c_str(),
+                     failed_keep_standing ? " —— 已停速保持站立（不趴下，等人工处置）" : "");
         return;
     }
 
@@ -138,7 +155,8 @@ DogPlanExecutor::Outcome DogPlanExecutor::dispatch(const MissionStep& st, std::s
     }
 
     // 失败原因补上"第几步、什么类型" —— 网页上只显示这一行，必须能直接定位。
-    if (out == Outcome::Failed && !abort_ && !last_error_.empty()) {
+    if ((out == Outcome::Failed || out == Outcome::FailedKeepStanding) &&
+        !abort_ && !last_error_.empty()) {
         last_error_ = "第 " + std::to_string(index) + " 步（" + to_string(st.type) +
                       "）：" + last_error_;
     }
@@ -268,34 +286,54 @@ DogPlanExecutor::Outcome DogPlanExecutor::do_goto(const MissionStep& st) {
             }
         } else {
             arrived_frames = 0;
-            // 世界系误差 → 机体系（与狗端里程计的旋转互逆）
-            const double c  = std::cos(s.yaw);
-            const double sn = std::sin(s.yaw);
-            const double err_x =  c * dx + sn * dy;
-            const double err_y = -sn * dx + c * dy;
 
-            Velocity v(static_cast<float>(clamp(kGotoKpXy * err_x, -kGotoMaxVx, kGotoMaxVx)),
-                       static_cast<float>(clamp(kGotoKpXy * err_y, -kGotoMaxVy, kGotoMaxVy)),
-                       0.0f,
-                       static_cast<float>(clamp(kGotoKpYaw * yaw_err, -kGotoMaxYawRate, kGotoMaxYawRate)));
+            // 航向式控制律（构型：只用 x + yaw，横向偏差由转向消化）——
+            //   bearing = 车→目标的方位角；bearing_err = bearing − 当前 yaw
+            const double bearing     = std::atan2(dy, dx);
+            const double bearing_err = wrap_pi(bearing - s.yaw);
+
+            double vx = 0.0, wz = 0.0;
+            if (dist <= kGotoTolXy) {
+                // ③ 位置已进容差、只差航向：平移停，原地转到终值航向
+                wz = clamp(kGotoKpYaw * yaw_err, -kGotoMaxYawRate, kGotoMaxYawRate);
+            } else if (std::abs(bearing_err) > kGotoAlignThresh) {
+                // ① 对准：航向误差太大不往前走，原地转
+                wz = clamp(kGotoKpYaw * bearing_err, -kGotoMaxYawRate, kGotoMaxYawRate);
+            } else {
+                // ② 前进 + bearing 微调：横向偏差随目标方位角变化被 yaw 吃掉。
+                //    只允许前进（cos 平滑减速）；冲过头时 bearing 翻转 ±π，
+                //    自动落回 ① 原地转回来，不需要额外的捕获半径分支。
+                vx = clamp(kGotoKpVx * dist * std::cos(bearing_err), 0.0, kGotoMaxVx);
+                wz = clamp(kGotoKpYaw * bearing_err, -kGotoMaxYawRate, kGotoMaxYawRate);
+            }
+
+            Velocity v(static_cast<float>(vx), 0.0f, 0.0f, static_cast<float>(wz));
             fc_.fly_by_velocity(v);
 
-            // 1 Hz 打一次距离/航向误差：现场查"走歪了"只能靠这个
+            // 1 Hz 打一次距离/方位/航向误差：现场查"走歪了"只能靠这个
             if (seconds_since(last_log) >= 1.0) {
                 last_log = std::chrono::steady_clock::now();
                 RCLCPP_INFO(logger_,
                             "[任务] goto: 现在 (%.2f, %.2f, %.2f) → 目标 (%.2f, %.2f, %.2f)，"
-                            "距离 %.2f m，航向误差 %.2f rad，已走 %.1fs",
-                            s.x, s.y, s.yaw, st.x, st.y, st.yaw, dist, yaw_err,
+                            "距离 %.2f m，方位误差 %.2f rad，终值航向误差 %.2f rad，已走 %.1fs",
+                            s.x, s.y, s.yaw, st.x, st.y, st.yaw, dist, bearing_err, yaw_err,
                             seconds_since(t0));
             }
         }
 
         // 超时判在到位之后：最后一拍刚好到位时应该算成功
         if (seconds_since(t0) > st.goto_timeout_s) {
+            // 超时未到位：**就地压零速**（连发几帧 0 Twist），不走 vel_stop。
+            // vel_stop 是"动作正常收尾"用的（见 stop_motion），失败路径按
+            // hpp 里的约定一律不用它；这里直接发 0 更快 —— 不用等小脑确认
+            // 那 ~0.6s，也不需要多一次状态切换。发完再交出失败，由统一处置
+            // （go_down_and_report）接手，那里同样是压零速、不碰 vel_stop。
+            publish_zero_velocity();
             last_error_ = "在规定时间内没走到目标点（剩余距离 " + std::to_string(dist) +
                           " m）—— 已停速保持站立，需人工处置";
-            return Outcome::Failed;
+            // **FailedKeepStanding**（不是 Failed）：狗已就地停住，不要 getdown，
+            // 留在 RL 站立位等人工处置。分流见 execute()。
+            return Outcome::FailedKeepStanding;
         }
         rate.sleep();
     }
