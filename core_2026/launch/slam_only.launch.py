@@ -40,21 +40,29 @@
                            （由 ~/webserver.sh 起静态服务，浏览器开
                             http://192.168.8.137:8080/，ROS 地址填
                             ws://192.168.8.137:9090）。
-    7. lidar_recorder      雷达 → 网页的唯一点云出口 + 建图落盘。
-                           订 /cloud_registered_body（body 系、IMU 去畸变、
-                           只经过 point_filter_num 抽稀）+ /aft_mapped_to_init，
-                           自己乘一次位姿变换到世界系。
-                           **不要改成订 /cloud_registered**：那份是
-                           feats_down_world，被 filter_size_surf=0.5 的体素
-                           降采样过，一面 10m 的墙只剩约 20 个点（差 ~20 倍）。
-                           另外用彩色相机给点上色（color_topic 留空则不上色）：
-                           雷达点按 TF 变到相机光学系、用彩色内参投影到像素取色，
-                           写进 rgb 字段。**相机只提供颜色，几何全部来自雷达**
-                           （2026-09-29 改：相机自己算深度这条路走不通 ——
-                           被动双目无投射散斑，无纹理处全是伪匹配，
-                           实测点云呈锥形发散；而几何本来就是雷达的强项）。
+    6b. stereo_points      双目点云（仅 map_source:=camera）。
+                           订左右红外 + 彩色，SGBM 算视差 → 深度 → 彩色点云，
+                           发 /camera/camera/depth/color/points。
+    7. lidar_recorder      点云 → 网页的唯一点云出口 + 建图落盘。
+                           **几何源由 map_source 决定**，两条路线各一份 Node：
+                           camera(默认) 订 /camera/camera/depth/color/points
+                             （帧 camera_camera_left，先搬到 body 再乘位姿；
+                              点云自带颜色，关掉上色那一遍）
+                           lidar(旧) 订 /cloud_registered_body（body 系、IMU 去畸变、
+                             只经过 point_filter_num 抽稀），用彩色相机投影补色。
+                             **不要改成订 /cloud_registered**：那份是
+                             feats_down_world，被 filter_size_surf=0.5 的体素
+                             降采样过，一面 10m 的墙只剩约 20 个点（差 ~20 倍）。
+                           两条路线都再用 /aft_mapped_to_init 乘一次位姿到世界系。
+                           **2026-10-07 换成相机路线的原因**：旧路线要求相机-雷达
+                           外参准确，而外参只能靠标定/假设 —— 折腾一轮标定后结论是
+                           数据分辨不出更好的外参。相机路线几何与颜色**同源**，
+                           整个外参问题不存在；代价是几何精度掉到厘米级
+                           （3.5m 处 ±0.2m），且被动双目在无纹理面上没有深度
+                           （白墙/亮地面/天花板）。
                            网页上「开始建图」打开时把每帧（变换后的）转发给浏览器，
-                           同时按体素去重（默认 0.01m）累积，关闭时写成单张 pcd
+                           同时按体素去重（相机 0.02m / 雷达 0.01m）累积，
+                           关闭时写成单张 pcd
                            （~/lidar_maps/map_<时间戳>.pcd + 同名 .json 边车，
                            pcd 带 rgb 字段）。
 
@@ -78,12 +86,12 @@ import os
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, TimerAction
-from launch.conditions import LaunchConfigurationEquals
+from launch.conditions import IfCondition, LaunchConfigurationEquals
 from launch.launch_description_sources import (
     AnyLaunchDescriptionSource,
     PythonLaunchDescriptionSource,
 )
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
@@ -101,11 +109,21 @@ def quat_from_rpy(roll, pitch, yaw):
 
 def generate_launch_description():
     # 雷达安装变换：**前向倒装 45°**、杆臂正前 0.286m（实测 286mm）。
-    # 四元数 (0, -0.923880, 0, 0.382683) = 绕 y 轴 −135°（= 180° + 45°），
-    # 即雷达的 +x 指向 base_link 的**后上方** 45°。
-    # 依据：静止时原始 Point-LIO 姿态反推为绕 y ≈ −139.3°，与 −135° 逐项吻合；
-    # "绕y+45°再绕z/x 180°"两种组合都会退化成万向锁，与实测不符。
-    mount_xyz_rpy = ["0.286", "0", "0", "0", "-0.923880", "0", "0.382683"]
+    # 四元数 (0.923880, 0, 0.382683, 0) = rpy(roll=0, pitch=−135°, yaw=π)，
+    # 即：绕 y 轴 −135°（前向倒装 45°）**再绕 base_link z 加 180°**。
+    #
+    # ⚠️ 2026-10-06 补上的那个 π（原来是 (0,-0.923880,0,0.382683) = 只有 Ry(−135°)）：
+    # 当年这个 mount 是从「静止时原始 Point-LIO 姿态反推」定的，而 camera_init 的
+    # 世界系 yaw 是启动时任意的 —— 那步把 yaw 假设成 0 是循环论证，**yaw 根本测不出来**
+    # （雷达自己看不见绕 z 的安装角）。2026-10-05 goto 跑反现场定下真正差的是 180° yaw，
+    # 当时只改了位姿那一路（lidar_data_node 的 mount_yaw=3.141593），TF 这一路留了待办。
+    # 现在对齐。**两路的 rpy 必须一致**：lidar_data_node 那套是 rpy(0,−135°,180°)。
+    #
+    # 为什么必须补：不补的话相机光轴在雷达 body 系里落到「方位 180°、俯仰 −45°」，
+    # 正好是雷达被遮挡的那个空洞（实测 body 系方位 100°~240° 全空、260°~80° 才有
+    # −5°~+55° 的覆盖）—— 网页/录制的彩色上色会几乎一个点都命中不了，只有贴地点勉强有色。
+    # 补上之后光轴落到「方位 0°、俯仰 +45°」，正落在覆盖区里。
+    mount_xyz_rpy = ["0.286", "0", "0", "0.923880", "0", "0.382683", "0"]
 
     # 彩色相机：装在机器人正前方、竖直；相对**车体**偏移 x+40mm、z+95mm。
     # 注意是相对车体（base_link）量的，不是相对雷达 —— 杆臂 0.286 才是雷达的位置，
@@ -140,6 +158,30 @@ def generate_launch_description():
             description='Point-LIO 延迟启动秒数，等雷达驱动就绪'),
         DeclareLaunchArgument(
             'rviz', default_value='false', description='是否开 rviz'),
+        # ── /lidar_data 来源（real=真链路 / fake=假节点发 0）──
+        # 互斥：两个来源同时发 /lidar_data，控制环会拿到两份互相矛盾的位姿
+        # （狗无规律乱走，极难倒查）—— 和"两份 Point-LIO"是同一类坑。
+        DeclareLaunchArgument(
+            'lidar_source', default_value='real',
+            description='/lidar_data 来源: real=Point-LIO→lidar_data_node(默认,实机) | '
+                        'fake=持续发 0 的假节点(无雷达台架联调)。两者互斥，'
+                        '见 ~/start_slam.sh'),
+        # ── 建图几何源（map_source:=camera 默认 / lidar 回退）──
+        # （2026-10-07 换向：原来是"雷达出几何 + 相机只上色"，那条路要求相机-雷达
+        #   外参准确，而外参只能靠标定/假设 —— 折腾一轮标定后结论是数据分辨不出来。
+        #   改成"相机自己的双目点云出几何，雷达只提供位姿"之后，几何和颜色同源，
+        #   **整个外参问题就不存在了**。代价是几何精度掉到厘米级、无纹理面没有深度。）
+        DeclareLaunchArgument(
+            'map_source', default_value='vision',
+            description='建图来源: vision=相机的神经深度+相机自带VIO位姿(默认，**纯视觉，'
+                        '雷达完全不参与**) | camera=相机的神经深度+雷达位姿 | '
+                        'lidar=雷达点云+相机上色(旧路线，保留以便对比/回退)'),
+        # 相机路线里雷达**仍然要跑**（Point-LIO 提供世界系位姿），所以这个开关
+        # 不动 lidar_source —— 两条路线都依赖 Point-LIO 的 /aft_mapped_to_init。
+        DeclareLaunchArgument(
+            'stereo_max_range_m', default_value='6.0',
+            description='深度点云的最远距离(m)。板载神经深度 3~6m 误差 <4%、'
+                        '6~8m <8%，所以默认放到 6m（比原先自己跑 SGBM 的 3.5m 宽得多）'),
         # ── 小脑通信桥（bridge:=ros2 默认 / ws 回退 / none 不起）──
         DeclareLaunchArgument(
             'bridge', default_value='ros2',
@@ -163,7 +205,13 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'voxel_size', default_value='0.01',
             description='建图体素去重边长(m)。静止重复扫描的同一面墙只留一个点；'
-                        '0.01 比 MID360 原生点间距还细，基本无损'),
+                        '0.01 比 MID360 原生点间距还细，基本无损。'
+                        '（雷达路线 map_source:=lidar 用这个）'),
+        DeclareLaunchArgument(
+            'cam_voxel_size', default_value='0.02',
+            description='相机路线(map_source:=camera)的体素边长(m)。比雷达那档粗一倍 —— '
+                        '双目点云本身就有约 1~2cm 的深度噪声，用 0.01 等于把噪声也当结构存，'
+                        '地图会迅速堆到 max_points 上限'),
         # ── 上色用的彩色图（可选）──
         # **是图像，不是点云**：几何由雷达给，相机只负责颜色。
         DeclareLaunchArgument(
@@ -273,6 +321,7 @@ def generate_launch_description():
         package='ros2_tools',
         executable='lidar_data_node',
         output='screen',
+        condition=LaunchConfigurationEquals('lidar_source', 'real'),
         parameters=[{
             'use_simulation': False,
             'simulation_odom_topic': '/absolute_pose',
@@ -281,7 +330,26 @@ def generate_launch_description():
             'apply_mount_transform': True,
             'mount_x': 0.286, 'mount_y': 0.0, 'mount_z': 0.0,
             # 前向倒装 45° = 绕 y 轴 −135°（−2.356194 rad）
-            'mount_roll': 0.0, 'mount_pitch': -2.356194, 'mount_yaw': 0.0,
+            # mount_yaw = π（2026-10-05 实测修正）：安装变换少了绕 base_link z 的
+            # 180°，上报车头方向原本是物理车头的背面（goto 时表现为走反）。
+            # 静态测不出来（见 lidar_data_node.cpp 注释）；改的是旋转整体。
+            'mount_roll': 0.0, 'mount_pitch': -2.356194, 'mount_yaw': 3.141593,
+        }],
+    )
+
+    # ── 4b. 假 /lidar_data（lidar_source:=fake）──────────────────────
+    # 无雷达/无 SLAM 的台架联调：持续发 (0,0,0)，让 dog_node 的前置检查能过、
+    # 网页能下发任务。**只验链路通不通** —— 位姿恒定，闭环任务必然收敛不了。
+    # 与上面的 lidar_data_node 互斥（见 lidar_source 的说明）。
+    fake_lidar_data = Node(
+        package='core_2026',
+        executable='fake_lidar_data',
+        name='fake_lidar_data',
+        output='screen',
+        condition=LaunchConfigurationEquals('lidar_source', 'fake'),
+        parameters=[{
+            'topic': 'lidar_data',
+            'rate_hz': 10.0,
         }],
     )
 
@@ -336,10 +404,63 @@ def generate_launch_description():
         }.items(),
     )
 
-    # ── 7. 建图录制:雷达 → 网页的唯一点云出口 + pcd 落盘 ──────────────
+    # ── 6b. 深度点云（map_source:=camera）──────────────────────────
+    # **用相机板载的神经深度**（`depth_points_node`）：订
+    # /camera/camera/depth/image_rect_raw（544x640 mono16，单位 mm，~12.7Hz）
+    # 反投影 + 彩色图取色 → /camera/camera/depth/color/points（帧 camera_camera_left）。
+    # 2026-10-07 换过来的：原先的 stereo_points（自己跑 SGBM）在无纹理面上
+    # 会锥形发散，实测地图是个放射状扇形；板载神经深度 0.19~3m <2%、100% 覆盖。
+    # ⚠️ 开深度**必须给相机独立供电**（有源 USB HUB），否则相机会约 19s 一轮
+    #    自己掉线重启（内核日志是设备发起的 USB disconnect，没有过流/带宽报错）。
+    stereo = Node(
+        package='stereo_points',
+        executable='depth_points_node',
+        name='depth_points',
+        output='screen',
+        parameters=[{
+            'max_range_m': LaunchConfiguration('stereo_max_range_m'),
+        }],
+        # camera 和 vision 两档都要深度点云（只有 lidar 旧路线不需要）。
+        # LaunchConfigurationEquals 只认单值，所以这里用 PythonExpression 拼个"或"。
+        condition=IfCondition(PythonExpression([
+            "'", LaunchConfiguration('map_source'), "' == 'camera' or '",
+            LaunchConfiguration('map_source'), "' == 'vision'",
+        ])),
+    )
+
+    # ── 7. 建图录制:点云 → 网页的唯一点云出口 + pcd 落盘 ──────────────
     # 立刻起（不必等雷达）：它收不到点云时只是不发数据，状态里会标 degraded，
     # 网页那边看到的是「未收到点云」而不是「点了没反应」。
-    recorder = Node(
+    #
+    # **两条路线各一份 Node，用 map_source 互斥**（和上面 lidar_data_node 的
+    # real/fake 同一个套路）：参数差异不止话题名，还有 cloud_frame（相机点云在
+    # 左目光学系，得先搬到 body 再乘位姿）和上色（相机点云自带颜色，要关掉补色那一遍）。
+    # 拆成两份比在参数里写条件表达式清楚得多。
+    recorder_camera = Node(
+        package='lidar_recorder',
+        executable='lidar_recorder_node',
+        name='lidar_recorder',
+        output='screen',
+        parameters=[{
+            'out_dir': LaunchConfiguration('maps_dir'),
+            'voxel_size': LaunchConfiguration('cam_voxel_size'),
+            'cloud_topic': '/camera/camera/depth/color/points',
+            # 相机点云在**左目光学系**；节点会走 base_link 中转搬到 body 再乘位姿
+            'cloud_frame': 'camera_camera_left',
+            # 留空 = 不上色：点云自带 rgb，前端的"给已有点补色"那一路整段跳过
+            'color_topic': '',
+            # **容差要比雷达路线宽**：雷达路线的帧戳与位姿戳是同一时刻（Point-LIO
+            # 一轮循环里用同一时间戳先发位姿再发点云），dt≈0，所以 0.05s 够；
+            # 而相机点云的戳来自相机侧（到达板子的时刻），比最新一条雷达位姿平均
+            # **新 60ms**（雷达解码+Point-LIO 的延迟），一直被 0.05s 判掉 ——
+            # 实测 86% 的帧被丢、rate 只有 1.1Hz。放宽到 0.2s：
+            # 那 60ms 的误差在走路速度下是 1.8cm、快转时 5.4°，相比深度本身的
+            # ±2%（1.5m 处 3cm）可以忽略。
+            'pose_tolerance_s': 0.2,
+        }],
+        condition=LaunchConfigurationEquals('map_source', 'camera'),
+    )
+    recorder_lidar = Node(
         package='lidar_recorder',
         executable='lidar_recorder_node',
         name='lidar_recorder',
@@ -347,9 +468,49 @@ def generate_launch_description():
         parameters=[{
             'out_dir': LaunchConfiguration('maps_dir'),
             'voxel_size': LaunchConfiguration('voxel_size'),
+            'cloud_topic': '/cloud_registered_body',
+            'cloud_frame': 'body',
             'color_topic': LaunchConfiguration('color_topic'),
             'color_info_topic': LaunchConfiguration('color_info_topic'),
         }],
+        condition=LaunchConfigurationEquals('map_source', 'lidar'),
+    )
+
+    # ── 7c. 纯视觉路线（map_source:=vision，默认）────────────────────
+    # 位姿改由**相机自带的 VIO** 提供，雷达完全不参与 —— 几何（神经深度）和位姿
+    # 都来自这同一台相机。和 camera 档只差三点：
+    #   1) body_frame 指成 VIO 的参考帧 camera_camera_imu，点云会被自动搬到该系
+    #      （camera_camera_imu → camera_camera_left 的静态 TF 相机自己在发）；
+    #   2) odom_type=posestamped —— VIO 发的是 geometry_msgs/PoseStamped；
+    #   3) odom_stamp_from_arrival —— VIO 的时间戳在**相机自己的时钟**里
+    #      （实测 header.stamp.sec≈3805，是相机开机计时），不改用到达时刻的话
+    #      会和点云帧戳差一个多数量级、一条位姿都配不上。
+    # 注意：**这只是换位姿源，不改画质**。扇形是深度逐帧噪声 + 朴素累积造成的，
+    # 与位姿源无关（实测 Point-LIO 静止时 yaw 22 秒只漂 0.41°）。
+    recorder_vision = Node(
+        package='lidar_recorder',
+        executable='lidar_recorder_node',
+        name='lidar_recorder',
+        output='screen',
+        parameters=[{
+            'out_dir': LaunchConfiguration('maps_dir'),
+            'voxel_size': LaunchConfiguration('cam_voxel_size'),
+            'cloud_topic': '/camera/camera/depth/color/points',
+            'cloud_frame': 'camera_camera_left',
+            # **不搬家**：设成点云自己的帧，recorder 就跳过静态 TF、直接把 VIO
+            # 位姿套上去。为什么不写 'camera_camera_imu'（VIO 的参考帧）——
+            # camera_camera_left **有两个父节点**（我们 launch 发的 camera_link→left，
+            # 和相机自己发的 camera_camera_imu→left），tf2 遇到这种直接拒绝查找，
+            # 结果 116 帧全被丢。而这两帧**朝向完全相同**（相机发的 imu→left 是纯平移，
+            # 只有 4.6cm），所以不搬家的误差就是那 4.6cm —— 比深度自身的 ±10~20cm 噪声还小。
+            'body_frame': 'camera_camera_left',
+            'color_topic': '',
+            'odom_topic': '/camera/camera/vio_100hz',
+            'odom_type': 'posestamped',
+            'odom_stamp_from_arrival': True,
+            'pose_tolerance_s': 0.05,
+        }],
+        condition=LaunchConfigurationEquals('map_source', 'vision'),
     )
 
     # ── 8. 作业交底语音播报:网页点场景 → /rl_briefing/play → 播 wav ────────
@@ -376,9 +537,13 @@ def generate_launch_description():
         tf_cam_rgb,
         slam,
         lidar_data_node,
+        fake_lidar_data,
         bridge,
         bridge_ws,
         rosbridge,
-        recorder,
+        stereo,
+        recorder_camera,
+        recorder_lidar,
+        recorder_vision,
         briefing,
     ])

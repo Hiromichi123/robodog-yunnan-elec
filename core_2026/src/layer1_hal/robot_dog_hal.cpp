@@ -71,6 +71,9 @@ RobotDogHAL::RobotDogHAL() : Node("robot_dog_hal_node") {
     this->declare_parameter<std::string>("lidar_pose_topic",  "/lidar_data");
     this->declare_parameter<std::string>("cmd_state_topic",   "/rl_real/cmd_state");
 
+    this->declare_parameter<std::string>("heartbeat_topic", "/rl_real/heartbeat");
+    this->declare_parameter<std::string>("posture_topic", "/rl_real/posture");
+
     // ── 任务参数 ────────────────────────────────────────────────────
     // 等命令终态的超时。注意 getup 在控制器里是 1s 预起身 + 2s 起身 = 3s，
     // locomotion 要等起身插值跑完（percent_getup>=1）才能进，所以都要留余量。
@@ -89,6 +92,11 @@ RobotDogHAL::RobotDogHAL() : Node("robot_dog_hal_node") {
     // check_stand 走命令生命周期，正常几十毫秒就回；给 5s 是因为小脑那边要
     // 实打实读一遍电机零位 + IMU（CheckMotorInitPosition）。
     this->declare_parameter<double>("check_stand_timeout_s", 5.0);
+    // 起立前电机可控性探针（probe_motors）的等终态超时。小脑异步执行约 2s，
+    // 给 15s 余量（照小脑 CMD_STATE_PROTOCOL §6 的超时表）。
+    this->declare_parameter<double>("probe_motors_timeout_s", 15.0);
+    // 进入 RL 前站姿校验（check_standing）的等终态超时。同步返回，给 3s。
+    this->declare_parameter<double>("check_standing_timeout_s", 3.0);
     // 起立后的稳定等待：从**发 getup 起算**补足到这个时长。getup 自身约 3s
     // （1s 预起身 + 2s 起身），所以实际是 DONE 后再等约 7s。这是"状态码确认"
     // 之外的第二道保险，给狗留够真的站稳的时间，之后才允许进 RL。
@@ -128,6 +136,8 @@ RobotDogHAL::RobotDogHAL() : Node("robot_dog_hal_node") {
     forward_duration_s_   = this->get_parameter("forward_duration_s").as_double();
     forward_vx_           = this->get_parameter("forward_vx").as_double();
     check_stand_timeout_s_  = this->get_parameter("check_stand_timeout_s").as_double();
+    probe_motors_timeout_s_ = this->get_parameter("probe_motors_timeout_s").as_double();
+    check_standing_timeout_s_ = this->get_parameter("check_standing_timeout_s").as_double();
     stand_settle_s_         = this->get_parameter("stand_settle_s").as_double();
     transition_settle_s_    = this->get_parameter("transition_settle_s").as_double();
     precondition_timeout_s_ = this->get_parameter("precondition_timeout_s").as_double();
@@ -163,6 +173,15 @@ RobotDogHAL::RobotDogHAL() : Node("robot_dog_hal_node") {
         [this](const std_msgs::msg::String::SharedPtr msg) {
             RobotDogHAL::cmd_state_cb(msg);
         });
+
+    // 原生小脑持续推送状态，不再依赖另一个桥轮询 status。
+    // heartbeat 带 state，posture 带 fsm 和 gamepad_override。
+    heartbeat_sub_ = this->create_subscription<std_msgs::msg::String>(
+        this->get_parameter("heartbeat_topic").as_string(), 10,
+        [this](const std_msgs::msg::String::SharedPtr msg) { protocol_state_cb(msg); });
+    posture_sub_ = this->create_subscription<std_msgs::msg::String>(
+        this->get_parameter("posture_topic").as_string(), 10,
+        [this](const std_msgs::msg::String::SharedPtr msg) { protocol_state_cb(msg); });
 
     // 订阅 check_stand 的细节结果。注意它**不在** cmd_state 生命周期里，
     // 所以不能用来等终态，只用来把 reason/motors/imu 写进日志。
@@ -206,7 +225,18 @@ bool RobotDogHAL::is_gamepad_override() const {
 void RobotDogHAL::publish_velocity(Velocity& velocity) {
     auto msg = geometry_msgs::msg::Twist();
     msg.linear.x  = velocity.get_vx();
-    msg.linear.y  = velocity.get_vy();
+    // ── 构型决定（2026-10-03）：轮足横向(vy)精度不足、运动中微调不可靠 ——
+    // **常规速度通道不发 y**。Velocity 的 y 字段、任务层的平移参数都保留着
+    // （以后要用）；将来真需要横向移动时，在那个场景的专属方法里另写显式
+    // vy 发布，不要从这条常规通道恢复透传。横向偏差由 goto 的航向式控制律
+    // 消化（见 dog_plan_executor.cpp 的 do_goto）。
+    const float vy_cmd = velocity.get_vy();
+    if (vy_cmd < -1e-3f || vy_cmd > 1e-3f) {
+        RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                             "命令含 vy=%.3f，本构型常规通道禁 y，已按 0 发送",
+                             static_cast<double>(vy_cmd));
+    }
+    msg.linear.y  = 0.0f;
     msg.angular.z = velocity.get_vyaw();
     // vz/vpitch/vroll ignored for ground robot
     cmd_vel_pub_->publish(msg);
@@ -428,6 +458,16 @@ void RobotDogHAL::dog_state_cb(const std_msgs::msg::String::SharedPtr msg) {
     if (has_gamepad) gamepad_override_ = gamepad;
 }
 
+void RobotDogHAL::protocol_state_cb(const std_msgs::msg::String::SharedPtr msg) {
+    std::string state, gamepad;
+    if (!json_get_str(msg->data, "fsm", state)) json_get_str(msg->data, "state", state);
+    if (state.rfind("RLFSMState", 0) != 0) return;
+    const bool has_gamepad = json_get_str(msg->data, "gamepad_override", gamepad);
+    std::lock_guard<std::mutex> lock(state_mutex_);
+    current_fsm_state_ = state;
+    if (has_gamepad) gamepad_override_ = (gamepad == "true");
+}
+
 void RobotDogHAL::cmd_state_cb(const std_msgs::msg::String::SharedPtr msg) {
     std::string cmd, phase, state;
     int code = -1;
@@ -501,6 +541,11 @@ double RobotDogHAL::timeout_for_cmd(const std::string& cmd) const {
         return getdown_timeout_s_;
     if (cmd == "check_stand" || cmd == "stand_check" || cmd == "check")
         return check_stand_timeout_s_;
+    // 起立前探针 / 进 RL 前站姿校验：本版由 run_probe_motors / run_check_standing
+    // 直接带超时调用，不经 transition_to；这两行只是让本表与小脑 §6 超时表一致。
+    if (cmd == "probe_motors" || cmd == "probe") return probe_motors_timeout_s_;
+    if (cmd == "check_standing" || cmd == "standingcheck" || cmd == "standing_check")
+        return check_standing_timeout_s_;
     // vel_stop 在控制器里 target 是 null：收到即完成（0→2），不该等满 8s。
     // 不单独给值的话会掉到下面的兜底 —— 闭环运动收尾时每一步白等 8 秒。
     if (cmd == "vel_stop" || cmd == "hold") return 3.0;
@@ -511,14 +556,16 @@ void RobotDogHAL::check_stand_result_cb(const std_msgs::msg::String::SharedPtr m
     // 报文是内嵌 JSON 字符串（小脑 web_bridge publishCheckStandResult）：
     //   {"ready":true,"motors_ready":true,"imu_ready":true,"reason":""}
     // 只用来打日志；通过与否以 cmd_state 的状态码为准（见 run_check_stand）。
-    std::string ready, motors, imu, reason;
+    std::string ready, motors, imu, can, reason;
     json_get_str(msg->data, "ready", ready);
     json_get_str(msg->data, "motors_ready", motors);
     json_get_str(msg->data, "imu_ready", imu);
+    json_get_str(msg->data, "can_ready", can);
     json_get_str(msg->data, "reason", reason);
 
     std::string detail = "motors_ready=" + (motors.empty() ? std::string("?") : motors)
-                       + " imu_ready="    + (imu.empty()    ? std::string("?") : imu);
+                       + " imu_ready="    + (imu.empty()    ? std::string("?") : imu)
+                       + " can_ready="    + (can.empty()    ? std::string("?") : can);
     if (!reason.empty()) detail += " reason=\"" + reason + "\"";
 
     {
@@ -533,6 +580,7 @@ bool RobotDogHAL::run_check_stand(double timeout_sec) {
     {
         std::lock_guard<std::mutex> lock(check_stand_mutex_);
         check_stand_detail_.clear();
+        check_stand_error_.clear();
     }
 
     // 走 /rl_real/command（和 ws_demo.py 的 send_action("check_stand") 一致），
@@ -568,6 +616,10 @@ bool RobotDogHAL::run_check_stand(double timeout_sec) {
     }
 
     if (!got_terminal) {
+        {
+            std::lock_guard<std::mutex> lock(check_stand_mutex_);
+            check_stand_error_ = "自检通信超时：未收到小脑 cmd_state 终态，请检查底层服务与 DDS 链路";
+        }
         RCLCPP_ERROR(this->get_logger(),
                      "[RobotDogHAL] ✗ check_stand 触发 %d 次、共 %.1fs 都没收到终态 —— "
                      "不可站立。桥在跑吗？cmd_state 话题有数据吗？（当前 FSM=%s）",
@@ -582,6 +634,11 @@ bool RobotDogHAL::run_check_stand(double timeout_sec) {
         code = pending_code_;
     }
     if (code != 2) {
+        {
+            std::lock_guard<std::mutex> lock(check_stand_mutex_);
+            check_stand_error_ = "小脑拒绝自检（code=" + std::to_string(code) + "）";
+            if (!check_stand_detail_.empty()) check_stand_error_ += "：" + check_stand_detail_;
+        }
         RCLCPP_ERROR(this->get_logger(),
                      "[RobotDogHAL] ✗ check_stand 未通过（code=%d）—— 不可站立", code);
         return false;
@@ -597,6 +654,42 @@ bool RobotDogHAL::run_check_stand(double timeout_sec) {
                 "[RobotDogHAL] ✓ check_stand 通过（第 %d 次触发拿到结果）%s",
                 attempt, suffix.c_str());
     return true;
+}
+
+bool RobotDogHAL::run_probe_motors(double timeout_sec) {
+    // 起立前门禁之二：小脑 getup 处理要求 motor_manager.hasProbeResults() &&
+    // areAllMotorsProbedOk()（rl_real_JXG.cpp 的 getup 分支），而探针结果在
+    // 每次趴下（Passive::Enter）都被 invalidateProbeResults() 作废 —— 所以每次
+    // 起立前都必须重新跑一遍探针，和 check_stand 一样不跨趴下周期。
+    //
+    // **单发一次**：小脑对 seq==0 的同名命令有 1.2s 去重、探针自身有
+    // probe_running_ 互斥，切片重发会被 REJECTED 误判成"探针失败"。探针异步
+    // 约 2s，中途只发 EXECUTING(1)——本类的 cmd_state_cb 只认 code>=2，自动忽略，
+    // 所以 wait_for_command_done 会一直等到真正的 DONE(2)/FAILED(3)/REJECTED(4)。
+    RCLCPP_INFO(this->get_logger(), "[RobotDogHAL] 起立前电机可控性探针（probe_motors）...");
+    request_fsm_transition("probe_motors");
+    if (wait_for_command_done(timeout_sec)) {
+        RCLCPP_INFO(this->get_logger(), "[RobotDogHAL] ✓ 探针通过：16 台电机全部可控");
+        return true;
+    }
+    RCLCPP_ERROR(this->get_logger(),
+                 "[RobotDogHAL] ✗ 探针未通过（存在不可控/无响应电机，或超时）—— 不可起立");
+    return false;
+}
+
+bool RobotDogHAL::run_check_standing(double timeout_sec) {
+    // 进入 RL 前的站姿门禁：小脑 locomotion 处理要求 stand_check_done_ &&
+    // stand_check_ok_（rl_real_JXG.cpp 的 locomotion 分支），同样在每次趴下时
+    // 作废，所以每次进 RL 前都要重新校验。同步返回，单发一次即可。
+    RCLCPP_INFO(this->get_logger(), "[RobotDogHAL] 进入 RL 前站姿校验（check_standing）...");
+    request_fsm_transition("check_standing");
+    if (wait_for_command_done(timeout_sec)) {
+        RCLCPP_INFO(this->get_logger(), "[RobotDogHAL] ✓ 站姿校验通过");
+        return true;
+    }
+    RCLCPP_ERROR(this->get_logger(),
+                 "[RobotDogHAL] ✗ 站姿校验未通过（关节偏离站姿/未静止）—— 不可进入 RL");
+    return false;
 }
 
 bool RobotDogHAL::transition_to(const std::string& cmd,

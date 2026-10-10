@@ -149,6 +149,11 @@ install(TARGETS dog_node DESTINATION lib/${PROJECT_NAME})
 if(mavros_msgs_FOUND)
   install(TARGETS quad_node car_mission_node test_max_curvature DESTINATION lib/${PROJECT_NAME})
 endif()
+# 假 /lidar_data（无雷达台架联调，见 scripts/fake_lidar_data.py 的注释）。
+# RENAME 去掉 .py：装出来是 lib/core_2026/fake_lidar_data，和别的节点一样用短名。
+install(PROGRAMS scripts/fake_lidar_data.py
+        DESTINATION lib/${PROJECT_NAME}
+        RENAME fake_lidar_data)
 install(DIRECTORY launch/ DESTINATION share/${PROJECT_NAME}/)
 
 ament_package()

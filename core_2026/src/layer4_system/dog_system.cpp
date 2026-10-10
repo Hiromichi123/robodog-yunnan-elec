@@ -171,6 +171,17 @@ bool DogSystem::pre_flight_checks() {
         return false;
     }
 
+    // ── 第 1.5 步：电机可控性探针（起立门禁之二，小脑 v7.5.1 起强制）──
+    // 小脑 getup 门禁除 check_stand 外还要求探针通过；探针结果每次趴下即作废，
+    // 所以每次起立前都要重跑。探针期间会转轮（正常），跑完小脑自动清超速锁存。
+    // 不通过就中止 —— 狗仍趴着，本就安全，不发任何安全动作。
+    RCLCPP_INFO(hal_->get_logger(), "[PreFlight] 请求起立前电机可控性探针 probe_motors...");
+    if (!hal_->run_probe_motors(hal_->get_probe_motors_timeout_s())) {
+        RCLCPP_ERROR(hal_->get_logger(),
+                     "[PreFlight] 电机探针未通过 —— 不可起立，任务中止（狗仍趴着，无需处置）");
+        return false;
+    }
+
     // ── 人工闸门：起立前确认现场安全（照 ~/dog_step_test.py）──────
     if (!hal_->wait_for_enter(
             "链路 OK，check_stand 通过。确认狗周围安全后按回车发起立")) {

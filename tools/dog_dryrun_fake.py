@@ -11,6 +11,10 @@
   它会照着真小脑的 FSM 规则拒绝非法切换（比如趴着就 getdown），这样
   dog_node 的"前置判断"那一关也能被真实验证到。
 
+  查询型命令 check_stand / probe_motors / check_standing 不动状态，分别回
+  check_stand_result 或直接 DONE —— 对应小脑 v7.5.1 的起立前探针门禁与
+  进入 RL 前站姿门禁，dog_node 会在 getup/locomotion 前自动发它们。
+
 配 dog_node 一起跑（**所有 /rl_real/* 都要 remap 走，别碰真狗那一路**）。
 本脚本在仓库 tools/ 下；板上完整路径
 ~/ros2_ws/src/robodog-yunnan-elec/tools/dog_dryrun_fake.py
@@ -63,6 +67,17 @@ CMD_TO_STATE = {
     'hold':       None,
     'zero':       None,
     'check_stand': None,                 # 查询型：不改状态
+    'probe_motors': None,                # 查询型（起立前门禁，v7.5.1 新增）：不改状态
+    'probe':        None,
+    'check_standing': None,              # 查询型（进 RL 前门禁，v7.5.1 新增）：不改状态
+    'standingcheck': None,
+}
+
+# 每条命令的模拟处理耗时覆盖（秒）。真小脑的探针是异步 ~2s，给长一点好把
+# "等终态"这条路径真实地走一遍（0.5s 太短，看不出上层有没有提前放弃）。
+LATENCY_OVERRIDE = {
+    'probe_motors': 2.0,
+    'probe':        2.0,
 }
 
 # 合法切换的前置状态（空 = 无条件）。照真小脑：趴着才能起立，站着才能进 RL/趴下。
@@ -134,7 +149,7 @@ class FakeCerebellum(Node):
             self.get_logger().warn(f'→ REJECTED 未知命令 {cmd}')
             return
 
-        self.pending.append((time.monotonic() + self.latency,
+        self.pending.append((time.monotonic() + LATENCY_OVERRIDE.get(cmd, self.latency),
                              (seq, cmd, code, 'DONE', target, target or self.state)))
 
     def tick(self):

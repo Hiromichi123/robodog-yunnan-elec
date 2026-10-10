@@ -41,6 +41,16 @@ void DogMissionExecutor::on_takeoff() {
         return;
     }
 
+    // ── 进入 RL 门禁：站姿校验（小脑 v7.5.1 起强制）──────────────────────
+    // 小脑 locomotion 处理要求 stand_check_done_ && stand_check_ok_，每次趴下即
+    // 作废，所以每次进 RL 前都要重跑。放在回车闸门之后、发 locomotion 之前，
+    // 让校验结果尽量新鲜。
+    RCLCPP_INFO(logger_, "[TAKEOFF] 站姿校验（进入 RL 的门禁）...");
+    if (!dog_hal_.run_check_standing(dog_hal_.get_check_standing_timeout_s())) {
+        fail_and_go_down("站姿校验未通过（关节偏离站姿或未静止）");
+        return;
+    }
+
     RCLCPP_INFO(logger_, "[TAKEOFF] 进入 RL 运动模式...");
     if (!dog_hal_.transition_to("locomotion", "RLFSMStateRLLocomotion",
                                 "RLFSMStateGetUp",

@@ -96,6 +96,27 @@ public:
     [[nodiscard]] bool run_check_stand(double timeout_sec);
 
     /**
+     * 起立前的电机可控性探针（小脑 getup 门禁之二，v7.5.1 起强制）：
+     * 往 /rl_real/command 发 probe_motors，等 cmd_state 终态。
+     *   DONE(2)                    = 16 台全部可控，可以起立
+     *   FAILED(3)/REJECTED(4)/超时 = 存在不可控/无响应电机，不可起立
+     * 小脑侧异步执行约 2s（中途只发 EXECUTING(1)，本类只认 code>=2，自动忽略）；
+     * 且对同名命令有 1.2s 去重、探针自身有 probe_running_ 互斥 —— 必须**单发一次**，
+     * 不能像 run_check_stand 那样切片重发（重发会被 REJECTED 误判成失败）。
+     * 小脑只允许 Passive 态执行，调用方负责保证当前状态。
+     */
+    [[nodiscard]] bool run_probe_motors(double timeout_sec);
+
+    /**
+     * 进入 RL 前的站姿校验（小脑 locomotion 门禁，v7.5.1 起强制）：
+     * 往 /rl_real/command 发 check_standing，等 cmd_state 终态。
+     *   DONE(2)     = 12 腿关节都在站姿邻域，可进 RL
+     *   REJECTED(4) = 偏离站姿/未静止，不可进 RL
+     * 同步返回，单发一次即可。只在站立态有意义（行走中关节天然偏离站姿）。
+     */
+    [[nodiscard]] bool run_check_standing(double timeout_sec);
+
+    /**
      * 一次带把关的状态切换，四道依次过：
      *   1. 前置判断：等当前 FSM 状态变成 require_state（空串=跳过）
      *   2. 发命令，等 cmd_state 终态（只认 DONE(2)）
@@ -155,14 +176,24 @@ public:
 
     // ---- 状态切换把关参数 ----
     [[nodiscard]] double get_check_stand_timeout_s() const { return check_stand_timeout_s_; }
+    /** 起立前电机探针的等终态超时（小脑异步约 2s，给 15s 余量） */
+    [[nodiscard]] double get_probe_motors_timeout_s() const { return probe_motors_timeout_s_; }
+    /** 进入 RL 前站姿校验的等终态超时 */
+    [[nodiscard]] double get_check_standing_timeout_s() const { return check_standing_timeout_s_; }
     /** 起立后的稳定等待（从发 getup 起算），默认 10s —— 双重保险的第二道 */
     [[nodiscard]] double get_stand_settle_s() const        { return stand_settle_s_; }
     /** 其他状态切换的默认稳定延迟，默认 1s */
     [[nodiscard]] double get_transition_settle_s() const   { return transition_settle_s_; }
 
+    [[nodiscard]] std::string get_check_stand_error() const {
+        std::lock_guard<std::mutex> lock(check_stand_mutex_);
+        return check_stand_error_;
+    }
+
 private:
     void lidar_cb(const ros2_tools::msg::LidarPose::SharedPtr msg);
     void dog_state_cb(const std_msgs::msg::String::SharedPtr msg);
+    void protocol_state_cb(const std_msgs::msg::String::SharedPtr msg);
     void cmd_state_cb(const std_msgs::msg::String::SharedPtr msg);
     void check_stand_result_cb(const std_msgs::msg::String::SharedPtr msg);
 
@@ -178,6 +209,9 @@ private:
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr      dog_state_sub_;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr      cmd_state_sub_;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr      check_stand_result_sub_;
+
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr heartbeat_sub_;
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr posture_sub_;
 
     // 状态
     mutable std::mutex state_mutex_;
@@ -204,6 +238,7 @@ private:
     // check_stand 细节（来自 check_stand_result 帧），只用于日志
     mutable std::mutex check_stand_mutex_;
     std::string        check_stand_detail_;
+    std::string        check_stand_error_;
 
     // 人工闸门：每次切换前是否等回车（照 ~/dog_step_test.py）
     bool   confirm_transitions_{true};
@@ -213,6 +248,8 @@ private:
 
     // 状态切换把关参数
     double check_stand_timeout_s_{5.0};
+    double probe_motors_timeout_s_{15.0};   // 起立前电机探针（小脑异步约 2s）
+    double check_standing_timeout_s_{3.0};  // 进 RL 前站姿校验
     double stand_settle_s_{10.0};
     double transition_settle_s_{1.0};
     double precondition_timeout_s_{5.0};

@@ -38,7 +38,16 @@ public:
         // 不是"朝前下方45°"（那是 +45°，实测对不上：原始姿态反推为 −139.3°，
         // 与 −135° 逐项吻合）。
         this->declare_parameter<double>("mount_pitch", -3.0 * M_PI / 4.0);
-        this->declare_parameter<double>("mount_yaw", 0.0);
+        // **2026-10-05 实测修正：mount_yaw 由 0 改成 π。**
+        // 症状：goto 时狗沿车头走、上报位姿却反着跑（位移方向与上报 yaw 差
+        // ≈180°），即上报的车头方向是物理车头的背面。也就是当初定的这个
+        // 安装变换少了一个绕 base_link z 的 180°。
+        // 这个 yaw **静态测不出来**：Point-LIO 的 camera_init 世界系 yaw 由
+        // 启动时雷达姿态定，而雷达自己看不见绕 z 的安装角 —— 当年"静止姿态
+        // 反推"那步把 yaw 假设成 0，是循环论证，这一项从来没被验过。
+        // 注意：改的是**旋转整体**（位置会跟着转到真实的 base 原点），
+        // 不是只给发布的 yaw 加 180 —— 那样位置和朝向会各说各话。
+        this->declare_parameter<double>("mount_yaw", M_PI);
         // 获取参数值
         using_gazebo_ = this->get_parameter("use_simulation").as_bool();
         std::string sim_topic = this->get_parameter("simulation_odom_topic").as_string();
@@ -158,7 +167,7 @@ private:
     bool using_gazebo_; // 仿真开关
     bool   apply_mount_ = true;   // 是否把位姿从雷达系换算到车体系
     double mount_x_ = 0.286, mount_y_ = 0.0, mount_z_ = 0.0;
-    double mount_roll_ = 0.0, mount_pitch_ = -3.0 * M_PI / 4.0, mount_yaw_ = 0.0;
+    double mount_roll_ = 0.0, mount_pitch_ = -3.0 * M_PI / 4.0, mount_yaw_ = M_PI;
     
     rclcpp::Publisher<ros2_tools::msg::LidarPose>::SharedPtr lidar_pub;
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub;

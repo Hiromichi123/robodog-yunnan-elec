@@ -76,6 +76,10 @@ Livox MID360 ──livox_ros_driver2──▶ Point-LIO ──/aft_mapped_to_ini
   （getup 10s、其余 1s）。非法切换被拦下并上报，不会盲发。
 - `passive` 已全链路移除：趴下一律 `getdown`（2s 平滑）。小脑的 ROS 接口
   2026-10-01 起直接 `REJECTED` passive（手柄 P 键与内置 Web 调试台还保留）。
+- **速度构型（2026-10-03）：常规控制只用 x + yaw** —— 轮足横向精度不足，HAL 层
+  统一禁 y（含 vy 的命令归零 + 1s 限流告警）；goto 改为**航向式控制律**：先对准
+  航向再前进，移动中的横向偏差由转向消化。任务层 vy 参数保留、供以后显式横向
+  场景；web 摇杆等直连小脑的通道不受此约束（显式手动横向）。
 - `dog_web.launch.py` 里 `confirm_transitions:=false` 是**把终端闸门换成网页闸门**，
   不是拆掉闸门 —— 非 tty 环境（launch/systemd/重定向）不走它会按安全策略直接中止。
 
