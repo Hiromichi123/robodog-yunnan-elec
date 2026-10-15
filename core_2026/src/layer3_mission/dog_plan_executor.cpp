@@ -6,41 +6,16 @@
 #include <thread>
 
 #include "layer0_common/velocity.hpp"
+#include "layer3_mission/goto_control.hpp"
 
 namespace mission {
 
 namespace {
 
-// ── goto 闭环参数（航向式控制律，2026-10-03 构型收敛）─────────────────────
-// 轮足横向(vy)精度不足、运动中微调不可靠 → 横向偏差不靠 vy，靠**航向**消化：
-//   ① 对准：bearing 误差大 → 原地转（"消除航向误差再移动"）；
-//   ② 前进：bearing 微调 —— 横向偏差随目标方位角变化被 yaw 连续吃掉；
-//   ③ 收尾：位置进容差后平移停，原地转到步内目标航向。
-// 全程不构造 vy（HAL 层也统一禁 y，见 robot_dog_hal.cpp）。
-// 增益沿用 dog_nav_demo/goto_goal.py 的实测值量级，要调在现场对着实测改。
-constexpr double kGotoKpVx        = 0.55;   // 距离→vx（原 kp_xy 的量级）
-constexpr double kGotoKpYaw       = 0.75;   // 航向误差→wz（bearing 与终值航向共用）
-constexpr double kGotoMaxVx       = 0.25;   // m/s
-constexpr double kGotoMaxYawRate  = 0.45;   // rad/s
-constexpr double kGotoAlignThresh = 0.35;   // rad，bearing 误差超它就原地转、不前进
-constexpr double kGotoTolXy       = 0.20;   // m，到位判据
-constexpr double kGotoTolYaw      = 0.15;   // rad
-// 原双轴 P 的两个参数已退役，数值留档供以后"显式横向"场景参考：
-//   kGotoKpXy=0.55（横向同增益）、kGotoMaxVy=0.18 m/s（横向限幅）
+// 到点控制律和容差集中在 goto_control.hpp，普通点不校准终点航向。
 constexpr double kPoseTimeoutS = 1.0;   // 位姿多久没更新就停
 constexpr int    kStopFrames  = 5;      // 到位后连发几帧零速再 vel_stop
 constexpr double kControlHz   = 20.0;
-
-// 不用 M_PI：glibc 的扩展，`-std=c++17` 下可能不给（flight_controller.cpp 用的是
-// gnu++17 才没事，这里不想依赖那个）。
-constexpr double kTwoPi = 6.283185307179586476925286766559;
-
-double clamp(double v, double lo, double hi) { return v < lo ? lo : (v > hi ? hi : v); }
-
-/** 角度归一化到 (-π, π]，与 flight_controller.cpp 的 wrap_pi 一致。 */
-double wrap_pi(double a) {
-    return std::remainder(a, kTwoPi);
-}
 
 double seconds_since(const std::chrono::steady_clock::time_point& t0) {
     return std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
@@ -149,7 +124,8 @@ DogPlanExecutor::Outcome DogPlanExecutor::dispatch(const MissionStep& st, std::s
         case StepType::GetUp:      out = do_getup(st);      break;
         case StepType::Locomotion: out = do_locomotion(st); break;
         case StepType::Move:       out = do_move(st);       break;
-        case StepType::Goto:       out = do_goto(st);       break;
+        case StepType::Goto:
+        case StepType::GotoPose:   out = do_goto(st);       break;
         case StepType::Wait:       out = do_wait(st);       break;
         case StepType::GetDown:    out = do_getdown(st);    break;
     }
@@ -180,18 +156,17 @@ DogPlanExecutor::Outcome DogPlanExecutor::do_check_stand(const MissionStep& st) 
 DogPlanExecutor::Outcome DogPlanExecutor::do_getup(const MissionStep& st) {
     const double settle = st.settle_s >= 0.0 ? st.settle_s : hal_.get_stand_settle_s();
 
-    // ── 起立门禁之一：电机可控性探针（小脑 v7.5.1 起强制）───────────────
-    // 小脑 getup 处理要求 hasProbeResults() && areAllMotorsProbedOk()，探针结果
-    // 每次趴下即作废，所以每次起立前都要重跑。探针只允许 Passive 态，所以这里
-    // 先看当前状态是不是 Passive；不是（比如狗已站着）就跳过，维持原来的失败行为。
-    if (hal_.get_current_fsm_state() == "RLFSMStatePassive") {
-        if (!hal_.run_probe_motors(hal_.get_probe_motors_timeout_s())) {
-            last_error_ = hal_.is_gamepad_override()
-                              ? "起立前电机探针未通过（手柄正抢着控制权）"
-                              : "起立前电机探针未通过（存在不可控/无响应电机）—— 不可起立";
-            return Outcome::Failed;
-        }
+    // 先等 Passive，再单发探针；Unknown 不能跳过探针后直接起立。
+    if (!hal_.wait_for_fsm_state("RLFSMStatePassive", hal_.get_precondition_timeout_s())) {
+        last_error_ = "起立前状态未确认趴下 —— 不发送探针或起立";
+        return Outcome::Failed;
     }
+    if (abort_) { last_error_ = "操作员急停"; return Outcome::Failed; }
+    if (!hal_.run_probe_motors(hal_.get_probe_motors_timeout_s())) {
+        last_error_ = "起立前电机探针未回复成功（失败、拒绝或超时）—— 不可起立";
+        return Outcome::Failed;
+    }
+    if (abort_) { last_error_ = "操作员急停"; return Outcome::Failed; }
 
     // 前置：狗必须是趴着的。已经站着时这一步会失败 —— 这是对的，
     // 硬发一次 getup 只会被 FSM 拒，不如把"当前状态"如实报出来。
@@ -268,13 +243,21 @@ DogPlanExecutor::Outcome DogPlanExecutor::do_move(const MissionStep& st) {
 }
 
 DogPlanExecutor::Outcome DogPlanExecutor::do_goto(const MissionStep& st) {
-    RCLCPP_INFO(logger_, "[任务] 到点 (%.2f, %.2f) 航向 %.2f rad，总超时 %.1fs",
-                st.x, st.y, st.yaw, st.goto_timeout_s);
+    const bool require_yaw = st.type == StepType::GotoPose;
+    RCLCPP_INFO(logger_, "[任务] %s，总超时 %.1fs", step_label(st).c_str(), st.goto_timeout_s);
 
     const auto t0 = std::chrono::steady_clock::now();
     auto last_log = t0;
     rclcpp::Rate rate(kControlHz);
     int arrived_frames = 0;
+    GotoController controller;  // 每个航点独立历史，不继承上一点的D项
+    const auto initial_config = hal_.get_goto_config();
+    auto tolerance_revision = initial_config.tolerance_revision;
+    RCLCPP_INFO(logger_, "[任务] 航向PD：45度内边走边转，Kp=%.2f Ki=0 Kd=%.2f，"
+                        "wz上限=%.2f D上限=%.2f rad/s，D滤波=%.2fs",
+                initial_config.config.kp_yaw, initial_config.config.kd_yaw,
+                initial_config.config.max_yaw_rate, initial_config.config.derivative_limit,
+                kGotoRateFilterTau);
 
     while (rclcpp::ok()) {
         if (abort_) {
@@ -296,56 +279,71 @@ DogPlanExecutor::Outcome DogPlanExecutor::do_goto(const MissionStep& st) {
             return Outcome::Failed;
         }
 
-        const DroneState s = hal_.get_state();
-        const double dx   = st.x - s.x;
-        const double dy   = st.y - s.y;
-        const double dist = std::hypot(dx, dy);
-        const double yaw_err = wrap_pi(st.yaw - s.yaw);
+        const auto snapshot = hal_.get_navigation_snapshot();
+        const double sample_age = std::chrono::duration<double>(
+            std::chrono::steady_clock::now() - snapshot.received_at).count();
+        if (!snapshot.available || sample_age < 0.0 || sample_age > kPoseTimeoutS) {
+            last_error_ = "导航快照不可用或已超时 —— 已停速";
+            publish_zero_velocity();
+            return Outcome::Failed;
+        }
+        const DroneState& s = snapshot.state;
+        const double sample_time = std::chrono::duration<double>(
+            snapshot.received_at.time_since_epoch()).count();
+        const auto tuning = hal_.get_goto_config();
+        if (tuning.tolerance_revision != tolerance_revision) {
+            arrived_frames = 0;
+            tolerance_revision = tuning.tolerance_revision;
+        }
+        const auto control = controller.update(st, s.x, s.y, s.yaw,
+                                               snapshot.sample_id, sample_time, tuning.config);
+        if (!control.valid) {
+            last_error_ = "导航位姿或目标含无效数值 —— 已停速";
+            publish_zero_velocity();
+            return Outcome::Failed;
+        }
+        const double dist = control.distance;
 
-        if (dist <= kGotoTolXy && std::abs(yaw_err) <= kGotoTolYaw) {
+        if (control.arrived) {
             // 到位：连发几帧零速（桥自己 0.5s 也会归零，但别等那半秒）
             Velocity zero(0.0f, 0.0f, 0.0f, 0.0f);
             hal_.publish_velocity(zero);
             if (++arrived_frames >= kStopFrames) {
-                RCLCPP_INFO(logger_, "[任务] 到点：距离 %.3f m，航向误差 %.3f rad",
-                            dist, yaw_err);
+                if (require_yaw) {
+                    RCLCPP_INFO(logger_, "[任务] 带航向到点：距离 %.3f m，航向误差 %.3f rad",
+                                dist, control.yaw_error);
+                } else {
+                    RCLCPP_INFO(logger_, "[任务] 位置到点：距离 %.3f m，不校准终点航向", dist);
+                }
                 stop_motion();
                 return Outcome::Ok;
             }
         } else {
             arrived_frames = 0;
 
-            // 航向式控制律（构型：只用 x + yaw，横向偏差由转向消化）——
-            //   bearing = 车→目标的方位角；bearing_err = bearing − 当前 yaw
-            const double bearing     = std::atan2(dy, dx);
-            const double bearing_err = wrap_pi(bearing - s.yaw);
-
-            double vx = 0.0, wz = 0.0;
-            if (dist <= kGotoTolXy) {
-                // ③ 位置已进容差、只差航向：平移停，原地转到终值航向
-                wz = clamp(kGotoKpYaw * yaw_err, -kGotoMaxYawRate, kGotoMaxYawRate);
-            } else if (std::abs(bearing_err) > kGotoAlignThresh) {
-                // ① 对准：航向误差太大不往前走，原地转
-                wz = clamp(kGotoKpYaw * bearing_err, -kGotoMaxYawRate, kGotoMaxYawRate);
-            } else {
-                // ② 前进 + bearing 微调：横向偏差随目标方位角变化被 yaw 吃掉。
-                //    只允许前进（cos 平滑减速）；冲过头时 bearing 翻转 ±π，
-                //    自动落回 ① 原地转回来，不需要额外的捕获半径分支。
-                vx = clamp(kGotoKpVx * dist * std::cos(bearing_err), 0.0, kGotoMaxVx);
-                wz = clamp(kGotoKpYaw * bearing_err, -kGotoMaxYawRate, kGotoMaxYawRate);
-            }
-
-            Velocity v(static_cast<float>(vx), 0.0f, 0.0f, static_cast<float>(wz));
+            Velocity v(static_cast<float>(control.vx), 0.0f, 0.0f,
+                       static_cast<float>(control.wz));
             fc_.fly_by_velocity(v);
 
             // 1 Hz 打一次距离/方位/航向误差：现场查"走歪了"只能靠这个
             if (seconds_since(last_log) >= 1.0) {
                 last_log = std::chrono::steady_clock::now();
                 RCLCPP_INFO(logger_,
-                            "[任务] goto: 现在 (%.2f, %.2f, %.2f) → 目标 (%.2f, %.2f, %.2f)，"
-                            "距离 %.2f m，方位误差 %.2f rad，终值航向误差 %.2f rad，已走 %.1fs",
-                            s.x, s.y, s.yaw, st.x, st.y, st.yaw, dist, bearing_err, yaw_err,
-                            seconds_since(t0));
+                            "[任务] %s: 现在 (%.2f, %.2f, %.2f) → 目标 (%.2f, %.2f)，"
+                            "距离 %.2f m，方位误差 %.2f rad，已走 %.1fs",
+                            to_string(st.type), s.x, s.y, s.yaw, st.x, st.y, dist,
+                            control.bearing_error, seconds_since(t0));
+                RCLCPP_INFO(logger_, "[任务] control: mode=%s vx=%.3f wz=%.3f "
+                                    "P=%.3f D=%.3f nav_yaw_rate=%.3f D_valid=%d "
+                                    "sample=%llu rx_age=%.3fs",
+                            goto_mode_name(control.mode), control.vx, control.wz,
+                            control.p_term, control.d_term, control.estimated_yaw_rate,
+                            static_cast<int>(control.derivative_valid),
+                            static_cast<unsigned long long>(snapshot.sample_id), sample_age);
+                if (require_yaw) {
+                    RCLCPP_INFO(logger_, "[任务] 终值航向 %.2f rad，误差 %.2f rad",
+                                st.yaw, control.yaw_error);
+                }
             }
         }
 
@@ -505,7 +503,10 @@ std::string DogPlanExecutor::step_label(const MissionStep& st) const {
                           st.vx, st.vy, st.wz, st.duration_s);
             return buf;
         case StepType::Goto:
-            std::snprintf(buf, sizeof(buf), "到点 (%.2f, %.2f, %.2f)", st.x, st.y, st.yaw);
+            std::snprintf(buf, sizeof(buf), "位置到点 (%.2f, %.2f)", st.x, st.y);
+            return buf;
+        case StepType::GotoPose:
+            std::snprintf(buf, sizeof(buf), "带航向到点 (%.2f, %.2f, %.2f rad)", st.x, st.y, st.yaw);
             return buf;
         case StepType::Wait:
             std::snprintf(buf, sizeof(buf), "等待 %.1fs", st.duration_s);
@@ -535,7 +536,12 @@ std::string DogPlanExecutor::gate_prompt(const MissionStep& st) const {
             break;
         case StepType::Goto:
             std::snprintf(buf, sizeof(buf),
-                          "即将闭环前往 (%.2f, %.2f) 航向 %.2f rad。"
+                          "即将闭环前往 (%.2f, %.2f)，只判断位置，不校准终点航向。"
+                          "确认路线空旷后点「继续」", st.x, st.y);
+            break;
+        case StepType::GotoPose:
+            std::snprintf(buf, sizeof(buf),
+                          "即将闭环前往 (%.2f, %.2f)，到点后校准航向 %.2f rad。"
                           "确认路线空旷后点「继续」",
                           st.x, st.y, st.yaw);
             break;

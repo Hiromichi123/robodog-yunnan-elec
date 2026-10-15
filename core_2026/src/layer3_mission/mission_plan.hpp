@@ -15,7 +15,8 @@
  *             {"type":"getup","settle_s":10},
  *             {"type":"locomotion"},
  *             {"type":"move","vx":0.1,"vy":0.0,"wz":0.0,"duration_s":3.0},
- *             {"type":"goto","x":1.5,"y":0.5,"yaw":0.0},
+ *             {"type":"goto","x":1.5,"y":0.5},
+ *             {"type":"goto_pose","x":2.5,"y":0.5,"yaw":1.57},
  *             {"type":"wait","duration_s":5.0},
  *             {"type":"getdown"}]}
  *
@@ -29,7 +30,8 @@ enum class StepType {
     GetUp,        // 起立（Passive → GetUp）
     Locomotion,   // 进 RL 运动模式（GetUp → RLLocomotion）
     Move,         // 定速移动：vx/vy/wz × duration
-    Goto,         // 闭环到点 (x, y, yaw)
+    Goto,         // 位置到点 (x, y)，不校准终点航向
+    GotoPose,     // 带航向到点 (x, y, yaw)
     Wait,         // 原地等
     GetDown,      // 平滑趴下（RLLocomotion → GetDown）
 };
@@ -81,11 +83,11 @@ struct MissionStep {
     double wz{0.0};
     double duration_s{0.0};
 
-    // goto：世界系（Point-LIO 建图坐标系）
+    // goto / goto_pose：世界系（Point-LIO 建图坐标系）
     double x{0.0};
     double y{0.0};
-    double yaw{0.0};
-    double goto_timeout_s{60.0};  // 到点闭环的总超时
+    double yaw{0.0};              // 仅 goto_pose 使用，JSON 必须显式提供
+    double goto_timeout_s{120.0};  // 到点闭环的总超时
 };
 
 struct MissionPlan {

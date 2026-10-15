@@ -41,7 +41,8 @@
     {"type": "getup", "settle_s": 10},
     {"type": "locomotion"},
     {"type": "move", "vx": 0.1, "vy": 0.0, "wz": 0.0, "duration_s": 3.0},
-    {"type": "goto", "x": 1.5, "y": 0.5, "yaw": 0.0, "goto_timeout_s": 60},
+    {"type": "goto", "x": 1.5, "y": 0.5, "goto_timeout_s": 60},
+    {"type": "goto_pose", "x": 2.5, "y": 0.5, "yaw": 1.57, "goto_timeout_s": 60},
     {"type": "wait", "duration_s": 5.0},
     {"type": "getdown", "settle_s": 1}
   ]
@@ -66,13 +67,53 @@
 | `getup` | `settle_s` | 10 | ≤120；起立。前置：狗必须趴着 |
 | `locomotion` | — | — | 进 RL 运动模式。前置：狗必须已起立 |
 | `move` | `vx` `vy` `wz` `duration_s` | 0.1 / 0 / 0 / 3.0 | vx,vy ≤0.5、wz ≤1.0、duration>0 且 ≤300 |
-| `goto` | `x` `y` `yaw` `goto_timeout_s` | 1.0 / 0 / 0 / 60 | 坐标 ≤±50 m，超时 ≤300。**世界系**（见 §7） |
+| `goto` | `x` `y` `goto_timeout_s` | 网页 1.0 / 0 / 120 | 仅位置到点，距离 ≤0.4 m；坐标 ≤±50 m，超时 ≤300。**世界系**（见 §7） |
+| `goto_pose` | `x` `y` `yaw` `goto_timeout_s` | 网页 1.0 / 0 / 0 / 120 | 带航向到点，距离 ≤0.4 m 且航向误差 ≤0.5 rad；JSON 必须显式提供 yaw，范围 ±2π；坐标/超时限制同 goto |
 | `wait` | `duration_s` | 5 | ≥0 且 ≤300 |
 | `getdown` | `settle_s` | 1 | ≤120；平滑趴下（2s 插值） |
 
 **没有 `passive`。** 2026-09-29 用户定：passive 的卸力（kp=0、靠重力砸下去）不可靠，
 已从整条链路移除 —— 回趴下一律用 `getdown`。任务里也就不需要"急停步骤"，
 急停是任务级动作（`abort` 指令）。
+
+### 两类到点（2026-10-15）
+
+- 普通 `goto` 只按位置判断，进入 0.4 m 半径后连发 5 帧零速确认完成；不在终点调 yaw。
+- `goto_pose` 先到位置，再原地校准指定终点 yaw；两项容差同时满足连续 5 帧才完成。
+- 下一点开始执行（通过确认闸门）后，按**当前位置到新目标的方位**纠偏：位置未到时，方位误差绝对值 **≤45°（π/4，含边界）保持前进＋偏航微调，>45°才只转不走**。两类都不使用 vy。`goto_pose` 位置已到后的终值航向校准仍原地进行，不受此行进规则影响。
+- 前进速度 `min(0.40, 0.70×距离)×cos(方位误差)` m/s，偏角越大越慢；45°时远距离约0.283m/s。位置到位后直接零速，本版不保证接近0.4m边界前物理速度平滑刹停。
+- 转向为专用PD：Kp=0.45、Ki=0、Kd=0.12；D项限±0.15rad/s，总输出限±0.35rad/s。D取自导航yaw的最短角差/新样本接收时间差，0.10s低通，只滤导数、不滤输出。允许D抵消甚至反向P以制动；不积累积分、不使用慢反向斜坡。
+- 每个航点重置控制历史；20Hz控制循环复用同一定位样本时不重复差分。首帧或间隔不在[0.02,0.30]s内时按P-only重新建立导数基准。到位确认仍为5个控制周期，不是5个独立定位样本。
+- 以上是**待实机验证的保守初值**。导航yaw差分不是独立机体陀螺仪；接收时戳不是源采样时戳，PD不能修复SLAM源延迟或轴向错误。若两路航向反馈再次明显冲突，应停止并诊断反馈，不继续靠PID掩盖。
+- 旧任务 `type:"goto"` 即使带 yaw 也按普通位置点执行，yaw 被忽略，不自动转换类型。需要保留终点朝向时显式改为 `goto_pose`；网页普通点不再显示/导出 yaw，地图点击默认普通点。
+- 位置半径是 0.4 m：相邻目标若已在半径内会直接完成，不保证经过目标精确中心。
+
+### 网页实时调参（运行中生效）
+
+“任务状态”下的“点到点控制参数”提供8项滑条与数值输入；上节数值均为启动默认值，实际以服务读回为准。仅影响goto/goto_pose，不直接发速度，不影响定速move/手柄。首次升级需重启dog_node；之后滑动调参无需重编或重启。
+
+| 键 | 默认 | 范围 | 单位 |
+|---|---:|---:|---|
+| kp_vx | 0.70 | 0.10–2.00 | 1/s |
+| kp_yaw | 0.45 | 0.10–2.00 | 1/s |
+| kd_yaw | 0.12 | 0–0.50 | — |
+| max_vx | 0.40 | 0–0.50 | m/s |
+| max_yaw_rate | 0.35 | 0–1.00 | rad/s |
+| derivative_limit | 0.15 | 0–0.35 | rad/s |
+| tol_xy | 0.40 | 0.05–1.00 | m |
+| tol_yaw | 0.50 | 0.02–1.57 | rad，仅goto_pose |
+
+- 滑动最多约5Hz合并提交，狗端接受后在下一控制周期取新配置，网页回读才显示已确认。降低限速立即按新上限计算；容差变更重置到位累计，扩大容差可能让当前点提前完成。
+- 参数在同一dog_node进程内跨任务保留，**不持久化**；重启恢复默认。固定45°门限、Ki=0及滤波时间常数不开放。
+- 速度上限0不是急停：线速度0仍可转向，角速度0仍可前进。紧急情况用独立“停止（急停）”。允许范围不代表所有组合已实机验证。
+- 断线/服务不可用禁用输入，重连只读回当前值，不自动重放旧编辑。写超时显示“结果未知”，已在途请求无法撤回，只读恢复后才允许新操作。多客户端同键按后提交者生效，回读只代表读取当时配置。
+
+狗端提供唯一绝对服务（不是可能重名的`/dog_node/set_parameters`）：
+- `/dog/goto/describe_parameters`：`rcl_interfaces/srv/DescribeParameters`，规格/范围/建议步长。
+- `/dog/goto/get_parameters`：`rcl_interfaces/srv/GetParameters`，按names顺序返回值，未知键为NOT_SET。
+- `/dog/goto/set_parameters_atomically`：`rcl_interfaces/srv/SetParametersAtomically`，仅接受type=3 DOUBLE；未知/重复键、非有限值、越界或类型错误整批拒绝，不部分生效。只提交实际修改键。
+
+配置唯一来源 `layer0_common/goto_config.hpp`，服务mutex保护整批替换，控制器按tick快照，不因调参重置角速度历史。与现有ROS节点参数表不保持第二份可写镜像。隔离服务测试只实例化调参组件，必须 `ROS_DOMAIN_ID=197 ROS_LOCALHOST_ONLY=1`，不启动真狗。
 
 ### 校验（狗端，执行前一步都不动就能拒）
 
@@ -106,7 +147,7 @@
 
 ## 4. 确认闸门（危险步骤前暂停）
 
-危险步骤 = **会改变姿态或位置的那些**：`getup` / `locomotion` / `move` / `goto` / `getdown`。
+危险步骤 = **会改变姿态或位置的那些**：`getup` / `locomotion` / `move` / `goto` / `goto_pose` / `getdown`。
 `check_stand`（只读）和 `wait` 不问 —— 尺度与原来的终端回车闸门一致。
 
 - `confirm:"each"` 时，到达危险步骤前狗**停下不动**，状态转 `waiting_confirm`，
@@ -202,7 +243,8 @@
 
 ```bash
 ~/ros2_ws/build.sh --packages-select core_2026
-~/ros2_ws/build/core_2026/mission_plan_selftest                       # 59 项契约自测
+~/ros2_ws/build/core_2026/mission_plan_selftest                       # 任务契约自测
+~/ros2_ws/build/core_2026/goto_control_selftest                       # 两类到点控制自测
 ~/ros2_ws/build/core_2026/mission_plan_selftest --parse-file x.json   # 验一份任务文件
 ```
 

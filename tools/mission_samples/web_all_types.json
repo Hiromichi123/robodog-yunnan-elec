@@ -47,7 +47,13 @@
       "type": "goto",
       "x": 1,
       "y": 0,
-      "yaw": 0,
+      "goto_timeout_s": 60
+    },
+    {
+      "type": "goto_pose",
+      "x": 2,
+      "y": 1,
+      "yaw": 1.57,
       "goto_timeout_s": 60
     },
     {

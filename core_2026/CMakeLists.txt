@@ -12,6 +12,8 @@ endif()
 # ── 依赖 ──────────────────────────────────────────────────────
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rcl_interfaces REQUIRED)
+find_package(Threads REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
@@ -60,6 +62,7 @@ set(TEST_MAX_CURVATURE_SOURCES
 # ── 机器狗源文件 ──────────────────────────────────────────
 set(DOG_SOURCES
   src/layer1_hal/robot_dog_hal.cpp
+  src/layer1_hal/goto_tuning.cpp
   src/layer2_control/pid_controller.cpp
   src/layer2_control/flight_controller.cpp
   src/layer3_mission/mission_executor.cpp
@@ -81,6 +84,7 @@ target_include_directories(dog_node PUBLIC
 )
 
 ament_target_dependencies(dog_node
+  rcl_interfaces
   rclcpp
   geometry_msgs
   nav_msgs
@@ -106,6 +110,14 @@ target_include_directories(mission_plan_selftest PRIVATE
   $ENV{CONDA_PREFIX}/include
 )
 # 不 install：这是开发自测工具，不是运行时组件。
+add_executable(goto_control_selftest test/goto_control_selftest.cpp)
+target_include_directories(goto_control_selftest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+add_executable(goto_config_selftest test/goto_config_selftest.cpp)
+target_include_directories(goto_config_selftest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(goto_config_selftest Threads::Threads)
+add_executable(goto_tuning_selftest test/goto_tuning_selftest.cpp src/layer1_hal/goto_tuning.cpp)
+target_include_directories(goto_tuning_selftest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+ament_target_dependencies(goto_tuning_selftest rclcpp rcl_interfaces)
 
 # ── 无人机 / 小车目标（需要 mavros_msgs，缺则整块跳过）──────────
 if(mavros_msgs_FOUND)

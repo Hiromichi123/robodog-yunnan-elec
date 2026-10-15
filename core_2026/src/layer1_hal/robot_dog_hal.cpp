@@ -3,6 +3,7 @@
 #include "layer0_common/velocity.hpp"
 #include <algorithm>
 #include <cctype>
+#include <chrono>
 #include <iostream>
 #include <vector>
 #include <unistd.h>   // isatty(STDIN_FILENO) —— 人工闸门判断有没有终端
@@ -60,6 +61,7 @@ bool json_get_int(const std::string& s, const std::string& key, int& out)
 }  // namespace
 
 RobotDogHAL::RobotDogHAL() : Node("robot_dog_hal_node") {
+    goto_tuning_ = std::make_unique<mission::GotoTuning>(*this);
     // ── 话题名对齐底层契约 ──────────────────────────────────────────
     // 底层是 dog_ws_bridge（把机器狗的 WebSocket 接口暴露成 ROS 话题），
     // 它提供的是 /rl_real/* 这一套。分工上"底层给协议、上层去适配"，
@@ -206,6 +208,11 @@ DroneState RobotDogHAL::get_state() const {
     return state_;
 }
 
+RobotDogHAL::NavigationSnapshot RobotDogHAL::get_navigation_snapshot() const {
+    std::lock_guard<std::mutex> lock(state_mutex_);
+    return {state_, navigation_sample_id_, navigation_received_at_, has_state_};
+}
+
 bool RobotDogHAL::has_state() const {
     std::lock_guard<std::mutex> lock(state_mutex_);
     return has_state_;
@@ -283,6 +290,8 @@ void RobotDogHAL::request_fsm_transition(const std::string& fsm_state) {
         std::lock_guard<std::mutex> lock(cmd_mutex_);
         pending_cmd_   = fsm_state;
         pending_code_  = -1;
+        probe_started_ = false;
+        probe_result_  = -1;
         pending_phase_.clear();
         pending_state_.clear();
     }
@@ -412,7 +421,9 @@ bool RobotDogHAL::safe_go_down(double settle_s) {
 // ===== 回调 =====
 void RobotDogHAL::lidar_cb(const ros2_tools::msg::LidarPose::SharedPtr msg) {
     std::lock_guard<std::mutex> lock(state_mutex_);
-    state_stamp_ = this->now();   // 闭环控制靠它判"这份位姿还能不能信"
+    state_stamp_ = this->now();   // 接收新鲜度，不代表源传感器采样时间
+    navigation_received_at_ = std::chrono::steady_clock::now();
+    ++navigation_sample_id_;
     state_.x   = msg->x;
     state_.y   = msg->y;
     state_.z   = msg->z;
@@ -429,6 +440,22 @@ void RobotDogHAL::dog_state_cb(const std_msgs::msg::String::SharedPtr msg) {
     // 于是 wait_for_fsm_state("RLFSMStatePassive") 永远比不中 —— 这正是
     // 它写好之后一直零调用的原因（前置判断/状态码确认全靠它，必须修）。
     const std::string& s = msg->data;
+    {
+        std::lock_guard<std::mutex> lock(cmd_mutex_);
+        if (pending_cmd_ == "probe_motors" && pending_code_ < 2) {
+            if (s == "probe motors: executing") {
+                probe_started_ = true;
+                probe_result_ = -1;
+            } else if (probe_started_ && probe_result_ < 0) {
+                if (s == "probe motors: all 16 motors controllable") {
+                    probe_result_ = 2;
+                } else if (s.rfind("probe motors: ", 0) == 0 &&
+                           s.find(" motors not responding") != std::string::npos) {
+                    probe_result_ = 3;
+                }
+            }
+        }
+    }
     std::string st;
     for (size_t p = 0; p + 6 <= s.size(); ++p) {
         if (s.compare(p, 6, "state=") != 0) continue;
@@ -483,6 +510,8 @@ void RobotDogHAL::cmd_state_cb(const std_msgs::msg::String::SharedPtr msg) {
     // 以及连上时自动发的 nav_on 都会产生 cmd_state，必须滤掉。
     if (pending_cmd_.empty() || cmd != pending_cmd_) return;
 
+    // 探针的命令 DONE 不能替代异步电机结果；只接受明确的成功反馈。
+    if (pending_cmd_ == "probe_motors" && code == 2) return;
     pending_code_  = code;
     pending_phase_ = phase;
     pending_state_ = state;
@@ -657,23 +686,29 @@ bool RobotDogHAL::run_check_stand(double timeout_sec) {
 }
 
 bool RobotDogHAL::run_probe_motors(double timeout_sec) {
-    // 起立前门禁之二：小脑 getup 处理要求 motor_manager.hasProbeResults() &&
-    // areAllMotorsProbedOk()（rl_real_JXG.cpp 的 getup 分支），而探针结果在
-    // 每次趴下（Passive::Enter）都被 invalidateProbeResults() 作废 —— 所以每次
-    // 起立前都必须重新跑一遍探针，和 check_stand 一样不跨趴下周期。
-    //
-    // **单发一次**：小脑对 seq==0 的同名命令有 1.2s 去重、探针自身有
-    // probe_running_ 互斥，切片重发会被 REJECTED 误判成"探针失败"。探针异步
-    // 约 2s，中途只发 EXECUTING(1)——本类的 cmd_state_cb 只认 code>=2，自动忽略，
-    // 所以 wait_for_command_done 会一直等到真正的 DONE(2)/FAILED(3)/REJECTED(4)。
+    // 当前小脑异步探针通过 feedback 报实际结果，不发 cmd_state 终态。
+    // 必须先收到本次 executing，再收到全部 16 台可控，不能拿旧 posture 放行。
     RCLCPP_INFO(this->get_logger(), "[RobotDogHAL] 起立前电机可控性探针（probe_motors）...");
     request_fsm_transition("probe_motors");
-    if (wait_for_command_done(timeout_sec)) {
-        RCLCPP_INFO(this->get_logger(), "[RobotDogHAL] ✓ 探针通过：16 台电机全部可控");
-        return true;
+    const auto start = std::chrono::steady_clock::now();
+    rclcpp::Rate rate(20);
+    while (rclcpp::ok()) {
+        int result;
+        {
+            std::lock_guard<std::mutex> lock(cmd_mutex_);
+            result = pending_code_ >= 3 ? pending_code_ : probe_result_;
+        }
+        if (result == 2) {
+            RCLCPP_INFO(this->get_logger(), "[RobotDogHAL] ✓ 探针回复成功：16 台电机全部可控，允许起立");
+            return true;
+        }
+        if (result >= 3) break;
+        if (std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count()
+            >= timeout_sec) break;
+        rate.sleep();
     }
     RCLCPP_ERROR(this->get_logger(),
-                 "[RobotDogHAL] ✗ 探针未通过（存在不可控/无响应电机，或超时）—— 不可起立");
+                 "[RobotDogHAL] ✗ 探针失败、被拒绝或回复超时 —— 不发送起立");
     return false;
 }
 
