@@ -111,6 +111,8 @@ void DogSystem::run_mission_loop() {
     // 先报一帧 idle：网页靠它判断"狗端在线"。刷新页面也靠这个自动对齐。
     {
         mission::DogMissionChannel::Status s;
+        s.safety_mode = hal_->safety_mode();
+        if (s.safety_mode == "observe") s.navigation_state = "observe_only_no_protection";
         s.phase = "idle";
         s.msg   = "等待网页下发任务";
         channel_->set_status(s);
@@ -131,6 +133,8 @@ void DogSystem::run_mission_loop() {
         if (!parsed.ok) {
             RCLCPP_ERROR(hal_->get_logger(), "[任务] 解析失败：%s", parsed.error.c_str());
             mission::DogMissionChannel::Status s;
+            s.safety_mode = hal_->safety_mode();
+            if (s.safety_mode == "observe") s.navigation_state = "observe_only_no_protection";
             s.phase = "rejected";
             s.msg   = "任务被拒：" + parsed.error;
             channel_->set_status(s);
@@ -141,6 +145,8 @@ void DogSystem::run_mission_loop() {
         if (!verr.empty()) {
             RCLCPP_ERROR(hal_->get_logger(), "[任务] 校验未通过：%s", verr.c_str());
             mission::DogMissionChannel::Status s;
+            s.safety_mode = hal_->safety_mode();
+            if (s.safety_mode == "observe") s.navigation_state = "observe_only_no_protection";
             s.phase = "rejected";
             s.name  = parsed.plan.name;
             s.msg   = "任务被拒：" + verr;

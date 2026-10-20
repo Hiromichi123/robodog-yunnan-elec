@@ -1,3 +1,5 @@
+# ROS 通信已独立：先从网页侧栏或 ros_web.launch.py 启动 rosbridge/rosapi。
+# 下方旧链路说明中的 rosbridge 项不再由本 launch 启动。
 """起「链路」：雷达 + SLAM + 小脑桥 + web 地面站入口，**不起 dog_node**。
 
 为什么桥放进来、dog_node 不放：
@@ -83,16 +85,19 @@
 
 import math
 import os
+import importlib.util
+from pathlib import Path
+from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, TimerAction
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, TimerAction, OpaqueFunction
 from launch.conditions import IfCondition, LaunchConfigurationEquals
 from launch.launch_description_sources import (
-    AnyLaunchDescriptionSource,
     PythonLaunchDescriptionSource,
 )
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
 
 
@@ -107,7 +112,41 @@ def quat_from_rpy(roll, pitch, yaw):
             cr * cp * cy + sr * sp * sy)
 
 
+def _safety_module():
+    path = Path(get_package_share_directory('core_2026')) / 'safety_config.py'
+    spec = importlib.util.spec_from_file_location('slam_safety_config', path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _safety_node(context, module, data):
+    enabled = LaunchConfiguration('local_safety').perform(context)
+    if enabled != 'true':
+        return []
+    # Explicit CLI overrides receive a new identity; never label altered values as the saved snapshot.
+    import copy
+    config = copy.deepcopy(data['config'])
+    if config['mode'] == 'disabled':
+        config['mode'] = 'enforce'
+    ground = LaunchConfiguration('safety_ground_z').perform(context)
+    if ground:
+        config['perception']['ground_z'] = float(ground)
+    effective = module.document(config)
+    params = module.perception_parameters(effective)
+    params['odom_topic'] = LaunchConfiguration('real_robot_odom_topic').perform(context)
+    if params['odom_topic'] != '/aft_mapped_to_init':
+        # A different odometry source is not the Web-validated configuration.
+        import hashlib
+        params['config_revision'] = hashlib.sha256(
+            (params['config_revision'] + '\n' + params['odom_topic']).encode()).hexdigest()
+    return [Node(package='ros2_tools', executable='local_obstacle_node',
+                 name='local_obstacle_node', output='screen', parameters=[params])]
+
+
 def generate_launch_description():
+    safety_module = _safety_module()
+    safety_data = safety_module.startup()
     # 雷达安装变换：**前向倒装 45°**、杆臂正前 0.286m（实测 286mm）。
     # 四元数 (0.923880, 0, 0.382683, 0) = rpy(roll=0, pitch=−135°, yaw=π)，
     # 即：绕 y 轴 −135°（前向倒装 45°）**再绕 base_link z 加 180°**。
@@ -146,6 +185,16 @@ def generate_launch_description():
         os.environ.get('MID360_CONFIG', '~/ros2_ws/config/MID360_config.json'))
 
     decls = [
+        DeclareLaunchArgument(
+            'local_safety', default_value='false' if safety_data['config']['mode'] == 'disabled' else 'true',
+            choices=['false', 'true'],
+            description='默认加载已保存避障配置；启动安全地图不启用运动，仅依赖雷达和有效位姿'),
+        DeclareLaunchArgument(
+            'safety_calibration_validated', default_value='false', choices=['false'],
+            description='兼容旧命令的废弃参数；不再作为避障门禁'),
+        DeclareLaunchArgument(
+            'safety_ground_z', default_value='',
+            description='留空加载保存的地面高度；显式覆盖会改变配置身份，需两端配置一致'),
         DeclareLaunchArgument(
             'livox_config', default_value=default_livox_config,
             description='MID360 网络配置（host_ip / 雷达 IP）'),
@@ -328,6 +377,7 @@ def generate_launch_description():
             'real_robot_odom_topic': LaunchConfiguration('real_robot_odom_topic'),
             # 安装变换参数（默认就是实机装法，见 lidar_data_node.cpp 注释）
             'apply_mount_transform': True,
+            'normalize_start_pose': True,
             'mount_x': 0.286, 'mount_y': 0.0, 'mount_z': 0.0,
             # 前向倒装 45° = 绕 y 轴 −135°（−2.356194 rad）
             # mount_yaw = π（2026-10-05 实测修正）：安装变换少了绕 base_link z 的
@@ -336,6 +386,10 @@ def generate_launch_description():
             'mount_roll': 0.0, 'mount_pitch': -2.356194, 'mount_yaw': 3.141593,
         }],
     )
+
+    # Safety is independent of the recorder/map source and uses Point-LIO poses.
+    # Missing depth/TF/calibration produces invalid snapshots, never unguarded free space.
+    local_obstacle = OpaqueFunction(function=_safety_node, args=[safety_module, safety_data])
 
     # ── 4b. 假 /lidar_data（lidar_source:=fake）──────────────────────
     # 无雷达/无 SLAM 的台架联调：持续发 (0,0,0)，让 dog_node 的前置检查能过、
@@ -383,26 +437,7 @@ def generate_launch_description():
         condition=LaunchConfigurationEquals('bridge', 'ws'),
     )
 
-    # ── 6. rosbridge:浏览器进 ROS 的入口 ─────────────────────────────
-    # 用官方 launch（端口/地址这些参数只在那处维护），它同时会把 rosapi 也起上
-    # ——网页「话题调试」页签列话题靠的就是 rosapi。
-    # **必须用 AnyLaunchDescriptionSource**：那份是 .xml，用
-    # PythonLaunchDescriptionSource 会抛 "invalid syntax (…xml, line 1)"，
-    # 而 launch 的异常会**把整条链路一起中断**（实测：只剩 3 个节点起来）。
-    # address 传空 = 监听所有网口 —— 笔记本上的浏览器要连 192.168.8.137:9090，
-    # 不能只听 127.0.0.1。
-    rosbridge = IncludeLaunchDescription(
-        AnyLaunchDescriptionSource([
-            PathJoinSubstitution([
-                FindPackageShare('rosbridge_server'), 'launch',
-                'rosbridge_websocket_launch.xml'
-            ])
-        ]),
-        launch_arguments={
-            'port': LaunchConfiguration('rosbridge_port'),
-            'address': '',
-        }.items(),
-    )
+    # Browser transport is now independently owned by ros_web.launch.py.
 
     # ── 6b. 深度点云（map_source:=camera）──────────────────────────
     # **用相机板载的神经深度**（`depth_points_node`）：订
@@ -537,10 +572,10 @@ def generate_launch_description():
         tf_cam_rgb,
         slam,
         lidar_data_node,
+        local_obstacle,
         fake_lidar_data,
         bridge,
         bridge_ws,
-        rosbridge,
         stereo,
         recorder_camera,
         recorder_lidar,

@@ -41,7 +41,8 @@
     {"type": "getup", "settle_s": 10},
     {"type": "locomotion"},
     {"type": "move", "vx": 0.1, "vy": 0.0, "wz": 0.0, "duration_s": 3.0},
-    {"type": "goto", "x": 1.5, "y": 0.5, "yaw": 0.0, "goto_timeout_s": 60},
+    {"type": "goto", "x": 1.5, "y": 0.5, "goto_timeout_s": 60},
+    {"type": "goto_pose", "x": 2.5, "y": 0.5, "yaw": 1.57, "goto_timeout_s": 60},
     {"type": "wait", "duration_s": 5.0},
     {"type": "getdown", "settle_s": 1}
   ]
@@ -66,13 +67,53 @@
 | `getup` | `settle_s` | 10 | ≤120；起立。前置：狗必须趴着 |
 | `locomotion` | — | — | 进 RL 运动模式。前置：狗必须已起立 |
 | `move` | `vx` `vy` `wz` `duration_s` | 0.1 / 0 / 0 / 3.0 | vx,vy ≤0.5、wz ≤1.0、duration>0 且 ≤300 |
-| `goto` | `x` `y` `yaw` `goto_timeout_s` | 1.0 / 0 / 0 / 60 | 坐标 ≤±50 m，超时 ≤300。**世界系**（见 §7） |
+| `goto` | `x` `y` `goto_timeout_s` | 网页 1.0 / 0 / 120 | 仅位置到点，距离 ≤0.4 m；坐标 ≤±50 m，超时 ≤300。**启动导航系**（见 §8） |
+| `goto_pose` | `x` `y` `yaw` `goto_timeout_s` | 网页 1.0 / 0 / 0 / 120 | 带航向到点，距离 ≤0.4 m 且航向误差 ≤0.5 rad；JSON 必须显式提供 yaw，范围 ±2π；坐标/超时限制同 goto |
 | `wait` | `duration_s` | 5 | ≥0 且 ≤300 |
 | `getdown` | `settle_s` | 1 | ≤120；平滑趴下（2s 插值） |
 
 **没有 `passive`。** 2026-09-29 用户定：passive 的卸力（kp=0、靠重力砸下去）不可靠，
 已从整条链路移除 —— 回趴下一律用 `getdown`。任务里也就不需要"急停步骤"，
 急停是任务级动作（`abort` 指令）。
+
+### 两类到点（2026-10-15）
+
+- 普通 `goto` 只按位置判断，进入 0.4 m 半径后连发 5 帧零速确认完成；不在终点调 yaw。
+- `goto_pose` 先到位置，再原地校准指定终点 yaw；两项容差同时满足连续 5 帧才完成。
+- 下一点开始执行（通过确认闸门）后，按**当前位置到新目标的方位**纠偏：位置未到时，方位误差绝对值 **≤45°（π/4，含边界）保持前进＋偏航微调，>45°才只转不走**。两类都不使用 vy。`goto_pose` 位置已到后的终值航向校准仍原地进行，不受此行进规则影响。
+- 前进速度 `min(0.40, 0.70×距离)×cos(方位误差)` m/s，偏角越大越慢；45°时远距离约0.283m/s。位置到位后直接零速，本版不保证接近0.4m边界前物理速度平滑刹停。
+- 转向为专用PD：Kp=0.45、Ki=0、Kd=0.12；D项限±0.15rad/s，总输出限±0.35rad/s。D取自导航yaw的最短角差/新样本接收时间差，0.10s低通，只滤导数、不滤输出。允许D抵消甚至反向P以制动；不积累积分、不使用慢反向斜坡。
+- 每个航点重置控制历史；20Hz控制循环复用同一定位样本时不重复差分。首帧或间隔不在[0.02,0.30]s内时按P-only重新建立导数基准。到位确认仍为5个控制周期，不是5个独立定位样本。
+- 以上是**待实机验证的保守初值**。导航yaw差分不是独立机体陀螺仪；接收时戳不是源采样时戳，PD不能修复SLAM源延迟或轴向错误。若两路航向反馈再次明显冲突，应停止并诊断反馈，不继续靠PID掩盖。
+- 旧任务 `type:"goto"` 即使带 yaw 也按普通位置点执行，yaw 被忽略，不自动转换类型。需要保留终点朝向时显式改为 `goto_pose`；网页普通点不再显示/导出 yaw，地图点击默认普通点。
+- 位置半径是 0.4 m：相邻目标若已在半径内会直接完成，不保证经过目标精确中心。
+
+### 网页实时调参（运行中生效）
+
+“任务状态”下的“点到点控制参数”提供8项滑条与数值输入；上节数值均为启动默认值，实际以服务读回为准。仅影响goto/goto_pose，不直接发速度，不影响定速move/手柄。首次升级需重启dog_node；之后滑动调参无需重编或重启。
+
+| 键 | 默认 | 范围 | 单位 |
+|---|---:|---:|---|
+| kp_vx | 0.70 | 0.10–2.00 | 1/s |
+| kp_yaw | 0.45 | 0.10–2.00 | 1/s |
+| kd_yaw | 0.12 | 0–0.50 | — |
+| max_vx | 0.40 | 0–0.50 | m/s |
+| max_yaw_rate | 0.35 | 0–1.00 | rad/s |
+| derivative_limit | 0.15 | 0–0.35 | rad/s |
+| tol_xy | 0.40 | 0.05–1.00 | m |
+| tol_yaw | 0.50 | 0.02–1.57 | rad，仅goto_pose |
+
+- 滑动最多约5Hz合并提交，狗端接受后在下一控制周期取新配置，网页回读才显示已确认。降低限速立即按新上限计算；容差变更重置到位累计，扩大容差可能让当前点提前完成。
+- 参数在同一dog_node进程内跨任务保留；热改不会自动落盘，点击「保存全部参数」才持久化，重启加载最后保存值（无保存文件时使用默认值，见文末持久化协议）。固定45°门限、Ki=0及滤波时间常数不开放。
+- 速度上限0不是急停：线速度0仍可转向，角速度0仍可前进。紧急情况用独立“停止（急停）”。允许范围不代表所有组合已实机验证。
+- 断线/服务不可用禁用输入，重连只读回当前值，不自动重放旧编辑。写超时显示“结果未知”，已在途请求无法撤回，只读恢复后才允许新操作。多客户端同键按后提交者生效，回读只代表读取当时配置。
+
+狗端提供唯一绝对服务（不是可能重名的`/dog_node/set_parameters`）：
+- `/dog/goto/describe_parameters`：`rcl_interfaces/srv/DescribeParameters`，规格/范围/建议步长。
+- `/dog/goto/get_parameters`：`rcl_interfaces/srv/GetParameters`，按names顺序返回值，未知键为NOT_SET。
+- `/dog/goto/set_parameters_atomically`：`rcl_interfaces/srv/SetParametersAtomically`，仅接受type=3 DOUBLE；未知/重复键、非有限值、越界或类型错误整批拒绝，不部分生效。只提交实际修改键。
+
+配置唯一来源 `layer0_common/goto_config.hpp`，服务mutex保护整批替换，控制器按tick快照，不因调参重置角速度历史。与现有ROS节点参数表不保持第二份可写镜像。隔离服务测试只实例化调参组件，必须 `ROS_DOMAIN_ID=197 ROS_LOCALHOST_ONLY=1`，不启动真狗。
 
 ### 校验（狗端，执行前一步都不动就能拒）
 
@@ -106,7 +147,7 @@
 
 ## 4. 确认闸门（危险步骤前暂停）
 
-危险步骤 = **会改变姿态或位置的那些**：`getup` / `locomotion` / `move` / `goto` / `getdown`。
+危险步骤 = **会改变姿态或位置的那些**：`getup` / `locomotion` / `move` / `goto` / `goto_pose` / `getdown`。
 `check_stand`（只读）和 `wait` 不问 —— 尺度与原来的终端回车闸门一致。
 
 - `confirm:"each"` 时，到达危险步骤前狗**停下不动**，状态转 `waiting_confirm`，
@@ -202,7 +243,8 @@
 
 ```bash
 ~/ros2_ws/build.sh --packages-select core_2026
-~/ros2_ws/build/core_2026/mission_plan_selftest                       # 59 项契约自测
+~/ros2_ws/build/core_2026/mission_plan_selftest                       # 任务契约自测
+~/ros2_ws/build/core_2026/goto_control_selftest                       # 两类到点控制自测
 ~/ros2_ws/build/core_2026/mission_plan_selftest --parse-file x.json   # 验一份任务文件
 ```
 
@@ -234,10 +276,11 @@ echo confirm > /tmp/c.json
 
 ## 8. 实机注意事项
 
-1. **`goto` 的坐标是世界系**（Point-LIO 建图坐标系），x/y/yaw 的正负号与朝向
-   **还没在实机标定过**。第一次用先发一个小距离（0.2~0.3 m）看它往哪个方向走，
-   别直接发几米的目标。狗端 goto 的日志里 1Hz 打着"现在位姿 → 目标 → 距离/航向误差"，
-   对着看就能判出方向对不对。
+1. **`goto` / `goto_pose` 的坐标是 `/lidar_data` 启动导航系**。默认将启动时车体位置/yaw 归零，
+   不是直接使用 Point-LIO 地图世界坐标。网页地图选点经 `/navigation_origin` 转换后才下发；
+   原点 `session_id` 随进程重启变化。任务执行期间原点会话变化必须停车重新确认，不能用新原点继续旧任务。
+   初始车头不平行过道时，沿启动 x 预设的远目标可能落进墙内；这不等同于 SLAM 漂移。
+   首次实机运动必须另行获授权，以低速、小距离核实坐标与安装方向，不直接试几米的目标。
 2. **手柄一动就抢走控制权**（小脑行为），此后所有指令被忽略。闭环步骤会检测到并失败，
    提示"先放开手柄"。
 3. **`passive` 已从上层移除，且 2026-10-01 起小脑的 ROS 接口也直接拒绝它**
@@ -250,3 +293,74 @@ echo confirm > /tmp/c.json
    移动中的横向偏差靠转向消化，**不依赖 vy**（轮足横向精度不足）。狗端 HAL 层
    统一禁 y：命令里带 vy 会被归零并发限流告警。任务 `move` 步骤的 `vy` 参数
    **保留但当前不生效**；以后需要横向移动时，在该场景的专属方法里显式发布。
+
+
+## 9. 近场保护与受阻目标修正（2026-10-16）
+
+部署默认 `safety_mode=disabled`，不会偷偷把未标定感知当成已验收避障。三种模式：
+
+- `disabled`：旧运动控制，无近场保护。
+- `observe`：只报告感知是否可用，**不提供碰撞保护**，不改目标、不改速度。
+- `enforce`：所有 HAL 非零发速必须通过新鲜安全快照及扫掠足迹门禁；观测无效、过期、unknown、无通路时停速。不是全场景防撞保证，也不能拦截小脑手柄或绕过 HAL 的外部发布者。
+
+实机启用 enforce 前必须另行完成外参/时间戳、前方与侧方覆盖、车体足迹及低速停车距离验证。
+雷达单源策略不再设置人工标定门禁；`safety_calibration_validated` 仅保留兼容解析，不决定放行。实际雷达、位姿、时间戳、坐标、配置版本及足迹检查仍有效。
+近场感知默认输出 `/local_safety/map`（`ros2_tools/msg/LocalSafetyMap`），HAL 的 `safety_map_topic` 默认订阅同一路。
+本机隔离干跑脚本是 `tools/corridor_navigation_dryrun.py`：只允许 `ROS_DOMAIN_ID=187`、
+`ROS_LOCALHOST_ONLY=1` 并显式传 `--isolated-demo`；脚本内全部接口 remap 到 `/corridor_test/*`，
+合成测试不需要 `calibration_validated=true`；必须使用隔离 domain、lo DDS 和测试话题，不连接实机桥。
+
+### 行为与完成语义
+
+1. 原始目标不修改。原目标进入可靠观测区且被连续 3 份不同安全地图确认占用后，才找横向修正落点。
+   未观测不等于障碍，更不等于空旷。落点须保留本段纵向进度、在修正范围内、足迹安全并与机器人连通。
+2. 机器人只前进＋转向，不恢复 vy；临时避障运动不算到达。最多修正 3 次，目标保持避免左右抖动。
+3. 到达 effective_goal、连续 5 个不同位姿样本达标且停车收尾成功，才产生 `adjusted_arrival` 并进入下一步。
+   `goto_pose` 始终保留原 yaw；不能安全转至指定 yaw 时不算成功。下一步仍使用原计划自己的坐标。
+4. 近场无安全动作/感知失效最多等待 5 s；持续 20 s 无前进进展或总超时也停车失败，**不会冒充到达**。
+   定时 `move` 被门禁拦截立即失败，不会等墙钟到期返回成功。阻挡失败停速保持站立，需人工看护。
+5. `confirm:each` 的人工闸门、急停、手柄及 FSM 检查保持不变。修正成功不代表免去下一步确认。
+
+### 状态扩展（向后兼容 version 1）
+
+`/dog/mission_status` 保留现有 phase 字符串，增加：
+
+```json
+{
+  "safety_mode": "enforce",
+  "navigation_state": "driving_adjusted",
+  "navigation_results": [{
+    "index": 1,
+    "outcome": "adjusted_arrival",
+    "reason": "原目标受阻，已到达保留前进距离的安全修正目标",
+    "original": {"x": 10.0, "y": 1.0},
+    "effective": {"x": 10.0, "y": 0.0}
+  }]
+}
+```
+
+`navigation_results` 最多 200 条，本任务内累计，后续步骤、最终结果和 2 Hz 心跳均保留。
+`outcome` 为 `arrived` / `adjusted_arrival` / `blocked`；下一份任务才清空。
+`navigation_state` 可为 `waiting_clearance`、`goal_adjusted`、`driving`、`driving_adjusted`、
+`arrived`、`adjusted_arrival`、`blocked` 或 `observe_*_no_protection`。
+网页使用文字明确显示保护模式与修正结果，不把“强制门禁已开启”显示成“已经保证不撞墙”。
+
+## 点到点参数显式持久化
+
+热调参仍由 `/dog/goto/set_parameters_atomically` 即时更新；只有显式调用
+`/dog/goto/save_parameters` (`std_srvs/srv/Trigger`，空请求) 才把狗端当前全部8项快照保存。
+保存服务不接收浏览器参数，不修改运行配置、不发送运动指令。磁盘写入在独立工作线程执行，
+成功响应在文件同步和原子替换完成后发送；并发保存被拒绝。
+
+默认文件为运行用户 `$HOME/.config/robodog/goto_tuning.json`，包含
+`schema_version:1`、`parameters` 和 UTC `saved_at`。启动时整组验证并恢复；无文件使用内置默认值。
+读取失败/损坏会记录错误并使用内置默认值，原文件不自动删除。未保存的热改在重启后丢失。
+
+`/dog/goto/get_persistence_state` (`std_srvs/srv/Trigger`) 的 `message` 为 JSON：
+`{schema_version:1, saving:bool, saved:null|{parameters:{...},saved_at:string}, load_error:string, save_error:string}`。
+成功表示状态查询成功，不表示已经有保存文件。保存成功响应采用相同结构；网页应将已保存
+快照与随后回读的当前值比较，不能假设保存期间别的客户端没有修改参数。
+保存超时的结果未知，不应自动重试；重连仅查询状态。
+
+测试构造 GotoTuning 必须注入临时配置路径。隔离测试进程用独立 ROS 域和 localhost，
+不得读写生产配置、启动 HAL 或发送速度/任务消息。

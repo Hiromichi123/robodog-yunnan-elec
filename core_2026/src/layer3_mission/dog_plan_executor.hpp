@@ -50,9 +50,9 @@ private:
     // Ok                 = 正常完成
     // Failed             = 失败：统一处置 = 停速 + getdown 回趴下
     // FailedKeepStanding = 失败，但**狗已就地停住、要留在 RL 站立位**，不要 getdown。
-    //                      目前只有 goto 超时用它：台架上反复试任务时不必每次
-    //                      重新起立。代价是没人处置它就一直在那站着（不自动卸力）。
-    enum class Outcome { Ok, Skipped, Failed, FailedKeepStanding };
+    //                      goto 超时/局部安全门禁失败使用，等待人工处置。
+    // AdjustedArrival    = 真正到达修正目标，保留结果后按原闸门规则进入下一步。
+    enum class Outcome { Ok, AdjustedArrival, Skipped, Failed, FailedKeepStanding };
 
     /** 确认闸门的三种结局。 */
     enum class Gate { Continue, AbortMission, SkipStep };
@@ -78,7 +78,11 @@ private:
      * **失败/中止路径不要用它** —— 那边紧接着就 getdown 回趴下了，
      * 再等一次 vel_stop 的确认纯属白等（实测多花 0.6s，急停时这半秒很值钱）。
      */
-    void stop_motion();
+    bool stop_motion();
+    bool accept_safety_session(const RobotDogHAL::SafetySnapshot& safety);
+    void navigation_status(const std::string& state, const std::string& message = "");
+    void record_navigation_result(const MissionStep& original, const MissionStep& effective,
+                                  const std::string& outcome, const std::string& reason);
     /** 位姿够不够新鲜（闭环控制的前提）。 */
     [[nodiscard]] bool pose_is_fresh(double max_age_s) const;
     /**
@@ -106,6 +110,12 @@ private:
     std::atomic<bool> abort_{false};   // spin 线程写，主线程读
     std::string       last_error_;     // 主线程写读，失败原因（已带"第N步"前缀）
     std::string       current_name_;   // 当前任务名，随每帧状态带给网页
+    std::string       safety_session_; // 整份任务固定，不能每个航点重新接受坐标原点
+    std::string       navigation_state_;
+    std::vector<DogMissionChannel::NavigationResult> navigation_results_;
+    std::size_t       current_index_{0}, current_total_{0};
+    std::string       current_type_;
+    std::chrono::steady_clock::time_point step_started_at_{};
 };
 
 }  // namespace mission

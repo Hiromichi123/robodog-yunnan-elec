@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+#include <cstdint>
 #include <mutex>
 #include <memory>
 #include <string>
@@ -9,6 +11,8 @@
 #include <std_msgs/msg/string.hpp>
 #include <ros2_tools/msg/lidar_pose.hpp>
 
+#include "layer1_hal/goto_tuning.hpp"
+#include "layer1_hal/local_safety.hpp"
 #include "layer1_hal/i_state_provider.hpp"
 #include "layer1_hal/i_command_publisher.hpp"
 #include "layer1_hal/i_vision_provider.hpp"
@@ -46,14 +50,35 @@ class RobotDogHAL
 {
 public:
     explicit RobotDogHAL();
+    [[nodiscard]] mission::GotoConfigSnapshot get_goto_config() const {
+        return goto_tuning_->snapshot();
+    }
+
+    using SafetySnapshot = LocalSafety::Snapshot;
+    [[nodiscard]] bool safety_enforced() const { return local_safety_->enforced(); }
+    [[nodiscard]] std::string safety_mode() const { return local_safety_->mode(); }
+    [[nodiscard]] const local_nav::Config& get_local_nav_config() const { return local_safety_->config(); }
+    [[nodiscard]] SafetySnapshot get_safety_snapshot() const { return local_safety_->snapshot(); }
+    void prepare_safety_startup(const local_nav::Pose& pose,bool fresh) { local_safety_->prepare_startup(pose,fresh); }
+    [[nodiscard]] bool last_velocity_blocked() const { return local_safety_->blocked(); }
+    [[nodiscard]] std::string last_safety_reason() const { return local_safety_->reason(); }
 
     // IStateProvider
     [[nodiscard]] DroneState get_state() const override;
+    struct NavigationSnapshot {
+        DroneState state{};
+        std::uint64_t sample_id{0};
+        std::chrono::steady_clock::time_point received_at{};
+        bool available{false};
+    };
+    // 同锁复制状态与接收元数据，避免把不同帧的姿态/时间配成一对。
+    [[nodiscard]] NavigationSnapshot get_navigation_snapshot() const;
     [[nodiscard]] bool       has_state() const override;
 
     // ICommandPublisher
     void publish_position(Target& target) override;
     void publish_velocity(Velocity& velocity) override;
+    void publish_recovery_reverse(Velocity& velocity);
 
     // IVisionProvider (空实现)
     [[nodiscard]] messages::msg::Vision get_vision() const override;
@@ -97,13 +122,10 @@ public:
 
     /**
      * 起立前的电机可控性探针（小脑 getup 门禁之二，v7.5.1 起强制）：
-     * 往 /rl_real/command 发 probe_motors，等 cmd_state 终态。
-     *   DONE(2)                    = 16 台全部可控，可以起立
-     *   FAILED(3)/REJECTED(4)/超时 = 存在不可控/无响应电机，不可起立
-     * 小脑侧异步执行约 2s（中途只发 EXECUTING(1)，本类只认 code>=2，自动忽略）；
-     * 且对同名命令有 1.2s 去重、探针自身有 probe_running_ 互斥 —— 必须**单发一次**，
-     * 不能像 run_check_stand 那样切片重发（重发会被 REJECTED 误判成失败）。
-     * 小脑只允许 Passive 态执行，调用方负责保证当前状态。
+     * 单发一次 probe_motors，等待 feedback 的 executing 和全部 16 台可控结果。
+     * cmd_state 的 DONE 不代表异步探针完成，不能单独放行起立。
+     * 无响应电机、FAILED/REJECTED、取消或超时均返回 false。
+     * 调用方必须先等待 Passive 态，不能在状态 Unknown 时跳过探针。
      */
     [[nodiscard]] bool run_probe_motors(double timeout_sec);
 
@@ -184,6 +206,7 @@ public:
     [[nodiscard]] double get_stand_settle_s() const        { return stand_settle_s_; }
     /** 其他状态切换的默认稳定延迟，默认 1s */
     [[nodiscard]] double get_transition_settle_s() const   { return transition_settle_s_; }
+    [[nodiscard]] double get_precondition_timeout_s() const { return precondition_timeout_s_; }
 
     [[nodiscard]] std::string get_check_stand_error() const {
         std::lock_guard<std::mutex> lock(check_stand_mutex_);
@@ -191,6 +214,8 @@ public:
     }
 
 private:
+    std::unique_ptr<mission::GotoTuning> goto_tuning_;
+    std::unique_ptr<LocalSafety> local_safety_;
     void lidar_cb(const ros2_tools::msg::LidarPose::SharedPtr msg);
     void dog_state_cb(const std_msgs::msg::String::SharedPtr msg);
     void protocol_state_cb(const std_msgs::msg::String::SharedPtr msg);
@@ -217,6 +242,8 @@ private:
     mutable std::mutex state_mutex_;
     DroneState         state_{};
     bool               has_state_{false};
+    std::uint64_t      navigation_sample_id_{0};
+    std::chrono::steady_clock::time_point navigation_received_at_{};
     rclcpp::Time       state_stamp_{0, 0, RCL_ROS_TIME};  // 位姿到货时刻
     std::string        current_fsm_state_{"Unknown"};
     bool               gamepad_override_{false};          // 手柄是否抢了控制权
@@ -225,6 +252,8 @@ private:
     mutable std::mutex cmd_mutex_;
     std::string        pending_cmd_;          // 正在等的命令名；空 = 没在等
     int                pending_code_{-1};     // 终态码；-1 = 还没收到
+    bool               probe_started_{false}; // 本次探针已收到 executing
+    int                probe_result_{-1};     // 实际探针结果；2 成功 / 3 失败
     std::string        pending_phase_;        // 文字形式，写日志用
     std::string        pending_state_;        // 终态时狗实际的 FSM 状态
 

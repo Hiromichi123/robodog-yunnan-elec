@@ -24,24 +24,52 @@ launch_ros 的 `parameters=` 会生成一份**按节点名索引**的参数文�
 命令行 `-p` 是本板验证过的路子（手动 `ros2 run ... -p forward_duration_s:=0.0` 一直这么用）。
 """
 
+import importlib.util
+from pathlib import Path
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument, OpaqueFunction
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
-def generate_launch_description():
+def _config_module():
+    path = Path(get_package_share_directory('core_2026')) / 'safety_config.py'
+    spec = importlib.util.spec_from_file_location('dog_safety_config', path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _start(context):
+    module = _config_module()
+    data = module.startup()
+    override = LaunchConfiguration('safety_mode').perform(context)
+    if override:
+        data['config']['mode'] = override
+        data = module.document(data['config'])
+    params = module.control_parameters(data)
+    # Runtime validity checks apply without an artificial calibration requirement.
+    args = ['--ros-args', '-p', 'wait_for_mission:=true', '-p', 'confirm_transitions:=false']
+    for name, value in params.items():
+        rendered = str(value).lower() if isinstance(value, bool) else str(value)
+        args.extend(['-p', name + ':=' + rendered])
     dog_node = Node(
         package='core_2026',
         executable='dog_node',
         name='dog_node',
         output='screen',
         emulate_tty=True,
-        arguments=[
-            '--ros-args',
-            # 网页驱动：起来后等 /dog/mission，不跑固定流程
-            '-p', 'wait_for_mission:=true',
-            # 终端闸门关掉（换成网页闸门，理由见文件头）
-            '-p', 'confirm_transitions:=false',
-        ],
+        additional_env={"RMW_IMPLEMENTATION": "rmw_cyclonedds_cpp"},
+        arguments=args,
     )
+    return [dog_node]
 
-    return LaunchDescription([dog_node])
+
+def generate_launch_description():
+    return LaunchDescription([
+        DeclareLaunchArgument('safety_mode', default_value='',
+                              choices=['', 'disabled', 'observe', 'enforce'],
+                              description='留空加载已保存配置；disabled/observe 无碰撞保护'),
+        OpaqueFunction(function=_start),
+    ])

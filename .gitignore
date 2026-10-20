@@ -3,3 +3,10 @@ install/
 log/
 __pycache__/
 *.pyc
+
+# Editor and dated launch backups
+*.bak
+*.bak-*
+*.bak[0-9]-*
+*.orig
+*~

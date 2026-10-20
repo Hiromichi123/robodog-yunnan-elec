@@ -12,6 +12,9 @@ endif()
 # ── 依赖 ──────────────────────────────────────────────────────
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rcl_interfaces REQUIRED)
+find_package(std_srvs REQUIRED)
+find_package(Threads REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
@@ -60,6 +63,9 @@ set(TEST_MAX_CURVATURE_SOURCES
 # ── 机器狗源文件 ──────────────────────────────────────────
 set(DOG_SOURCES
   src/layer1_hal/robot_dog_hal.cpp
+  src/layer1_hal/goto_tuning.cpp
+  src/layer1_hal/goto_persistence.cpp
+  src/layer1_hal/local_safety.cpp
   src/layer2_control/pid_controller.cpp
   src/layer2_control/flight_controller.cpp
   src/layer3_mission/mission_executor.cpp
@@ -81,6 +87,8 @@ target_include_directories(dog_node PUBLIC
 )
 
 ament_target_dependencies(dog_node
+  rcl_interfaces
+  std_srvs
   rclcpp
   geometry_msgs
   nav_msgs
@@ -106,6 +114,25 @@ target_include_directories(mission_plan_selftest PRIVATE
   $ENV{CONDA_PREFIX}/include
 )
 # 不 install：这是开发自测工具，不是运行时组件。
+add_executable(local_safety_selftest test/local_safety_selftest.cpp src/layer1_hal/local_safety.cpp)
+target_include_directories(local_safety_selftest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+ament_target_dependencies(local_safety_selftest rclcpp rcl_interfaces ros2_tools std_msgs nav_msgs)
+add_executable(local_recovery_selftest test/local_recovery_selftest.cpp)
+target_include_directories(local_recovery_selftest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+add_executable(soft_buffer_selftest test/soft_buffer_selftest.cpp)
+target_include_directories(soft_buffer_selftest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+add_executable(local_navigation_selftest test/local_navigation_selftest.cpp)
+target_include_directories(local_navigation_selftest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+add_executable(goto_control_selftest test/goto_control_selftest.cpp)
+target_include_directories(goto_control_selftest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+add_executable(goto_config_selftest test/goto_config_selftest.cpp)
+target_include_directories(goto_config_selftest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(goto_config_selftest Threads::Threads)
+add_executable(goto_tuning_selftest test/goto_tuning_selftest.cpp src/layer1_hal/goto_tuning.cpp src/layer1_hal/goto_persistence.cpp)
+target_include_directories(goto_tuning_selftest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+ament_target_dependencies(goto_tuning_selftest rclcpp rcl_interfaces std_srvs)
+add_executable(goto_persistence_selftest test/goto_persistence_selftest.cpp src/layer1_hal/goto_persistence.cpp)
+target_include_directories(goto_persistence_selftest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src $ENV{CONDA_PREFIX}/include)
 
 # ── 无人机 / 小车目标（需要 mavros_msgs，缺则整块跳过）──────────
 if(mavros_msgs_FOUND)
@@ -155,5 +182,7 @@ install(PROGRAMS scripts/fake_lidar_data.py
         DESTINATION lib/${PROJECT_NAME}
         RENAME fake_lidar_data)
 install(DIRECTORY launch/ DESTINATION share/${PROJECT_NAME}/)
+install(FILES scripts/safety_config.py DESTINATION share/${PROJECT_NAME})
+install(PROGRAMS scripts/start_local_safety.py DESTINATION lib/${PROJECT_NAME})
 
 ament_package()

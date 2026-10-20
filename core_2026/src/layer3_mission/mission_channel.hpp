@@ -4,6 +4,7 @@
 #include <functional>
 #include <mutex>
 #include <string>
+#include <vector>
 
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
@@ -28,6 +29,14 @@ namespace mission {
  */
 class DogMissionChannel : public rclcpp::Node {
 public:
+    struct NavigationResult {
+        int index{0};
+        std::string outcome;  // arrived / adjusted_arrival / blocked
+        std::string reason;
+        double original_x{0.0}, original_y{0.0};
+        double effective_x{0.0}, effective_y{0.0};
+    };
+
     /** 一帧状态。字段就是网页上要显示的东西。 */
     struct Status {
         std::string phase{"idle"};   // idle/running/waiting_confirm/done/aborted/failed/rejected
@@ -37,6 +46,10 @@ public:
         std::string prompt;          // waiting_confirm 时给操作员看的那句话
         int    index{-1};            // 当前步骤（从 1 起；-1 = 无）
         int    total{0};
+        std::string safety_mode{"disabled"};
+        std::string navigation_state;
+        // 本任务累积结果，后续步骤/心跳/完成状态不能抹掉修正到达记录。
+        std::vector<NavigationResult> navigation_results;
         // 当前步骤的起始时刻：elapsed_s 由发布那一刻算，省得主线程一边跑一边刷时间
         std::chrono::steady_clock::time_point step_started_at{};
     };

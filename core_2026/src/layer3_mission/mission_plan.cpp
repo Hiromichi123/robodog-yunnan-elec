@@ -69,6 +69,7 @@ const char* to_string(StepType t) {
         case StepType::Locomotion: return "locomotion";
         case StepType::Move:       return "move";
         case StepType::Goto:       return "goto";
+        case StepType::GotoPose:   return "goto_pose";
         case StepType::Wait:       return "wait";
         case StepType::GetDown:    return "getdown";
     }
@@ -81,6 +82,7 @@ bool step_type_from_string(const std::string& s, StepType& out) {
     if (s == "locomotion")  { out = StepType::Locomotion; return true; }
     if (s == "move")        { out = StepType::Move;       return true; }
     if (s == "goto")        { out = StepType::Goto;       return true; }
+    if (s == "goto_pose")   { out = StepType::GotoPose;   return true; }
     if (s == "wait")        { out = StepType::Wait;       return true; }
     if (s == "getdown")     { out = StepType::GetDown;    return true; }
     return false;
@@ -92,6 +94,7 @@ bool is_dangerous_step(StepType t) {
         case StepType::Locomotion:
         case StepType::Move:
         case StepType::Goto:
+        case StepType::GotoPose:
         case StepType::GetDown:
             return true;
         case StepType::CheckStand:
@@ -102,7 +105,7 @@ bool is_dangerous_step(StepType t) {
 }
 
 bool needs_rl_mode(StepType t) {
-    return t == StepType::Move || t == StepType::Goto;
+    return t == StepType::Move || t == StepType::Goto || t == StepType::GotoPose;
 }
 
 ParseResult parse_mission_json(const std::string& text) {
@@ -200,7 +203,7 @@ ParseResult parse_mission_json(const std::string& text) {
         }
         if (!step_type_from_string(type_s, st.type)) {
             r.error = where + "不认识的 type=" + type_s +
-                      "（可用：check_stand / getup / locomotion / move / goto / wait / getdown）";
+                      "（可用：check_stand / getup / locomotion / move / goto / goto_pose / wait / getdown）";
             return r;
         }
 
@@ -239,7 +242,13 @@ ParseResult parse_mission_json(const std::string& text) {
         rd.num("duration_s", st.duration_s);
         rd.num("x", st.x);
         rd.num("y", st.y);
-        rd.num("yaw", st.yaw);
+        if (st.type == StepType::GotoPose &&
+            (!js.contains("yaw") || js["yaw"].is_null())) {
+            r.error = where + "goto_pose 必须显式提供 yaw（rad）";
+            return r;
+        }
+        // 普通 goto 的旧 yaw 字段已退役，不再读取或参与校验。
+        if (st.type != StepType::Goto) rd.num("yaw", st.yaw);
         rd.num("goto_timeout_s", st.goto_timeout_s);
         if (!rd.ok) return r;
 
@@ -294,10 +303,11 @@ std::string validate_plan(const MissionPlan& plan) {
                 break;
 
             case StepType::Goto:
+            case StepType::GotoPose:
                 if (!(std::abs(st.x) <= kMaxAbsXy) || !(std::abs(st.y) <= kMaxAbsXy)) {
                     return where + "目标点 (x, y) 超出 ±" + fmt_num(kMaxAbsXy) + " m 范围";
                 }
-                if (!(std::abs(st.yaw) <= kTwoPi + 1e-6)) {
+                if (st.type == StepType::GotoPose && !(std::abs(st.yaw) <= kTwoPi + 1e-6)) {
                     return where + "yaw 超出 ±2π";
                 }
                 if (!(st.goto_timeout_s > 0.0)) {

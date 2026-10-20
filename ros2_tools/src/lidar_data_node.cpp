@@ -10,6 +10,12 @@
  * - real_robot_odom_topic (string): 实机里程计话题，默认"/aft_mapped_to_init"
  */
 #include <cmath>
+#include "ros2_tools/navigation_frame.hpp"
+#include <chrono>
+#include <sstream>
+#include <iomanip>
+#include <random>
+#include <std_msgs/msg/string.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -21,6 +27,12 @@
 class LidarDataNode : public rclcpp::Node {
 public:
     LidarDataNode() : Node("lidar_data_node") {
+        // Even identical numerical startup origins must identify a new process.
+        std::random_device random;
+        std::ostringstream session;
+        session << std::hex << std::chrono::system_clock::now().time_since_epoch().count()
+                << '-' << random() << random();
+        session_id_ = session.str();
         // 参数声明
         this->declare_parameter<bool>("use_simulation", false);
         this->declare_parameter<std::string>("simulation_odom_topic", "/absolute_pose");
@@ -48,6 +60,8 @@ public:
         // 注意：改的是**旋转整体**（位置会跟着转到真实的 base 原点），
         // 不是只给发布的 yaw 加 180 —— 那样位置和朝向会各说各话。
         this->declare_parameter<double>("mount_yaw", M_PI);
+        this->declare_parameter<bool>("normalize_start_pose", true);
+        normalize_start_ = this->get_parameter("normalize_start_pose").as_bool();
         // 获取参数值
         using_gazebo_ = this->get_parameter("use_simulation").as_bool();
         std::string sim_topic = this->get_parameter("simulation_odom_topic").as_string();
@@ -73,18 +87,17 @@ public:
         // 雷达数据发布
         lidar_pub = this->create_publisher<ros2_tools::msg::LidarPose>("lidar_data", 10);
         RCLCPP_INFO(this->get_logger(), "创建发布 lidar_data");
+        world_pub_ = this->create_publisher<ros2_tools::msg::LidarPose>("lidar_data_world", 10);
+        origin_pub_ = this->create_publisher<std_msgs::msg::String>(
+            "navigation_origin", rclcpp::QoS(1).reliable().transient_local());
+        origin_timer_ = this->create_wall_timer(std::chrono::seconds(1), [this]() {
+            if (origin_ready_) publishOrigin();
+        });
 
-        // 订阅 PointLIO 里程计（实机模式）
+        const auto topic = using_gazebo_ ? sim_topic : real_topic;
         odom_sub = this->create_subscription<nav_msgs::msg::Odometry>(
-            real_topic, 10, 
-            [this](const nav_msgs::msg::Odometry::SharedPtr msg){ LidarDataNode::odomCallback(msg);});
-        RCLCPP_INFO(this->get_logger(), "创建实机odom订阅: %s", real_topic.c_str());
-
-        // 订阅仿真里程计（仿真模式）
-        local_position_sub = this->create_subscription<nav_msgs::msg::Odometry>(
-            sim_topic, 10, 
-            [this](const nav_msgs::msg::Odometry::SharedPtr msg){ LidarDataNode::odomCallback(msg);});
-        RCLCPP_INFO(this->get_logger(), "创建仿真odom订阅: %s", sim_topic.c_str());
+            topic, 10, [this](const nav_msgs::msg::Odometry::SharedPtr msg) { odomCallback(msg); });
+        RCLCPP_INFO(this->get_logger(), "里程计订阅: %s", topic.c_str());
     }
 
     // 兼容版odom回调
@@ -100,6 +113,10 @@ public:
         double z = pose.position.z;
         tf2::Quaternion q(pose.orientation.x, pose.orientation.y,
                         pose.orientation.z, pose.orientation.w);
+        if (!std::isfinite(x) || !std::isfinite(y) || !std::isfinite(z) ||
+            !std::isfinite(q.x()) || !std::isfinite(q.y()) || !std::isfinite(q.z()) ||
+            !std::isfinite(q.w()) || !std::isfinite(q.length2()) || q.length2() < 1e-12) return;
+        q.normalize();
         tf2::Matrix3x3 m(q);
         double roll, pitch, yaw;
         m.getRPY(roll, pitch, yaw);
@@ -110,9 +127,7 @@ public:
             // 其中 T_base_lidar 就是安装变换。
             tf2::Transform T_world_lidar;
             T_world_lidar.setOrigin(tf2::Vector3(x, y, z));
-            T_world_lidar.setRotation(tf2::Quaternion(
-                pose.orientation.x, pose.orientation.y,
-                pose.orientation.z, pose.orientation.w));
+            T_world_lidar.setRotation(q);
 
             tf2::Transform T_base_lidar;
             T_base_lidar.setOrigin(tf2::Vector3(mount_x_, mount_y_, mount_z_));
@@ -124,8 +139,27 @@ public:
             const tf2::Vector3 o = T_world_base.getOrigin();
             tf2::Matrix3x3 mb(T_world_base.getRotation());
             x = o.x(); y = o.y(); z = o.z();
+            q = T_world_base.getRotation();
             mb.getRPY(roll, pitch, yaw);
         }
+
+        ros2_tools::msg::LidarPose world;
+        world.x=x; world.y=y; world.z=z;
+        world.roll=roll; world.pitch=pitch; world.yaw=yaw;
+        world_pub_->publish(world);
+        if (!origin_ready_) {
+            x0_=normalize_start_ ? x : 0; y0_=normalize_start_ ? y : 0;
+            z0_=normalize_start_ ? z : 0; yaw0_=normalize_start_ ? yaw : 0;
+            origin_ready_=true;
+            publishOrigin();
+            RCLCPP_INFO(this->get_logger(), "导航原点: (%.3f, %.3f, %.3f), yaw=%.2f deg",
+                        x0_, y0_, z0_, yaw0_*180/M_PI);
+        }
+        const auto nav = world_to_navigation(x, y, z, x0_, y0_, z0_, yaw0_);
+        x = nav[0]; y = nav[1]; z = nav[2];
+        tf2::Quaternion rotation;
+        rotation.setRPY(0,0,-yaw0_);
+        tf2::Matrix3x3(rotation*q).getRPY(roll,pitch,yaw);
 
         // 归一化到 (-π, π]
         // 原为 [0, 2π)：副作用是"负零"会变成 2π —— 机器人水平静止时 pitch
@@ -164,6 +198,20 @@ public:
     }
 
 private:
+    void publishOrigin() {
+        std::ostringstream out;
+        out << std::setprecision(17)
+            << "{\"frame\":\"" << (normalize_start_ ? "startup_navigation" : "slam_world")
+            << "\",\"session_id\":\"" << session_id_ << "\",\"x\":" << x0_ << ",\"y\":" << y0_
+            << ",\"z\":" << z0_ << ",\"yaw\":" << yaw0_ << "}";
+        std_msgs::msg::String msg; msg.data=out.str(); origin_pub_->publish(msg);
+    }
+    std::string session_id_;
+    bool normalize_start_=true, origin_ready_=false;
+    double x0_=0, y0_=0, z0_=0, yaw0_=0;
+    rclcpp::Publisher<ros2_tools::msg::LidarPose>::SharedPtr world_pub_;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr origin_pub_;
+    rclcpp::TimerBase::SharedPtr origin_timer_;
     bool using_gazebo_; // 仿真开关
     bool   apply_mount_ = true;   // 是否把位姿从雷达系换算到车体系
     double mount_x_ = 0.286, mount_y_ = 0.0, mount_z_ = 0.0;

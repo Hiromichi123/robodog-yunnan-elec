@@ -5,15 +5,22 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# RoboStack 不设置 LD_LIBRARY_PATH；生成的消息库也需要自己的间接依赖搜索路径。
+if(DEFINED ENV{CONDA_PREFIX})
+  list(APPEND CMAKE_INSTALL_RPATH "$ENV{CONDA_PREFIX}/lib" "${CMAKE_INSTALL_PREFIX}/lib")
+endif()
+
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
@@ -27,7 +34,11 @@ find_package(OpenCV QUIET)
 find_package(cv_bridge QUIET)
 find_package(realsense2 QUIET)
 
-rosidl_generate_interfaces(${PROJECT_NAME} "msg/LidarPose.msg")
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/LidarPose.msg"
+  "msg/LocalSafetyMap.msg"
+  DEPENDENCIES std_msgs nav_msgs
+)
 ament_export_dependencies(rosidl_default_runtime)
 
 # ── 必需目标 ──────────────────────────────────────────────────────
@@ -58,8 +69,19 @@ target_include_directories(lidar_data_node PUBLIC
 rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
 target_link_libraries(lidar_data_node ${cpp_typesupport_target})
 
-ament_target_dependencies(lidar_data_node rclcpp geometry_msgs tf2 tf2_geometry_msgs nav_msgs)
+ament_target_dependencies(lidar_data_node rclcpp std_msgs geometry_msgs tf2 tf2_geometry_msgs nav_msgs)
 ament_target_dependencies(lidar_to_px4_bridge rclcpp geometry_msgs nav_msgs)
+
+add_executable(local_obstacle_node src/local_obstacle_node.cpp)
+target_include_directories(local_obstacle_node PRIVATE include $ENV{CONDA_PREFIX}/include)
+target_link_libraries(local_obstacle_node ${cpp_typesupport_target})
+ament_target_dependencies(local_obstacle_node
+  rclcpp std_msgs nav_msgs sensor_msgs geometry_msgs tf2 tf2_ros tf2_geometry_msgs)
+add_executable(local_safety_evidence_selftest test/local_safety_evidence_selftest.cpp)
+target_include_directories(local_safety_evidence_selftest PRIVATE include)
+add_executable(bounded_pose_buffer_selftest test/bounded_pose_buffer_selftest.cpp)
+target_include_directories(bounded_pose_buffer_selftest PRIVATE include)
+ament_target_dependencies(bounded_pose_buffer_selftest tf2)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -68,7 +90,7 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-install(TARGETS lidar_data_node DESTINATION lib/${PROJECT_NAME})
+install(TARGETS lidar_data_node local_obstacle_node DESTINATION lib/${PROJECT_NAME})
 install(TARGETS lidar_to_px4_bridge DESTINATION lib/${PROJECT_NAME})
 # 注：上游此处重复 install 了一次 lidar_to_px4_bridge，已去掉（无功能影响）
 if(TARGET ground_camera_node)

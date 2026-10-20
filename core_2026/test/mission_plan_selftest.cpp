@@ -136,7 +136,9 @@ int parse_file_mode(const char* path) {
                 std::printf("vx=%.2f vy=%.2f wz=%.2f × %.1fs", st.vx, st.vy, st.wz,
                             st.duration_s); break;
             case StepType::Goto:
-                std::printf("(%.2f, %.2f, %.2f) 超时 %.0fs", st.x, st.y, st.yaw,
+                std::printf("位置 (%.2f, %.2f) 超时 %.0fs", st.x, st.y, st.goto_timeout_s); break;
+            case StepType::GotoPose:
+                std::printf("位置＋航向 (%.2f, %.2f, %.2f) 超时 %.0fs", st.x, st.y, st.yaw,
                             st.goto_timeout_s); break;
             case StepType::Wait:
                 std::printf("%.1fs", st.duration_s); break;
@@ -303,7 +305,7 @@ int main(int argc, char** argv) {
     std::printf("[8] type 字符串往返\n");
     {
         const StepType all[] = {StepType::CheckStand, StepType::GetUp, StepType::Locomotion,
-                                StepType::Move, StepType::Goto, StepType::Wait,
+                                StepType::Move, StepType::Goto, StepType::GotoPose, StepType::Wait,
                                 StepType::GetDown};
         bool round_trip = true;
         for (StepType t : all) {
@@ -313,6 +315,36 @@ int main(int argc, char** argv) {
         check(round_trip, "每个类型的名字都能原样解析回来（网页照着 to_string 写）");
         StepType dummy{};
         check(!step_type_from_string("passive", dummy), "passive 不再是合法类型");
+    }
+
+    // 两类到点契约：旧 goto 的 yaw 不会隐式升级为 goto_pose。
+    {
+        const auto plan = must_parse(
+            R"({"steps":[{"type":"goto","x":1,"y":2,"yaw":99},
+                         {"type":"goto_pose","x":3,"y":4,"yaw":1.57}]})", "两类到点");
+        must_validate(plan, "普通点忽略旧 yaw，有向点校验 yaw");
+        check(plan.steps.size() == 2 && plan.steps[0].type == StepType::Goto &&
+              plan.steps[0].yaw == 0 && plan.steps[1].type == StepType::GotoPose &&
+              plan.steps[1].yaw == 1.57, "两类到点字段不混淆");
+        check(is_dangerous_step(StepType::GotoPose), "goto_pose 要确认");
+        check(needs_rl_mode(StepType::Goto) && needs_rl_mode(StepType::GotoPose),
+              "两类到点都要求 RL");
+        must_validate(must_parse(R"({"steps":[{"type":"goto","x":1,"y":2}]})",
+                                 "普通点不带 yaw"), "普通点无需 yaw");
+        must_fail_parse(R"({"steps":[{"type":"goto_pose","x":1,"y":2}]})",
+                        "yaw", "有向点缺 yaw");
+        must_fail_parse(R"({"steps":[{"type":"goto_pose","yaw":null}]})",
+                        "yaw", "有向点 yaw=null");
+        must_fail_parse(R"({"steps":[{"type":"goto_pose","yaw":"1"}]})",
+                        "必须是数字", "有向点 yaw 字符串");
+        must_fail_parse(R"({"steps":[{"type":"goto_pose","yaw":1e999}]})",
+                        "合法", "有向点 yaw 溢出");
+        must_reject(must_parse(R"({"steps":[{"type":"goto_pose","yaw":7}]})",
+                               "有向点角度超限"), "yaw", "有向点 yaw 超过2π");
+        must_reject(must_parse(R"({"steps":[{"type":"goto_pose","x":51,"yaw":0}]})",
+                               "有向点位置超限"), "范围", "有向点共用坐标限制");
+        must_reject(must_parse(R"({"steps":[{"type":"goto_pose","yaw":0,"goto_timeout_s":0}]})",
+                               "有向点零超时"), "goto_timeout_s", "有向点共用超时限制");
     }
 
     std::printf("\n== %d 项，失败 %d 项 ==\n", g_total, g_failed);

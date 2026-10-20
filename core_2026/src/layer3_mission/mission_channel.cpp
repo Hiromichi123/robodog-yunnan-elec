@@ -136,7 +136,18 @@ void DogMissionChannel::publish_status_now() {
         {"index", s.index},
         {"total", s.total},
         {"elapsed_s", elapsed},
+        {"safety_mode", s.safety_mode},
+        {"navigation_state", s.navigation_state},
+        {"navigation_results", nlohmann::json::array()},
     };
+    for (const auto& result : s.navigation_results) {
+        if (j["navigation_results"].size() >= 200) break;
+        j["navigation_results"].push_back({
+            {"index", result.index}, {"outcome", result.outcome}, {"reason", result.reason},
+            {"original", {{"x", result.original_x}, {"y", result.original_y}}},
+            {"effective", {{"x", result.effective_x}, {"y", result.effective_y}}},
+        });
+    }
 
     auto msg = std_msgs::msg::String();
     msg.data = j.dump();
