@@ -229,6 +229,17 @@ bool RobotDogHAL::is_gamepad_override() const {
     return gamepad_override_;
 }
 
+bool RobotDogHAL::dog_feedback_fresh(double max_age_s) const {
+    std::lock_guard<std::mutex> lock(state_mutex_);
+    return std::chrono::duration<double>(std::chrono::steady_clock::now() - dog_feedback_at_).count() <= max_age_s;
+}
+
+bool RobotDogHAL::getdown_settled() const {
+    std::lock_guard<std::mutex> lock(state_mutex_);
+    return current_fsm_state_ == "RLFSMStatePassive" && posture_settled_ &&
+           std::chrono::duration<double>(std::chrono::steady_clock::now() - posture_feedback_at_).count() <= 1.0;
+}
+
 // ===== ICommandPublisher =====
 void RobotDogHAL::publish_velocity(Velocity& velocity) {
     auto msg = geometry_msgs::msg::Twist();
@@ -259,6 +270,8 @@ void RobotDogHAL::publish_velocity(Velocity& velocity) {
                             "[近场安全] 停速：%s", local_safety_->reason().c_str());
     }
     // vz/vpitch/vroll ignored for ground robot
+    std::lock_guard<std::mutex> publish_lock(takeoff_publish_mutex_);
+    if (takeoff_motion_inhibited()) msg = geometry_msgs::msg::Twist();
     cmd_vel_pub_->publish(msg);
 }
 
@@ -270,6 +283,8 @@ void RobotDogHAL::publish_recovery_reverse(Velocity& velocity) {
           nav.available&&age>=0&&age<=.5,velocity.get_vx(),velocity.get_vyaw())) {
         msg.linear.x=velocity.get_vx();
     } else RCLCPP_WARN_THROTTLE(get_logger(),*get_clock(),1000,"[恢复后退] 停速：%s",local_safety_->reason().c_str());
+    std::lock_guard<std::mutex> publish_lock(takeoff_publish_mutex_);
+    if (takeoff_motion_inhibited()) msg = geometry_msgs::msg::Twist();
     cmd_vel_pub_->publish(msg);
 }
 
@@ -308,6 +323,15 @@ int64_t RobotDogHAL::get_last_dvs_detect_time_ns() const {
 
 // ===== 命令生命周期 =====
 void RobotDogHAL::request_fsm_transition(const std::string& fsm_state) {
+    std::lock_guard<std::mutex> publish_lock(takeoff_publish_mutex_);
+    if (takeoff_motion_inhibited() &&
+        ((fsm_state == "getdown" && (takeoff_action_cancelled_ || !dog_feedback_fresh() || is_gamepad_override())) ||
+         (fsm_state != "getdown" && fsm_state != "status" && fsm_state != "vel_stop"))) {
+        std::lock_guard<std::mutex> lock(cmd_mutex_);
+        pending_cmd_ = fsm_state; pending_code_ = 3;
+        pending_phase_ = "TAKEOFF_INHIBITED";
+        return;
+    }
     {
         // 先清上一次的终态，再记下这次要等的命令。
         // 顺序很重要：如果先发后清，回包快的话会被自己清掉。
@@ -403,6 +427,7 @@ bool RobotDogHAL::safe_go_down(double settle_s) {
     const int    max_attempts = 3;
 
     for (int attempt = 1; attempt <= max_attempts; ++attempt) {
+        if (takeoff_motion_inhibited() && takeoff_action_cancelled_) return false;
         const std::string st = get_current_fsm_state();
 
         if (st == "RLFSMStatePassive" || st == "RLFSMStateGetDown") {
@@ -506,16 +531,23 @@ void RobotDogHAL::dog_state_cb(const std_msgs::msg::String::SharedPtr msg) {
 
     std::lock_guard<std::mutex> lock(state_mutex_);
     current_fsm_state_ = st;
+    dog_feedback_at_ = std::chrono::steady_clock::now();
     if (has_gamepad) gamepad_override_ = gamepad;
 }
 
 void RobotDogHAL::protocol_state_cb(const std_msgs::msg::String::SharedPtr msg) {
-    std::string state, gamepad;
+    std::string state, gamepad, settled;
+    const bool has_settled = json_get_str(msg->data, "settled", settled);
     if (!json_get_str(msg->data, "fsm", state)) json_get_str(msg->data, "state", state);
     if (state.rfind("RLFSMState", 0) != 0) return;
     const bool has_gamepad = json_get_str(msg->data, "gamepad_override", gamepad);
     std::lock_guard<std::mutex> lock(state_mutex_);
     current_fsm_state_ = state;
+    dog_feedback_at_ = std::chrono::steady_clock::now();
+    if (has_settled) {
+        posture_settled_ = settled == "true";
+        posture_feedback_at_ = dog_feedback_at_;
+    }
     if (has_gamepad) gamepad_override_ = (gamepad == "true");
 }
 
@@ -546,7 +578,8 @@ std::string RobotDogHAL::get_current_fsm_state() const {
     return current_fsm_state_;
 }
 
-bool RobotDogHAL::wait_for_fsm_state(const std::string& target, double timeout_sec) {
+bool RobotDogHAL::wait_for_fsm_state(const std::string& target, double timeout_sec,
+                                     bool allow_takeoff_inhibit) {
     // target 支持 "A|B" 多个候选，任一命中即算到达。
     // getdown 非要这个不可：RLFSMStateGetDown 是**过渡态**，2s 动画跑完会自动
     // 转到 RLFSMStatePassive，只等 GetDown 会擦肩而过、误报超时
@@ -571,6 +604,7 @@ bool RobotDogHAL::wait_for_fsm_state(const std::string& target, double timeout_s
     auto start = this->now();
     rclcpp::Rate rate(10);
     while (rclcpp::ok()) {
+        if (takeoff_motion_inhibited() && (!allow_takeoff_inhibit || takeoff_action_cancelled_)) return false;
         if (hit(get_current_fsm_state())) {
             return true;
         }
@@ -761,7 +795,7 @@ bool RobotDogHAL::transition_to(const std::string& cmd,
     if (!require_state.empty()) {
         RCLCPP_INFO(this->get_logger(),
                     "[RobotDogHAL] 前置判断：等当前状态 → %s", require_state.c_str());
-        if (!wait_for_fsm_state(require_state, precondition_timeout_s_)) {
+        if (!wait_for_fsm_state(require_state, precondition_timeout_s_, cmd == "getdown")) {
             RCLCPP_ERROR(this->get_logger(),
                          "[RobotDogHAL] ✗ 前置判断不满足：要求 %s，实际 %s —— 不发 '%s'",
                          require_state.c_str(), get_current_fsm_state().c_str(),
@@ -788,7 +822,7 @@ bool RobotDogHAL::transition_to(const std::string& cmd,
     // wait_for_command_done 只保证状态码到了 DONE(2)；这里再要一次实证：
     // 读回来的 FSM 状态必须真的等于期望值，否则不算切换成功。
     if (!expect_state.empty()) {
-        if (!wait_for_fsm_state(expect_state, fsm_confirm_timeout_s_)) {
+        if (!wait_for_fsm_state(expect_state, fsm_confirm_timeout_s_, cmd == "getdown")) {
             RCLCPP_ERROR(this->get_logger(),
                          "[RobotDogHAL] ✗ 状态码未变到 %s（当前 %s）—— 视为 '%s' 未完成",
                          expect_state.c_str(), get_current_fsm_state().c_str(),
@@ -809,6 +843,7 @@ bool RobotDogHAL::transition_to(const std::string& cmd,
         rclcpp::Rate rate(20);
         const auto t_wait = this->now();
         while (rclcpp::ok() && (this->now() - t_wait).seconds() < remain) {
+            if (takeoff_motion_inhibited() && (cmd != "getdown" || takeoff_action_cancelled_)) return false;
             rate.sleep();
         }
     }

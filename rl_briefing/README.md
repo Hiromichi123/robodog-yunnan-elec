@@ -27,7 +27,7 @@
 
 ## 起
 
-跟着链路一起起（`slam_only.launch.py` 里有它），或单独起：
+随任务程序 `core_2026/dog_web.launch.py` 自动启动（不依赖 SLAM 就绪），或单独起：
 
 ```bash
 ~/rosrun.sh 'ros2 launch rl_briefing briefing_player.launch.py'

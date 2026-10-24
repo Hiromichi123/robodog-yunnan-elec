@@ -43,6 +43,10 @@ DogSystem::DogSystem() {
         if (hal_)       hal_->cancel_pending_command();
     });
 
+    channel_->set_takeoff_hook([this]() {
+        if (plan_exec_) plan_exec_->request_takeoff_getdown();
+    });
+
     // Spin 线程：一个 executor 带两个节点（HAL + 任务通道）。
     // 单线程、共用 wait set —— 回调之间没有新的并发，主线程仍独占所有阻塞操作。
     auto executor = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
@@ -97,6 +101,7 @@ void DogSystem::run() {
 bool DogSystem::wait_for_lidar() {
     RCLCPP_INFO(hal_->get_logger(), "[PreFlight] 等待 LiDAR 定位...");
     while (rclcpp::ok() && !hal_->has_state()) {
+        plan_exec_->service_takeoff_getdown();
         RCLCPP_WARN_THROTTLE(hal_->get_logger(), *hal_->get_clock(), 5000,
             "[PreFlight] 未收到 lidar_data 定位数据");
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -123,6 +128,7 @@ void DogSystem::run_mission_loop() {
     std::string doc;
 
     while (rclcpp::ok()) {
+        if (plan_exec_->service_takeoff_getdown()) { rate.sleep(); continue; }
         if (!channel_->take_doc(doc)) {
             rate.sleep();
             continue;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <atomic>
 #include <cstdint>
 #include <mutex>
 #include <memory>
@@ -107,7 +108,8 @@ public:
     [[nodiscard]] int wait_for_command_code(double timeout_sec, bool verbose = true);
 
     [[nodiscard]] std::string get_current_fsm_state() const;
-    [[nodiscard]] bool wait_for_fsm_state(const std::string& target, double timeout_sec);
+    [[nodiscard]] bool wait_for_fsm_state(const std::string& target, double timeout_sec,
+                                          bool allow_takeoff_inhibit = false);
 
     // === 状态切换把关（本版新增）===
     /**
@@ -168,6 +170,8 @@ public:
 
     /** 急停专用：把主线程正在等的命令伪造成终态，让它立刻返回（见 .cpp）。 */
     void cancel_pending_command();
+    void cancel_takeoff_action() { takeoff_action_cancelled_ = true; cancel_pending_command(); }
+    void prepare_takeoff_action() { takeoff_action_cancelled_ = false; }
 
     /**
      * 失败/中止时的唯一安全动作：回趴下（getdown 平滑趴下，不用 passive 卸力）。
@@ -184,6 +188,13 @@ public:
 
     /** 手柄是否抢走了控制权（小脑行为：抢走后所有指令被忽略）。 */
     [[nodiscard]] bool is_gamepad_override() const;
+    void inhibit_takeoff_motion(bool on) {
+        std::lock_guard<std::mutex> lock(takeoff_publish_mutex_);
+        takeoff_motion_inhibited_.store(on);
+    }
+    [[nodiscard]] bool takeoff_motion_inhibited() const { return takeoff_motion_inhibited_.load(); }
+    [[nodiscard]] bool dog_feedback_fresh(double max_age_s = 1.0) const;
+    [[nodiscard]] bool getdown_settled() const;
 
     /** 网页驱动模式：true = 等 /dog/mission 上的任务，而不是跑固定流程。 */
     [[nodiscard]] bool get_wait_for_mission() const { return wait_for_mission_; }
@@ -246,6 +257,10 @@ private:
     std::chrono::steady_clock::time_point navigation_received_at_{};
     rclcpp::Time       state_stamp_{0, 0, RCL_ROS_TIME};  // 位姿到货时刻
     std::string        current_fsm_state_{"Unknown"};
+    std::chrono::steady_clock::time_point dog_feedback_at_{}, posture_feedback_at_{};
+    bool posture_settled_{false};
+    std::atomic<bool> takeoff_motion_inhibited_{false}, takeoff_action_cancelled_{false};
+    mutable std::mutex takeoff_publish_mutex_;
     bool               gamepad_override_{false};          // 手柄是否抢了控制权
 
     // 命令生命周期（回调和等待分别在 spin 线程与主线程，必须加锁）

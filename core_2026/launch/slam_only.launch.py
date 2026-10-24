@@ -548,20 +548,7 @@ def generate_launch_description():
         condition=LaunchConfigurationEquals('map_source', 'vision'),
     )
 
-    # ── 8. 作业交底语音播报:网页点场景 → /rl_briefing/play → 播 wav ────────
-    # 零运动风险（只往声卡写音频），所以放链路里跟着一起起 —— 网页点交底就该有反应。
-    # 音频不在包里（可替换资源），默认 ~/briefing_audio；生成/替换见
-    # src/robodog-yunnan-elec/rl_briefing/scripts/make_wavs.py
-    briefing = Node(
-        package='rl_briefing',
-        executable='briefing_player',
-        name='briefing_player',
-        output='screen',
-        parameters=[{
-            'audio_dir': LaunchConfiguration('audio_dir'),
-            'device': LaunchConfiguration('audio_device'),
-        }],
-    )
+    # 作业交底由 dog_web.launch.py 管理，避免随 SLAM 重复启动。
 
     return LaunchDescription(decls + [
         livox_driver,
@@ -580,5 +567,4 @@ def generate_launch_description():
         recorder_camera,
         recorder_lidar,
         recorder_vision,
-        briefing,
     ])

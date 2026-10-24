@@ -97,6 +97,10 @@ ament_target_dependencies(dog_node
   messages
 )
 
+add_executable(takeoff_getdown_selftest test/takeoff_getdown_selftest.cpp)
+target_include_directories(takeoff_getdown_selftest PRIVATE src $ENV{CONDA_PREFIX}/include)
+install(TARGETS takeoff_getdown_selftest DESTINATION lib/${PROJECT_NAME})
+
 # ── 任务书解析自测（不需要 ROS、不需要硬件）────────────────────
 # 任务 JSON 是网页与狗之间的契约，而本包之前一个测试都没有。这个目标只链
 # nlohmann + 标准库，所以**故意放在 mavros_msgs 那个 if 外面** ——
@@ -186,3 +190,7 @@ install(FILES scripts/safety_config.py DESTINATION share/${PROJECT_NAME})
 install(PROGRAMS scripts/start_local_safety.py DESTINATION lib/${PROJECT_NAME})
 
 ament_package()
+
+install(PROGRAMS scripts/drone_preset_bridge.py DESTINATION lib/${PROJECT_NAME})
+install(PROGRAMS scripts/takeoff_thrust_receiver.py scripts/start_takeoff_receiver.sh
+        DESTINATION lib/${PROJECT_NAME})

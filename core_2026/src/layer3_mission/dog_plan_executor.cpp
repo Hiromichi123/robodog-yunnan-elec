@@ -1,5 +1,7 @@
 #include "layer2_control/local_recovery.hpp"
 #include "layer3_mission/dog_plan_executor.hpp"
+#include <random>
+#include <nlohmann/json.hpp>
 
 #include <chrono>
 #include <cmath>
@@ -73,7 +75,60 @@ DogPlanExecutor::DogPlanExecutor(RobotDogHAL&       hal,
     : hal_(hal), fc_(fc), channel_(channel), logger_(logger) {}
 
 void DogPlanExecutor::request_abort() {
+    operator_abort_ = true;
     abort_ = true;
+    hal_.cancel_takeoff_action();
+}
+
+void DogPlanExecutor::request_takeoff_getdown() {
+    std::lock_guard<std::mutex> lock(takeoff_mutex_);
+    // The callback stops future motion publications immediately; HAL waits remain on the main thread.
+    hal_.inhibit_takeoff_motion(true);
+    takeoff_pending_ = true;
+    if (!drone_waiting_) {
+        takeoff_interrupted_ = true;
+        abort_ = true;
+        hal_.cancel_pending_command();
+    }
+}
+
+bool DogPlanExecutor::service_takeoff_getdown() {
+    TakeoffGetdownEvent event;
+    if (!channel_.take_takeoff_getdown(event)) return false;
+    {
+        std::lock_guard<std::mutex> lock(takeoff_mutex_);
+        takeoff_pending_ = false;
+        hal_.prepare_takeoff_action();
+    }
+    channel_.set_doc_accepting(false);
+    publish_zero_velocity();
+    const double now = std::chrono::duration<double>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    if (now > event.expires_at || now - event.at > .75) {
+        channel_.takeoff_status(event, "expired", "事件处理前已过期，未发送趴下；旧任务已停止，需要人工处置");
+    } else if (operator_abort_) {
+        channel_.takeoff_status(event, "unconfirmed", "操作员急停优先；联动不继续发起动作");
+    } else if (!hal_.dog_feedback_fresh() || hal_.is_gamepad_override()) {
+        channel_.takeoff_status(event, "unconfirmed", "狗状态陈旧或手柄接管，未发送趴下，需要人工处置");
+    } else {
+        channel_.takeoff_status(event, "executing", "起飞推力触发 getdown；等待真实趴下反馈");
+        const bool accepted = hal_.safe_go_down();
+        const auto end = std::chrono::steady_clock::now() + std::chrono::seconds(3);
+        while (accepted && !operator_abort_ && rclcpp::ok() && std::chrono::steady_clock::now() < end &&
+               hal_.dog_feedback_fresh() && !hal_.is_gamepad_override() && !hal_.getdown_settled())
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        const bool done = accepted && !operator_abort_ && hal_.dog_feedback_fresh() && !hal_.is_gamepad_override() &&
+                          hal_.getdown_settled();
+        channel_.takeoff_status(event, done ? "done" : "unconfirmed", done ?
+            "已确认狗趴下且 settled" : "getdown 未确认完成；不会自动恢复原任务，请人工核实");
+    }
+    // Clearing the publication inhibit permits only a future explicit task, never resumes the interrupted task.
+    {
+        std::lock_guard<std::mutex> lock(takeoff_mutex_);
+        if (!takeoff_pending_) hal_.inhibit_takeoff_motion(false);
+    }
+    if (!drone_waiting_) channel_.set_doc_accepting(true);
+    return true;
 }
 
 void DogPlanExecutor::drain_cmds() {
@@ -87,7 +142,11 @@ void DogPlanExecutor::drain_cmds() {
 // 主流程
 // ────────────────────────────────────────────────────────────────────────
 void DogPlanExecutor::execute(const MissionPlan& plan) {
+    if (takeoff_pending_) { service_takeoff_getdown(); return; }
+    takeoff_interrupted_ = false;
+    operator_abort_ = false;
     abort_ = false;
+    if (takeoff_pending_) { takeoff_interrupted_ = true; abort_ = true; }
     last_error_.clear();
     drain_cmds();                        // 上一轮残留的 confirm/abort 不算数
     channel_.set_doc_accepting(false);   // 跑任务期间不再收新任务
@@ -118,7 +177,7 @@ void DogPlanExecutor::execute(const MissionPlan& plan) {
 
         // 危险步骤前的人工闸门。尺度与原来的终端闸门一致：
         // 会改变姿态/位置的那几步要问，check_stand / wait 不问。
-        if (plan.confirm == ConfirmMode::Each && is_dangerous_step(st.type)) {
+        if ((plan.confirm == ConfirmMode::Each && is_dangerous_step(st.type)) || st.type == StepType::DroneMission) {
             switch (confirm_gate(st.type, gate_prompt(st), i + 1, total)) {
                 case Gate::Continue: break;
                 case Gate::AbortMission: abort_ = true; break;
@@ -140,6 +199,11 @@ void DogPlanExecutor::execute(const MissionPlan& plan) {
 
     channel_.set_doc_accepting(true);
 
+    if ((takeoff_interrupted_ || takeoff_pending_) && !operator_abort_) {
+        service_takeoff_getdown();
+        push("aborted", -1, total, "", "起飞推力联动：原任务已停止，不会自动恢复；趴下结果见联动状态", "", false);
+        return;
+    }
     if (abort_) {
         go_down_and_report("操作员急停");
         push("aborted", -1, total, "", "已急停：停速 + getdown 回趴下", "", false);
@@ -179,6 +243,7 @@ DogPlanExecutor::Outcome DogPlanExecutor::dispatch(const MissionStep& st, std::s
         case StepType::GotoPose:   out = do_goto(st);       break;
         case StepType::Wait:       out = do_wait(st);       break;
         case StepType::GetDown:    out = do_getdown(st);    break;
+        case StepType::DroneMission: out = do_drone_mission(st); break;
     }
 
     // 失败原因补上"第几步、什么类型" —— 网页上只显示这一行，必须能直接定位。
@@ -628,6 +693,54 @@ DogPlanExecutor::Outcome DogPlanExecutor::do_getdown(const MissionStep& st) {
     return Outcome::Failed;
 }
 
+DogPlanExecutor::Outcome DogPlanExecutor::do_drone_mission(const MissionStep& st) {
+    drone_waiting_ = true;
+    struct ResetWaiting { std::atomic<bool>& flag; ~ResetWaiting() { flag = false; } } reset{drone_waiting_};
+    publish_zero_velocity();
+    if (abort_ || takeoff_pending_) { last_error_="起飞趴下联动/急停已中断当前步骤，未发送飞机执行请求"; return Outcome::Failed; }
+    if (!channel_.drone_online()) { last_error_="无人机桥未上线，未发送起飞请求"; return Outcome::Failed; }
+    std::random_device rd;
+    const char* hex="0123456789abcdef";
+    std::string id; for(int i=0;i<32;++i) id+=hex[rd()&15];
+    auto cancel=[&]() { channel_.send_drone(nlohmann::json{{"action","cancel"},{"request_id",id}}.dump()); };
+    nlohmann::json request={{"action","execute"},{"request_id",id},{"preset_id",st.preset_id},
+        {"preset_revision",st.preset_revision},{"approved",true},
+        {"prepare_timeout",st.prepare_timeout_s},{"flight_timeout",st.flight_timeout_s}};
+    channel_.send_drone(request.dump());
+    const auto start=std::chrono::steady_clock::now();
+    auto last= start;
+    rclcpp::Rate rate(20);
+    while(rclcpp::ok()) {
+        if(abort_) { cancel(); last_error_="已请求中止无人机；降落状态须核实"; return Outcome::Failed; }
+        if (takeoff_pending_) {
+            service_takeoff_getdown();
+            if (abort_) { cancel(); last_error_="操作员急停优先，已请求无人机中止"; return Outcome::Failed; }
+            // Dog getdown is independent of the aircraft mission: never send aircraft cancel here.
+            last = std::chrono::steady_clock::now();
+        }
+        const auto now=std::chrono::steady_clock::now();
+        if(std::chrono::duration<double>(now-start).count()>st.prepare_timeout_s+st.flight_timeout_s+15) {
+            cancel(); last_error_="无人机任务超时，已请求中止；请核实飞机并准备遥控接管"; return Outcome::Failed;
+        }
+        const auto text=channel_.drone_result(id,3.0);
+        if(!text.empty()) {
+            last=now;
+            auto j=nlohmann::json::parse(text,nullptr,false);
+            const auto phase=j.value("phase",std::string{});
+            const auto msg=j.value("message",std::string{});
+            push("running",current_index_,current_total_,"drone_mission", "无人机："+phase+" "+msg,"",false);
+            if(phase=="done") return Outcome::Ok;
+            if(phase=="failed"||phase=="cancelled"||phase=="intervention") {
+                cancel(); last_error_="无人机任务未成功："+msg+"；请核实飞机状态"; return Outcome::Failed;
+            }
+        } else if(std::chrono::duration<double>(now-last).count()>5) {
+            cancel();last_error_="无人机桥失联，起飞/降落结果未知，请遥控接管";return Outcome::Failed;
+        }
+        rate.sleep();
+    }
+    cancel();last_error_="任务节点退出，已请求无人机中止；须人工核实";return Outcome::Failed;
+}
+
 // ────────────────────────────────────────────────────────────────────────
 // 闸门 / 停止 / 上报
 // ────────────────────────────────────────────────────────────────────────
@@ -776,6 +889,7 @@ std::string DogPlanExecutor::step_label(const MissionStep& st) const {
             std::snprintf(buf, sizeof(buf), "等待 %.1fs", st.duration_s);
             return buf;
         case StepType::GetDown:    return "趴下";
+        case StepType::DroneMission: return "指挥无人机："+st.preset_name;
     }
     return "未知步骤";
 }
@@ -783,6 +897,8 @@ std::string DogPlanExecutor::step_label(const MissionStep& st) const {
 std::string DogPlanExecutor::gate_prompt(const MissionStep& st) const {
     char buf[224];
     switch (st.type) {
+        case StepType::DroneMission:
+            return "将自动准备无人机定位并真实起飞，预设："+st.preset_name+"，版本："+st.preset_revision.substr(0,12)+"。确认环境安全、遥控就绪后继续；等待飞机完成上锁。";
         case StepType::GetUp:
             std::snprintf(buf, sizeof(buf),
                           "即将起立（狗会从趴姿站起来）。确认周围安全后点「继续」");

@@ -5,6 +5,9 @@
 #include <mutex>
 #include <string>
 #include <vector>
+#include <unordered_set>
+
+#include "layer3_mission/takeoff_getdown.hpp"
 
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
@@ -78,6 +81,15 @@ public:
      * 而那几秒里狗还在动。
      */
     void set_abort_hook(std::function<void()> hook);
+    void send_drone(const std::string& json);
+    std::string drone_result(const std::string& request_id, double max_age_s);
+    bool drone_online() const;
+    void set_takeoff_hook(std::function<void()> hook);
+    [[nodiscard]] bool take_takeoff_getdown(TakeoffGetdownEvent& event);
+    void takeoff_status(const TakeoffGetdownEvent& event, const std::string& phase,
+                        const std::string& message);
+    bool takeoff_enabled() const { return takeoff_enabled_; }
+
 
 private:
     void on_doc(const std_msgs::msg::String::SharedPtr msg);
@@ -96,6 +108,17 @@ private:
     bool                  doc_accepting_{true};
     Status                status_;
     std::function<void()> abort_hook_;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr drone_pub_;
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr drone_sub_;
+    std::string drone_status_;
+    std::chrono::steady_clock::time_point drone_at_{};
+    bool takeoff_enabled_{false}, has_takeoff_{false};
+    TakeoffGetdownEvent takeoff_event_;
+    std::unordered_set<std::string> takeoff_seen_;
+    std::function<void()> takeoff_hook_;
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr takeoff_sub_;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr takeoff_status_pub_;
+
 };
 
 }  // namespace mission

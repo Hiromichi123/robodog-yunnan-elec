@@ -1,4 +1,4 @@
-"""单独起语音播报节点（正常情况下它跟着 slam_only.launch.py 一起起）。
+"""单独起语音播报节点（正常情况下它跟着 core_2026/dog_web.launch.py 一起起）。
 
     ros2 launch rl_briefing briefing_player.launch.py
     ros2 launch rl_briefing briefing_player.launch.py device:=dmix:CARD=realtekrt5616co,DEV=0

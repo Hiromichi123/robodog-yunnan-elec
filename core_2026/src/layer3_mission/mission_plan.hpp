@@ -33,6 +33,7 @@ enum class StepType {
     Goto,         // 位置到点 (x, y)，不校准终点航向
     GotoPose,     // 带航向到点 (x, y, yaw)
     Wait,         // 原地等
+    DroneMission, // 执行飞机已保存预设（只引用，不编辑航线）
     GetDown,      // 平滑趴下（RLLocomotion → GetDown）
 };
 
@@ -68,6 +69,8 @@ bool needs_rl_mode(StepType t);
 /** 一个步骤。所有参数都带缺省值，JSON 里给多少算多少。 */
 struct MissionStep {
     StepType type{StepType::Wait};
+    std::string preset_id, preset_revision, preset_name;
+    double prepare_timeout_s{120.0}, flight_timeout_s{600.0};
 
     // check_stand
     double timeout_s{5.0};        // 等自检结果的上限；<=0 表示用 HAL 的 check_stand_timeout_s
