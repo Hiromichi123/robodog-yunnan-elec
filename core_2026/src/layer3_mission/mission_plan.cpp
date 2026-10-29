@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstdio>
 #include <string>
+#include <algorithm>
 
 #include <nlohmann/json.hpp>
 
@@ -72,6 +73,7 @@ const char* to_string(StepType t) {
         case StepType::GotoPose:   return "goto_pose";
         case StepType::Wait:       return "wait";
         case StepType::GetDown:    return "getdown";
+        case StepType::DroneMission: return "drone_mission";
     }
     return "unknown";
 }
@@ -85,6 +87,7 @@ bool step_type_from_string(const std::string& s, StepType& out) {
     if (s == "goto_pose")   { out = StepType::GotoPose;   return true; }
     if (s == "wait")        { out = StepType::Wait;       return true; }
     if (s == "getdown")     { out = StepType::GetDown;    return true; }
+    if (s == "drone_mission") { out = StepType::DroneMission; return true; }
     return false;
 }
 
@@ -96,6 +99,7 @@ bool is_dangerous_step(StepType t) {
         case StepType::Goto:
         case StepType::GotoPose:
         case StepType::GetDown:
+        case StepType::DroneMission:
             return true;
         case StepType::CheckStand:
         case StepType::Wait:
@@ -250,6 +254,24 @@ ParseResult parse_mission_json(const std::string& text) {
         // 普通 goto 的旧 yaw 字段已退役，不再读取或参与校验。
         if (st.type != StepType::Goto) rd.num("yaw", st.yaw);
         rd.num("goto_timeout_s", st.goto_timeout_s);
+        rd.num("prepare_timeout_s", st.prepare_timeout_s);
+        rd.num("flight_timeout_s", st.flight_timeout_s);
+        if (st.type == StepType::DroneMission) {
+            for (const auto& field : {"preset_id", "preset_revision", "preset_name"}) {
+                std::string* out = std::string(field)=="preset_id" ? &st.preset_id :
+                    std::string(field)=="preset_revision" ? &st.preset_revision : &st.preset_name;
+                if (read_string(js, field, *out) != FieldState::Ok) {
+                    r.error = where + std::string(field) + " 必须是字符串"; return r;
+                }
+            }
+            for (auto it=js.begin(); it!=js.end(); ++it) {
+                const auto& k=it.key();
+                if (k!="type" && k!="preset_id" && k!="preset_revision" && k!="preset_name" &&
+                    k!="prepare_timeout_s" && k!="flight_timeout_s") {
+                    r.error=where+"无人机模块仅允许预设引用，禁止航线覆写"; return r;
+                }
+            }
+        }
         if (!rd.ok) return r;
 
         r.plan.steps.push_back(st);
@@ -328,6 +350,17 @@ std::string validate_plan(const MissionPlan& plan) {
                 }
                 break;
 
+            case StepType::DroneMission: {
+                auto hex = [](const std::string& v, std::size_t size) {
+                    return v.size()==size && std::all_of(v.begin(),v.end(),[](char c){return (c>='0'&&c<='9')||(c>='a'&&c<='f');});
+                };
+                if (!hex(st.preset_id,32) || !hex(st.preset_revision,64)) return where+"无效飞机预设ID/版本";
+                if (st.preset_name.empty() || st.preset_name.size()>240) return where+"无效预设名称";
+                if (!finite(st.prepare_timeout_s) || st.prepare_timeout_s<10 || st.prepare_timeout_s>300 ||
+                    !finite(st.flight_timeout_s) || st.flight_timeout_s<30 || st.flight_timeout_s>3600)
+                    return where+"无人机准备/飞行超时超出范围";
+                break;
+            }
             case StepType::Locomotion:
                 break;
         }

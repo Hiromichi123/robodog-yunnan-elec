@@ -1,0 +1,9 @@
+[Unit]
+Description=Set Yundea A31-1 (A311) USB speaker PCM volume to hardware max
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/a311-pcm-max.sh
+
+[Install]
+WantedBy=multi-user.target

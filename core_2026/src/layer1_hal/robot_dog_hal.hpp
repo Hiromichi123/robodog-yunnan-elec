@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <atomic>
 #include <cstdint>
 #include <mutex>
 #include <memory>
@@ -107,7 +108,8 @@ public:
     [[nodiscard]] int wait_for_command_code(double timeout_sec, bool verbose = true);
 
     [[nodiscard]] std::string get_current_fsm_state() const;
-    [[nodiscard]] bool wait_for_fsm_state(const std::string& target, double timeout_sec);
+    [[nodiscard]] bool wait_for_fsm_state(const std::string& target, double timeout_sec,
+                                          bool allow_takeoff_inhibit = false);
 
     // === 状态切换把关（本版新增）===
     /**
@@ -168,13 +170,15 @@ public:
 
     /** 急停专用：把主线程正在等的命令伪造成终态，让它立刻返回（见 .cpp）。 */
     void cancel_pending_command();
+    void cancel_takeoff_action() { takeoff_action_cancelled_ = true; cancel_pending_command(); }
+    void prepare_takeoff_action() { takeoff_action_cancelled_ = false; }
 
     /**
      * 失败/中止时的唯一安全动作：回趴下（getdown 平滑趴下，不用 passive 卸力）。
      *   RLLocomotion → 发 getdown 并等确认
-     *   GetDown/Passive → 已经趴着，不发命令，直接算成功
-     *   GetUp（起立动画中）→ 等 1s 重试，最多 3 次
-     *   状态读不到 / 别的情况 → 不发命令，返回 false（需人工处置）
+     *   GetUp + 新鲜 settled=true → 发 getdown；起立中有界等待站稳
+     *   GetDown/Passive → 不重复发命令，等待新鲜 Passive + settled 才算成功
+     *   状态陈旧 / 手柄接管 / 取消 / 不支持的状态 → 返回 false（需人工处置）
      * @param settle_s 稳定延迟；<0 = 用 transition_settle_s_（失败路径的默认）
      */
     [[nodiscard]] bool safe_go_down(double settle_s = -1.0);
@@ -184,6 +188,13 @@ public:
 
     /** 手柄是否抢走了控制权（小脑行为：抢走后所有指令被忽略）。 */
     [[nodiscard]] bool is_gamepad_override() const;
+    void inhibit_takeoff_motion(bool on) {
+        std::lock_guard<std::mutex> lock(takeoff_publish_mutex_);
+        takeoff_motion_inhibited_.store(on);
+    }
+    [[nodiscard]] bool takeoff_motion_inhibited() const { return takeoff_motion_inhibited_.load(); }
+    [[nodiscard]] bool dog_feedback_fresh(double max_age_s = 1.0) const;
+    [[nodiscard]] bool getdown_settled() const;
 
     /** 网页驱动模式：true = 等 /dog/mission 上的任务，而不是跑固定流程。 */
     [[nodiscard]] bool get_wait_for_mission() const { return wait_for_mission_; }
@@ -246,6 +257,12 @@ private:
     std::chrono::steady_clock::time_point navigation_received_at_{};
     rclcpp::Time       state_stamp_{0, 0, RCL_ROS_TIME};  // 位姿到货时刻
     std::string        current_fsm_state_{"Unknown"};
+    std::chrono::steady_clock::time_point dog_feedback_at_{}, posture_feedback_at_{};
+    std::string posture_fsm_;
+    bool posture_settled_{false};
+    [[nodiscard]] bool getdown_allowed(bool require_ready) const;
+    std::atomic<bool> takeoff_motion_inhibited_{false}, takeoff_action_cancelled_{false};
+    mutable std::mutex takeoff_publish_mutex_;
     bool               gamepad_override_{false};          // 手柄是否抢了控制权
 
     // 命令生命周期（回调和等待分别在 spin 线程与主线程，必须加锁）

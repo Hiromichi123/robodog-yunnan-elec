@@ -6,6 +6,8 @@
 #include <chrono>
 #include <iostream>
 #include <vector>
+#include <thread>
+#include <nlohmann/json.hpp>
 #include <unistd.h>   // isatty(STDIN_FILENO) —— 人工闸门判断有没有终端
 
 namespace {
@@ -229,6 +231,30 @@ bool RobotDogHAL::is_gamepad_override() const {
     return gamepad_override_;
 }
 
+bool RobotDogHAL::dog_feedback_fresh(double max_age_s) const {
+    std::lock_guard<std::mutex> lock(state_mutex_);
+    return std::chrono::duration<double>(std::chrono::steady_clock::now() - dog_feedback_at_).count() <= max_age_s;
+}
+
+bool RobotDogHAL::getdown_settled() const {
+    std::lock_guard<std::mutex> lock(state_mutex_);
+    return current_fsm_state_ == "RLFSMStatePassive" && posture_fsm_ == current_fsm_state_ &&
+           posture_settled_ && !gamepad_override_ &&
+           std::chrono::duration<double>(std::chrono::steady_clock::now() - posture_feedback_at_).count() <= 1.0;
+}
+
+bool RobotDogHAL::getdown_allowed(bool require_ready) const {
+    std::lock_guard<std::mutex> lock(state_mutex_);
+    const auto now = std::chrono::steady_clock::now();
+    if (gamepad_override_ ||
+        std::chrono::duration<double>(now - dog_feedback_at_).count() > 1.0 ||
+        (takeoff_motion_inhibited() && takeoff_action_cancelled_)) return false;
+    if (!require_ready) return true;
+    if (current_fsm_state_ == "RLFSMStateRLLocomotion") return true;
+    return current_fsm_state_ == "RLFSMStateGetUp" && posture_fsm_ == current_fsm_state_ &&
+           posture_settled_ && std::chrono::duration<double>(now - posture_feedback_at_).count() <= 1.0;
+}
+
 // ===== ICommandPublisher =====
 void RobotDogHAL::publish_velocity(Velocity& velocity) {
     auto msg = geometry_msgs::msg::Twist();
@@ -259,6 +285,8 @@ void RobotDogHAL::publish_velocity(Velocity& velocity) {
                             "[近场安全] 停速：%s", local_safety_->reason().c_str());
     }
     // vz/vpitch/vroll ignored for ground robot
+    std::lock_guard<std::mutex> publish_lock(takeoff_publish_mutex_);
+    if (takeoff_motion_inhibited()) msg = geometry_msgs::msg::Twist();
     cmd_vel_pub_->publish(msg);
 }
 
@@ -270,6 +298,8 @@ void RobotDogHAL::publish_recovery_reverse(Velocity& velocity) {
           nav.available&&age>=0&&age<=.5,velocity.get_vx(),velocity.get_vyaw())) {
         msg.linear.x=velocity.get_vx();
     } else RCLCPP_WARN_THROTTLE(get_logger(),*get_clock(),1000,"[恢复后退] 停速：%s",local_safety_->reason().c_str());
+    std::lock_guard<std::mutex> publish_lock(takeoff_publish_mutex_);
+    if (takeoff_motion_inhibited()) msg = geometry_msgs::msg::Twist();
     cmd_vel_pub_->publish(msg);
 }
 
@@ -308,6 +338,15 @@ int64_t RobotDogHAL::get_last_dvs_detect_time_ns() const {
 
 // ===== 命令生命周期 =====
 void RobotDogHAL::request_fsm_transition(const std::string& fsm_state) {
+    std::lock_guard<std::mutex> publish_lock(takeoff_publish_mutex_);
+    if ((fsm_state == "getdown" && !getdown_allowed(true)) ||
+        (takeoff_motion_inhibited() &&
+         fsm_state != "getdown" && fsm_state != "status" && fsm_state != "vel_stop")) {
+        std::lock_guard<std::mutex> lock(cmd_mutex_);
+        pending_cmd_ = fsm_state; pending_code_ = 3;
+        pending_phase_ = fsm_state == "getdown" ? "GETDOWN_PRECONDITION_FAILED" : "TAKEOFF_INHIBITED";
+        return;
+    }
     {
         // 先清上一次的终态，再记下这次要等的命令。
         // 顺序很重要：如果先发后清，回包快的话会被自己清掉。
@@ -345,6 +384,11 @@ int RobotDogHAL::wait_for_command_code(double timeout_sec, bool verbose) {
                 state = pending_state_;
             }
         }
+        if (cmd.empty()) {
+            std::lock_guard<std::mutex> lock(cmd_mutex_);
+            cmd = pending_cmd_;
+        }
+        if (cmd == "getdown" && !getdown_allowed(false)) return -1;
         if (code >= 0) {
             const double dt = (this->now() - start).seconds();
             if (code == 2) {
@@ -391,54 +435,35 @@ void RobotDogHAL::cancel_pending_command() {
 }
 
 bool RobotDogHAL::safe_go_down(double settle_s) {
-    // 失败/中止时的**唯一**安全动作：回趴下用 getdown（平滑 2s 插值）。
-    // 2026-09-29 用户定：passive 的卸力不可靠，不再用它（它会 kp=0 让狗靠
-    // 重力砸下去）。
-    //
-    // 为什么要看状态再决定发不发：
-    //   - 已经 Passive（趴着）时发 getdown，FSM 会拒（本来就没站着），报出来
-    //     只会让人误以为"安全动作失败了"。
-    //   - 起立动画跑到一半（GetUp）时 getdown 同样会被拒，得等它站稳再来。
-    const double retry_gap_s = 1.0;
-    const int    max_attempts = 3;
-
-    for (int attempt = 1; attempt <= max_attempts; ++attempt) {
-        const std::string st = get_current_fsm_state();
-
-        if (st == "RLFSMStatePassive" || st == "RLFSMStateGetDown") {
-            RCLCPP_WARN(this->get_logger(),
-                        "[安全趴下] 狗当前是 %s —— 已经趴着/正在趴，无需再发命令",
-                        st.c_str());
-            return true;
+    // GetUp 在站稳后仍是 GetUp；只信任同一 FSM 的新鲜 posture.settled。
+    const auto ready_end = std::chrono::steady_clock::now() + std::chrono::seconds(3);
+    bool sent = false;
+    auto down_end = std::chrono::steady_clock::now() + std::chrono::duration<double>(getdown_timeout_s_);
+    while (rclcpp::ok()) {
+        if (!getdown_allowed(false)) {
+            RCLCPP_ERROR(get_logger(), "[安全趴下] 状态陈旧、手柄接管或动作已取消，未确认趴下");
+            return false;
         }
-        if (st == "RLFSMStateRLLocomotion") {
-            RCLCPP_WARN(this->get_logger(), "[安全趴下] 发 getdown（平滑趴下）");
-            return transition_to("getdown",
-                                 "RLFSMStateGetDown|RLFSMStatePassive", "",
-                                 settle_s < 0.0 ? transition_settle_s_ : settle_s);
+        if (getdown_settled()) return true;
+        const auto st = get_current_fsm_state();
+        if (!sent && getdown_allowed(true)) {
+            // 发布出口再次检查前置；发出后不自动重发。
+            if (!transition_to("getdown", "RLFSMStateGetDown|RLFSMStatePassive", "",
+                               settle_s < 0.0 ? transition_settle_s_ : settle_s)) return false;
+            sent = true;
+            down_end = std::chrono::steady_clock::now() + std::chrono::duration<double>(getdown_timeout_s_);
+        } else if (st != "RLFSMStateGetUp" && st != "RLFSMStateGetDown" &&
+                   st != "RLFSMStatePassive" && !(sent && st == "RLFSMStateRLLocomotion")) {
+            RCLCPP_ERROR(get_logger(), "[安全趴下] 不支持的状态 %s，需要人工处置", st.c_str());
+            return false;
         }
-        if (st == "RLFSMStateGetUp") {
-            RCLCPP_WARN(this->get_logger(),
-                        "[安全趴下] 狗正在起立（%s），这会儿 getdown 会被 FSM 拒 —— "
-                        "等 %.1fs 再试（第 %d/%d 次）",
-                        st.c_str(), retry_gap_s, attempt, max_attempts);
-            rclcpp::Rate rate(20);
-            const auto t0 = this->now();
-            while (rclcpp::ok() && (this->now() - t0).seconds() < retry_gap_s) {
-                rate.sleep();
-            }
-            continue;
+        const auto now = std::chrono::steady_clock::now();
+        if ((!sent && st == "RLFSMStateGetUp" && now >= ready_end) || now >= down_end) {
+            RCLCPP_ERROR(get_logger(), "[安全趴下] 等待站稳或真实趴下完成超时（%s）", st.c_str());
+            return false;
         }
-
-        // Unknown / 别的状态：不瞎发命令 —— 状态不可信时发什么都是赌
-        RCLCPP_ERROR(this->get_logger(),
-                     "[安全趴下] 当前 FSM 状态不可用（%s）—— 不发 getdown，"
-                     "需要人工确认后处置", st.c_str());
-        return false;
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
-
-    RCLCPP_ERROR(this->get_logger(),
-                 "[安全趴下] 重试 %d 次仍未成功 —— 需要人工确认后处置", max_attempts);
     return false;
 }
 
@@ -505,18 +530,39 @@ void RobotDogHAL::dog_state_cb(const std_msgs::msg::String::SharedPtr msg) {
     }
 
     std::lock_guard<std::mutex> lock(state_mutex_);
+    if (current_fsm_state_ != st) { posture_fsm_.clear(); posture_settled_ = false; }
     current_fsm_state_ = st;
+    dog_feedback_at_ = std::chrono::steady_clock::now();
     if (has_gamepad) gamepad_override_ = gamepad;
 }
 
 void RobotDogHAL::protocol_state_cb(const std_msgs::msg::String::SharedPtr msg) {
-    std::string state, gamepad;
-    if (!json_get_str(msg->data, "fsm", state)) json_get_str(msg->data, "state", state);
+    const auto value = nlohmann::json::parse(msg->data, nullptr, false);
+    if (!value.is_object()) return;
+    const auto field = value.find(value.contains("fsm") ? "fsm" : "state");
+    if (field == value.end() || !field->is_string()) return;
+    const auto state = field->get<std::string>();
     if (state.rfind("RLFSMState", 0) != 0) return;
-    const bool has_gamepad = json_get_str(msg->data, "gamepad_override", gamepad);
     std::lock_guard<std::mutex> lock(state_mutex_);
+    if (current_fsm_state_ != state) {
+        posture_fsm_.clear();
+        posture_settled_ = false;
+    }
     current_fsm_state_ = state;
-    if (has_gamepad) gamepad_override_ = (gamepad == "true");
+    dog_feedback_at_ = std::chrono::steady_clock::now();
+    if (value.contains("fsm")) {
+        // 心跳不能刷新 posture 证据；非法/缺失字段不能沿用旧 settled。
+        posture_fsm_.clear();
+        posture_settled_ = false;
+        if (value.contains("settled") && value["settled"].is_boolean() &&
+            value.contains("gamepad_override") && value["gamepad_override"].is_boolean()) {
+            posture_fsm_ = state;
+            posture_settled_ = value["settled"].get<bool>();
+            posture_feedback_at_ = dog_feedback_at_;
+        }
+    }
+    if (value.contains("gamepad_override") && value["gamepad_override"].is_boolean())
+        gamepad_override_ = value["gamepad_override"].get<bool>();
 }
 
 void RobotDogHAL::cmd_state_cb(const std_msgs::msg::String::SharedPtr msg) {
@@ -546,7 +592,8 @@ std::string RobotDogHAL::get_current_fsm_state() const {
     return current_fsm_state_;
 }
 
-bool RobotDogHAL::wait_for_fsm_state(const std::string& target, double timeout_sec) {
+bool RobotDogHAL::wait_for_fsm_state(const std::string& target, double timeout_sec,
+                                     bool allow_takeoff_inhibit) {
     // target 支持 "A|B" 多个候选，任一命中即算到达。
     // getdown 非要这个不可：RLFSMStateGetDown 是**过渡态**，2s 动画跑完会自动
     // 转到 RLFSMStatePassive，只等 GetDown 会擦肩而过、误报超时
@@ -571,6 +618,7 @@ bool RobotDogHAL::wait_for_fsm_state(const std::string& target, double timeout_s
     auto start = this->now();
     rclcpp::Rate rate(10);
     while (rclcpp::ok()) {
+        if (takeoff_motion_inhibited() && (!allow_takeoff_inhibit || takeoff_action_cancelled_)) return false;
         if (hit(get_current_fsm_state())) {
             return true;
         }
@@ -761,7 +809,7 @@ bool RobotDogHAL::transition_to(const std::string& cmd,
     if (!require_state.empty()) {
         RCLCPP_INFO(this->get_logger(),
                     "[RobotDogHAL] 前置判断：等当前状态 → %s", require_state.c_str());
-        if (!wait_for_fsm_state(require_state, precondition_timeout_s_)) {
+        if (!wait_for_fsm_state(require_state, precondition_timeout_s_, cmd == "getdown")) {
             RCLCPP_ERROR(this->get_logger(),
                          "[RobotDogHAL] ✗ 前置判断不满足：要求 %s，实际 %s —— 不发 '%s'",
                          require_state.c_str(), get_current_fsm_state().c_str(),
@@ -788,7 +836,7 @@ bool RobotDogHAL::transition_to(const std::string& cmd,
     // wait_for_command_done 只保证状态码到了 DONE(2)；这里再要一次实证：
     // 读回来的 FSM 状态必须真的等于期望值，否则不算切换成功。
     if (!expect_state.empty()) {
-        if (!wait_for_fsm_state(expect_state, fsm_confirm_timeout_s_)) {
+        if (!wait_for_fsm_state(expect_state, fsm_confirm_timeout_s_, cmd == "getdown")) {
             RCLCPP_ERROR(this->get_logger(),
                          "[RobotDogHAL] ✗ 状态码未变到 %s（当前 %s）—— 视为 '%s' 未完成",
                          expect_state.c_str(), get_current_fsm_state().c_str(),
@@ -809,6 +857,8 @@ bool RobotDogHAL::transition_to(const std::string& cmd,
         rclcpp::Rate rate(20);
         const auto t_wait = this->now();
         while (rclcpp::ok() && (this->now() - t_wait).seconds() < remain) {
+            if (cmd == "getdown" && !getdown_allowed(false)) return false;
+            if (takeoff_motion_inhibited() && (cmd != "getdown" || takeoff_action_cancelled_)) return false;
             rate.sleep();
         }
     }

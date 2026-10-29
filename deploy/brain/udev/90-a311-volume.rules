@@ -1,0 +1,2 @@
+# Yundea A31-1 USB 声卡（ALSA 卡名 A311）每次出现时把 PCM 拉到硬件最大。
+ACTION=="add", SUBSYSTEM=="sound", KERNEL=="card*", ATTR{id}=="A311", TAG+="systemd", ENV{SYSTEMD_WANTS}+="a311-pcm-max.service"

@@ -45,6 +45,9 @@ public:
 
     /** 由 spin 线程的急停钩子调用：置位后主线程在下一个检查点退出。 */
     void request_abort();
+    void request_takeoff_getdown();
+    /** Main thread only; also serviced while idle / waiting for LiDAR. */
+    bool service_takeoff_getdown();
 
 private:
     // Ok                 = 正常完成
@@ -66,6 +69,7 @@ private:
     Outcome do_goto(const MissionStep& st);
     Outcome do_wait(const MissionStep& st);
     Outcome do_getdown(const MissionStep& st);
+    Outcome do_drone_mission(const MissionStep& st);
 
     /** 危险步骤前的人工闸门（终端回车那道闸门的网页版）。 */
     Gate confirm_gate(StepType type, const std::string& prompt,
@@ -107,6 +111,11 @@ private:
     DogMissionChannel& channel_;
     rclcpp::Logger     logger_;
 
+    std::mutex takeoff_mutex_;
+    std::atomic<bool> operator_abort_{false};
+    std::atomic<bool> takeoff_pending_{false};
+    std::atomic<bool> drone_waiting_{false};
+    std::atomic<bool> takeoff_interrupted_{false};
     std::atomic<bool> abort_{false};   // spin 线程写，主线程读
     std::string       last_error_;     // 主线程写读，失败原因（已带"第N步"前缀）
     std::string       current_name_;   // 当前任务名，随每帧状态带给网页

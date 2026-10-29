@@ -36,12 +36,80 @@ DogMissionChannel::DogMissionChannel() : Node("dog_mission_node") {
         cmd_topic, 10,
         [this](std_msgs::msg::String::SharedPtr m) { this->on_cmd(m); });
 
+    drone_pub_ = create_publisher<std_msgs::msg::String>("/dog/drone/request", 10);
+    drone_sub_ = create_subscription<std_msgs::msg::String>("/dog/drone/status", 10,
+        [this](std_msgs::msg::String::SharedPtr m) {
+            std::lock_guard<std::mutex> lock(mutex_);
+            drone_status_=m->data; drone_at_=std::chrono::steady_clock::now();
+        });
+    takeoff_enabled_ = declare_parameter<bool>("enable_takeoff_getdown", false);
+    const bool web_mode = declare_parameter<bool>("wait_for_mission", false);
+    if (takeoff_enabled_ && !web_mode)
+        throw std::runtime_error("enable_takeoff_getdown requires wait_for_mission=true; fixed legacy flow cannot arbitrate events");
+    if (takeoff_enabled_) {
+        takeoff_status_pub_ = create_publisher<std_msgs::msg::String>("/dog/takeoff_getdown/status", 10);
+        takeoff_sub_ = create_subscription<std_msgs::msg::String>("/dog/takeoff_getdown", 1,
+            [this](std_msgs::msg::String::SharedPtr msg) {
+                TakeoffGetdownEvent event;
+                const double now = std::chrono::duration<double>(
+                    std::chrono::system_clock::now().time_since_epoch()).count();
+                if (!takeoff_getdown_event(msg->data, now, event)) return;
+                std::function<void()> hook;
+                {
+                    std::lock_guard<std::mutex> lock(mutex_);
+                    if (has_takeoff_ || takeoff_seen_.size() >= 4096 ||
+                        !takeoff_seen_.insert(event.event_id).second) return;
+                    takeoff_event_ = event; has_takeoff_ = true; hook = takeoff_hook_;
+                    pending_doc_.clear(); has_doc_ = false; doc_accepting_ = false;
+                    if (hook) hook();
+                }
+                takeoff_status(event, "queued", "起飞推力达到阈值，等待主控制线程处理");
+            });
+    }
     heartbeat_ = this->create_wall_timer(std::chrono::milliseconds(500),
                                          [this]() { this->publish_status_now(); });
 
     RCLCPP_INFO(this->get_logger(),
                 "[任务通道] 就绪 | 任务=%s 指令=%s 状态=%s（2Hz 心跳）",
                 doc_topic.c_str(), cmd_topic.c_str(), status_topic.c_str());
+}
+
+void DogMissionChannel::send_drone(const std::string& json) {
+    std_msgs::msg::String msg; msg.data=json; drone_pub_->publish(msg);
+}
+
+bool DogMissionChannel::drone_online() const {
+    return drone_pub_->get_subscription_count()>0;
+}
+
+std::string DogMissionChannel::drone_result(const std::string& request_id, double max_age_s) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (std::chrono::duration<double>(std::chrono::steady_clock::now()-drone_at_).count()>max_age_s) return {};
+    auto j=nlohmann::json::parse(drone_status_,nullptr,false);
+    if (j.is_discarded() || !j.is_object() || j.value("request_id",std::string{})!=request_id) return {};
+    return drone_status_;
+}
+
+void DogMissionChannel::set_takeoff_hook(std::function<void()> hook) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    takeoff_hook_ = std::move(hook);
+}
+
+bool DogMissionChannel::take_takeoff_getdown(TakeoffGetdownEvent& event) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!has_takeoff_) return false;
+    event = takeoff_event_; has_takeoff_ = false;
+    return true;
+}
+
+void DogMissionChannel::takeoff_status(const TakeoffGetdownEvent& event, const std::string& phase,
+                                      const std::string& message) {
+    if (!takeoff_status_pub_) return;
+    std_msgs::msg::String msg;
+    msg.data = nlohmann::json{{"event_id", event.event_id}, {"run_id", event.run_id},
+        {"phase", phase}, {"message", message}, {"at", std::chrono::duration<double>(
+            std::chrono::system_clock::now().time_since_epoch()).count()}}.dump();
+    takeoff_status_pub_->publish(msg);
 }
 
 void DogMissionChannel::set_abort_hook(std::function<void()> hook) {
@@ -52,6 +120,7 @@ void DogMissionChannel::set_abort_hook(std::function<void()> hook) {
 void DogMissionChannel::set_doc_accepting(bool on) {
     std::lock_guard<std::mutex> lock(mutex_);
     doc_accepting_ = on;
+    if (!on) { pending_doc_.clear(); has_doc_ = false; }
 }
 
 void DogMissionChannel::on_doc(const std_msgs::msg::String::SharedPtr msg) {

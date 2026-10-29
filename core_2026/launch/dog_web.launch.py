@@ -28,7 +28,8 @@ import importlib.util
 from pathlib import Path
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, OpaqueFunction
+from launch.actions import DeclareLaunchArgument, OpaqueFunction, RegisterEventHandler, LogInfo
+from launch.event_handlers import OnProcessExit
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
@@ -50,7 +51,9 @@ def _start(context):
         data = module.document(data['config'])
     params = module.control_parameters(data)
     # Runtime validity checks apply without an artificial calibration requirement.
-    args = ['--ros-args', '-p', 'wait_for_mission:=true', '-p', 'confirm_transitions:=false']
+    takeoff = LaunchConfiguration('enable_takeoff_getdown').perform(context).lower() == 'true'
+    args = ['--ros-args', '-p', 'wait_for_mission:=true', '-p', 'confirm_transitions:=false',
+            '-p', 'enable_takeoff_getdown:=' + str(takeoff).lower()]
     for name, value in params.items():
         rendered = str(value).lower() if isinstance(value, bool) else str(value)
         args.extend(['-p', name + ':=' + rendered])
@@ -63,11 +66,36 @@ def _start(context):
         additional_env={"RMW_IMPLEMENTATION": "rmw_cyclonedds_cpp"},
         arguments=args,
     )
-    return [dog_node]
+    bridge = Node(package='core_2026', executable='drone_preset_bridge.py',
+                  name='drone_preset_bridge', output='screen',
+                  additional_env={"RMW_IMPLEMENTATION":"rmw_cyclonedds_cpp"})
+    # 交底随任务程序启动，与 SLAM/定位是否就绪无关。
+    briefing = Node(package='rl_briefing', executable='briefing_player',
+                    name='briefing_player', output='screen',
+                    additional_env={"RMW_IMPLEMENTATION": "rmw_cyclonedds_cpp"},
+                    parameters=[{'audio_dir': LaunchConfiguration('audio_dir'),
+                                 'device': LaunchConfiguration('audio_device')}])
+    actions = [dog_node, bridge, briefing]
+    if takeoff:
+        receiver = Node(package='core_2026', executable='start_takeoff_receiver.sh',
+                        name='takeoff_thrust_process', output='screen',
+                        arguments=['--enable-actions'])
+        # Never tear down active dog control merely because telemetry failed.
+        actions.extend([RegisterEventHandler(OnProcessExit(
+            target_action=receiver, on_exit=[LogInfo(msg=
+                'ERROR: 推力监听已退出，自动趴下联动不可用；请检查日志，不会自动重启/重放事件。')])), receiver])
+    return actions
 
 
 def generate_launch_description():
     return LaunchDescription([
+        DeclareLaunchArgument('audio_dir', default_value='/home/jinjiao/briefing_audio',
+                              description='交底 WAV 目录'),
+        DeclareLaunchArgument('audio_device', default_value='plughw:CARD=A311,DEV=0',
+                              description='交底 ALSA 播放设备'),
+        DeclareLaunchArgument('enable_takeoff_getdown', default_value='true',
+                              choices=['true', 'false'],
+                              description='起飞推力>=0.43时联动趴下；随dog启动监听'),
         DeclareLaunchArgument('safety_mode', default_value='',
                               choices=['', 'disabled', 'observe', 'enforce'],
                               description='留空加载已保存配置；disabled/observe 无碰撞保护'),

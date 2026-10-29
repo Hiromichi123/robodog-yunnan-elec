@@ -21,8 +21,7 @@ DogMissionExecutor::DogMissionExecutor(
 void DogMissionExecutor::fail_and_go_down(const std::string& reason) {
     RCLCPP_ERROR(logger_, "[FAULT] %s —— 停速 + getdown 回趴下并中止任务",
                  reason.c_str());
-    // 安全路径：safe_go_down 内部不发任何"被前置判断挡住"的命令，
-    // 已经趴着/正在趴时它直接算成功 —— 绝不能被闸门拦住。
+    // 安全路径不走人工闸门；由 HAL 判断能否发送并等待真实趴稳确认。
     if (!dog_hal_.safe_go_down()) {
         RCLCPP_ERROR(logger_,
             "[FAULT] 趴下未确认 —— 狗的状态需要人工确认后处置（不自动卸力）");
@@ -116,17 +115,9 @@ void DogMissionExecutor::on_land() {
         return;
     }
 
-    // 全流程只有一种"回趴下"方式：getdown（数字9 → GetDown，2s 平滑插值）。
-    // 2026-09-29 用户定：passive（P 键 → 直接跳 Passive，kp=0 卸力）的卸力
-    // 不可靠，已从整条链路移除 —— 失败路径、预检失败、急停，一律走这里或
-    // RobotDogHAL::safe_go_down()。
-    //
-    // 目标状态写两个：RLFSMStateGetDown 是过渡态，动画跑完会自动转 Passive，
-    // 只等前者会擦肩而过、误报超时（协议文档 §6）。
-    RCLCPP_INFO(logger_, "[LAND] 发送 getdown（平滑趴下）...");
-    if (!dog_hal_.transition_to("getdown",
-                                "RLFSMStateGetDown|RLFSMStatePassive", "",
-                                dog_hal_.get_transition_settle_s())) {
+    // 与任务趴下、故障收尾和推力联动共用同一套状态判断及完成确认。
+    RCLCPP_INFO(logger_, "[LAND] 请求 getdown（平滑趴下）...");
+    if (!dog_hal_.safe_go_down()) {
         // 这里不转 FAULT：任务本身已经跑完，趴下没确认多半是狗已经卸力。
         // 但仍然要说清楚，别让人以为一切正常。
         RCLCPP_WARN(logger_, "[LAND] 趴下未确认完成（狗可能已卸力，或链路已断）");
