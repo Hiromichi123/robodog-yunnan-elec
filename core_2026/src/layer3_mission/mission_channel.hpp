@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <cstdint>
 #include <functional>
 #include <mutex>
 #include <string>
@@ -81,6 +82,27 @@ public:
      * 而那几秒里狗还在动。
      */
     void set_abort_hook(std::function<void()> hook);
+    /**
+     * 取最近一条播报状态（/rl_briefing/status）与会到达序号。
+     * 播报是“长任务”：狗端发布 /rl_briefing/play 后靠它等 done/失败，
+     * 等价于 Action 的 feedback/result。序号用于区分“这条是发布之后才到的”。
+     */
+    [[nodiscard]] bool briefing_status(std::string& out, uint64_t& seq) const;
+    /**
+     * 取最近一条运控回执（/rl_real/feedback）与会到达序号。
+     * /rl_real/command 本身是“发完即走”，任务要判断成败必须等 accepted/rejected。
+     */
+    [[nodiscard]] bool command_feedback(std::string& out, uint64_t& seq) const;
+    /**
+     * 取最近一帧姿态/就绪状态（/rl_real/posture，JSON 文本）与它的新鲜度。
+     * 电机类命令执行前用它判断 can_ready 等前置条件，避免“发出去就算成功”。
+     */
+    [[nodiscard]] bool posture_state(std::string& out, double& age_s) const;
+
+    /** 发一条播报请求到 /rl_briefing/play（异步播放，不阻塞调用方）。 */
+    void announce(const std::string& scene);
+    /** 停掉正在播放的交底音频（给 briefing_player 发 "stop"）。 */
+    void stop_announce();
     void send_drone(const std::string& json);
     std::string drone_result(const std::string& request_id, double max_age_s);
     bool drone_online() const;
@@ -118,6 +140,17 @@ private:
     std::function<void()> takeoff_hook_;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr takeoff_sub_;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr takeoff_status_pub_;
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr briefing_sub_;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr    briefing_pub_;
+    std::string           briefing_status_;
+    uint64_t              briefing_seq_{0};
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr feedback_sub_;
+    std::string           command_feedback_;
+    uint64_t              command_feedback_seq_{0};
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr posture_sub_;
+    std::string           posture_;
+    uint64_t              posture_seq_{0};
+    std::chrono::steady_clock::time_point posture_at_{};
 
 };
 

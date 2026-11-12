@@ -1,0 +1,19 @@
+[Unit]
+Description=JXG offline speech-to-text (Vosk) for web transcript (/rl_asr/*)
+After=network.target sound.target
+Wants=network.target
+
+[Service]
+User=jinjiao
+Group=jinjiao
+Environment=HOME=/home/jinjiao
+Environment=MAMBA_ROOT_PREFIX=/home/jinjiao/micromamba
+WorkingDirectory=/home/jinjiao
+# rosrun.sh 内部是 micromamba run -n ros；与 jxg-web.service 的写法一致。
+ExecStart=/home/jinjiao/rosrun.sh "ros2 launch rl_briefing asr_node.launch.py"
+# 节点自己会处理 arecord 的重试/退出；只有真正崩了才重启。
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

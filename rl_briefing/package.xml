@@ -12,6 +12,9 @@
   <depend>rclcpp</depend>
   <depend>std_msgs</depend>
 
+  <!-- 离线语音转写节点 asr_node.py -->
+  <exec_depend>rclpy</exec_depend>
+
   <export>
     <build_type>ament_cmake</build_type>
   </export>

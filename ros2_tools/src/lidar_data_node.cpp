@@ -4,6 +4,8 @@
  * 兼容PointLIO里程计消息格式
  * 发布消息类型: ros2_tools::msg::LidarPose
  * 订阅消息类型: nav_msgs::msg::Odometry
+ *              std_msgs::msg::Empty  /lidar_data/reset_origin（网页「SLAM 清 0」：
+ *              把当前位置设为新的导航原点；下一帧里程计生效）
  * 配置参数:
  * - use_simulation (bool): 是否使用仿真里程计，默认true
  * - simulation_odom_topic (string): 仿真里程计话题，默认"/absolute_pose"
@@ -15,6 +17,7 @@
 #include <sstream>
 #include <iomanip>
 #include <random>
+#include <std_msgs/msg/empty.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <nav_msgs/msg/odometry.hpp>
@@ -98,6 +101,19 @@ public:
         odom_sub = this->create_subscription<nav_msgs::msg::Odometry>(
             topic, 10, [this](const nav_msgs::msg::Odometry::SharedPtr msg) { odomCallback(msg); });
         RCLCPP_INFO(this->get_logger(), "里程计订阅: %s", topic.c_str());
+
+        // 网页「SLAM 清 0」：不重启 SLAM，只把**下一帧**的当前位姿设为新原点。
+        // 与启动时 normalize_start_pose 同一套逻辑，/navigation_origin 会随后重发。
+        // ⚠️ dog_node 用的是同一条 /lidar_data：位姿会瞬间跳变，只应在狗静止、
+        // 没有任务执行时触发（网页端已加确认）。
+        reset_sub_ = this->create_subscription<std_msgs::msg::Empty>(
+            "lidar_data/reset_origin", 10,
+            [this](const std_msgs::msg::Empty::SharedPtr) {
+                normalize_start_ = true;
+                origin_ready_ = false;
+                RCLCPP_WARN(this->get_logger(),
+                    "收到清 0 请求: 下一帧位姿将设为新的导航原点");
+            });
     }
 
     // 兼容版odom回调
@@ -219,6 +235,7 @@ private:
     
     rclcpp::Publisher<ros2_tools::msg::LidarPose>::SharedPtr lidar_pub;
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub;
+    rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr reset_sub_;
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr local_position_sub;
 
     ros2_tools::msg::LidarPose lidar_pose;

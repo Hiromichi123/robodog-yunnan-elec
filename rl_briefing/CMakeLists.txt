@@ -49,4 +49,8 @@ install(DIRECTORY launch config
 install(PROGRAMS scripts/make_wavs.py
   DESTINATION lib/${PROJECT_NAME})
 
+# 离线语音转写节点（Python/rclpy + Vosk）。ros2 launch 按 lib/<pkg>/asr_node.py 找。
+install(PROGRAMS scripts/asr_node.py
+  DESTINATION lib/${PROJECT_NAME})
+
 ament_package()

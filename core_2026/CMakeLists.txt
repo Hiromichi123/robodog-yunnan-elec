@@ -194,6 +194,9 @@ endif()
 install(PROGRAMS scripts/fake_lidar_data.py
         DESTINATION lib/${PROJECT_NAME}
         RENAME fake_lidar_data)
+# Project-owned rosbridge spin recovery; keep the installed upstream environment unchanged.
+install(PROGRAMS scripts/rosbridge_guarded.py DESTINATION lib/${PROJECT_NAME} RENAME rosbridge_websocket)
+install(FILES scripts/rosbridge_spin_guard.py DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY launch/ DESTINATION share/${PROJECT_NAME}/)
 install(FILES scripts/safety_config.py DESTINATION share/${PROJECT_NAME})
 install(PROGRAMS scripts/start_local_safety.py DESTINATION lib/${PROJECT_NAME})

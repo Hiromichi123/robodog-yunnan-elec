@@ -24,9 +24,46 @@ namespace {
 constexpr double kPoseTimeoutS = 1.0;   // 位姿多久没更新就停
 constexpr int    kStopFrames  = 5;      // 到位后连发几帧零速再 vel_stop
 constexpr double kControlHz   = 20.0;
+// 播报类操作点位的等待上限：交底音频单段约 2.5~3 分钟，留足余量
+constexpr double kBriefingWaitS = 600.0;
+// 发布后多久还没听到“playing/结束”，就判定播报节点没响应
+constexpr double kBriefingStartS = 10.0;
+// /rl_real/command 发布后等运控回执（accepted/rejected）的上限
+constexpr double kCommandAckWaitS = 12.0;
+// 只回 "executing" 或把结果发到别的话题的命令（probe_motors/check_stand/zero），
+// 收不到 accepted 就是收不到，别白等 12s
+constexpr double kQuickAckWaitS = 3.0;
+// 电机探针是异步长任务：扫完 16 个电机约 12~15s，必须等最终结果
+constexpr double kProbeWaitS = 30.0;
+constexpr double kCheckWaitS = 10.0;
+// 等姿态到位的上限：起立约 6s、趴下约 8s（含 2.5s 沉降），留足余量
+constexpr double kPostureWaitS = 20.0;
+// 姿态话题多久没更新就认为运控不报姿态（老固件），不再硬等
+constexpr double kPostureMissingS = 3.0;
 
 double seconds_since(const std::chrono::steady_clock::time_point& t0) {
     return std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+}
+
+// 语音提醒：任务名是动态的，播报音频在板子上预生成（edge-tts），
+// 文件名固定为 mission_start_<任务名>.wav。找不到就返回空串，不播也不降级。
+std::string mission_start_audio_name(const std::string& name) {
+    std::string safe;
+    for (char ch : name) {
+        if (ch == '/' || ch == '\\' || ch == ':' || ch == ',' ||
+            ch == '\n' || ch == '\r') {
+            continue;
+        }
+        safe.push_back(ch);
+    }
+    if (safe.empty()) return {};
+    const char* home = std::getenv("HOME");
+    const std::string path = std::string(home ? home : "/home/jinjiao") +
+                             "/briefing_audio/mission_start_" + safe + ".wav";
+    std::FILE* fp = std::fopen(path.c_str(), "rb");
+    if (!fp) return {};
+    std::fclose(fp);
+    return "mission_start_" + safe;
 }
 
 // Written only after publishing zero velocity, never in the moving hot path.
@@ -77,6 +114,7 @@ DogPlanExecutor::DogPlanExecutor(RobotDogHAL&       hal,
 void DogPlanExecutor::request_abort() {
     operator_abort_ = true;
     abort_ = true;
+    channel_.stop_announce();   // 急停连播报一起停，不等主线程退出
     hal_.cancel_takeoff_action();
 }
 
@@ -160,6 +198,26 @@ void DogPlanExecutor::execute(const MissionPlan& plan) {
                 plan.confirm == ConfirmMode::Each ? "逐步确认（危险步骤前暂停）"
                                                   : "一次授权（全程不暂停）");
 
+    // 语音提醒：先等“收到平台下发任务”播完，再播“开始执行<任务名>任务”，
+    // 否则 briefing_player 会打断上一句。播报失败不影响任务本身。
+    {
+        std::string ignore;
+        uint64_t seq = 0;
+        (void)channel_.briefing_status(ignore, seq);
+        if (seq > 0) (void)wait_briefing_done(8.0, seq);
+        const std::string start_scene = mission_start_audio_name(plan.name);
+        if (!start_scene.empty()) {
+            seq = 0;
+            (void)channel_.briefing_status(ignore, seq);
+            channel_.announce(start_scene);
+            (void)wait_briefing_done(12.0, seq);
+        } else {
+            RCLCPP_WARN(logger_, "[任务] 未找到开始播报音频 %s，跳过（新任务名需预生成）",
+                        ("mission_start_" + plan.name + ".wav").c_str());
+        }
+        last_error_.clear();
+    }
+
     std::size_t completed = 0;
     bool failed = false;
     bool failed_keep_standing = false;   // 失败，但狗已停住、要留在站立位（不 getdown）
@@ -192,6 +250,7 @@ void DogPlanExecutor::execute(const MissionPlan& plan) {
         if (out == Outcome::Failed) { failed = true; break; }
         if (out == Outcome::FailedKeepStanding) { failed_keep_standing = true; break; }
         ++completed;
+        if (completed == 1 && total > 1) channel_.announce("mission_running");
     }
 
     channel_.set_doc_accepting(true);
@@ -202,6 +261,7 @@ void DogPlanExecutor::execute(const MissionPlan& plan) {
         return;
     }
     if (abort_) {
+        channel_.stop_announce();   // 兜底：非 abort 钩子置位时也停播报
         go_down_and_report("操作员急停");
         push("aborted", -1, total, "", "已急停：停速 + getdown 回趴下", "", false);
         RCLCPP_WARN(logger_, "[任务] 「%s」已中止（完成 %zu/%zu 步）",
@@ -218,6 +278,7 @@ void DogPlanExecutor::execute(const MissionPlan& plan) {
         } else {
             go_down_and_report(last_error_);
         }
+        channel_.announce("mission_fail");
         push("failed", -1, total, "", last_error_, "", false);
         RCLCPP_ERROR(logger_, "[任务] 「%s」失败于 %zu/%zu 步：%s%s",
                      plan.name.c_str(), completed + 1, total, last_error_.c_str(),
@@ -225,6 +286,7 @@ void DogPlanExecutor::execute(const MissionPlan& plan) {
         return;
     }
 
+    channel_.announce("mission_done");
     push("done", -1, total, "", "任务完成", "", false);
     RCLCPP_INFO(logger_, "[任务] 「%s」完成（%zu 步）", plan.name.c_str(), total);
 }
@@ -241,6 +303,7 @@ DogPlanExecutor::Outcome DogPlanExecutor::dispatch(const MissionStep& st, std::s
         case StepType::Wait:       out = do_wait(st);       break;
         case StepType::GetDown:    out = do_getdown(st);    break;
         case StepType::DroneMission: out = do_drone_mission(st); break;
+        case StepType::RosPub:      out = do_ros_pub(st);      break;
     }
 
     // 失败原因补上"第几步、什么类型" —— 网页上只显示这一行，必须能直接定位。
@@ -689,6 +752,433 @@ DogPlanExecutor::Outcome DogPlanExecutor::do_getdown(const MissionStep& st) {
     return Outcome::Failed;
 }
 
+static std::string RosShellQuote(const std::string& s) {
+    std::string out = "'";
+    for (char c : s) {
+        // 单引号转义成 '\''（用 0x27/0x5c 写，避免多层转义出错）
+        if (c == 0x27) { out += 0x27; out += 0x5c; out += 0x27; out += 0x27; }
+        else out += c;
+    }
+    out += "'";
+    return out;
+}
+
+// 按字节上限截断，但不切断 UTF-8 多字节字符 —— 错误信息里常是中文，
+// 按字节 substr 会切出半个字符，nlohmann::json 序列化时直接抛 316 异常。
+static std::string Utf8Prefix(const std::string &s, std::size_t max_bytes) {
+    if (s.size() <= max_bytes) return s;
+    std::size_t cut = max_bytes;
+    while (cut > 0 && (static_cast<unsigned char>(s[cut]) & 0xC0) == 0x80) --cut;
+    return s.substr(0, cut);
+}
+
+static std::string RosTrim(std::string s) {
+    while (!s.empty() && (s.back() == '\n' || s.back() == '\r' || s.back() == ' ' || s.back() == '\t'))
+        s.pop_back();
+    return s;
+}
+
+// ros2 CLI 的 stderr 混着大量 [WARN]/[INFO]（DDS 发现告警等），真正的失败原因
+// 往往在最后几行。原来取前 200 字符会被这些告警占满，页面只看得到无关的 WARN。
+// 这里过滤 WARN/INFO，保留最后 3 行非噪声输出（每行限 200 字符）。
+static std::string RosErrorSummary(const std::string &out) {
+    std::string last[3];
+    int count = 0;
+    std::size_t pos = 0;
+    while (pos < out.size()) {
+        std::size_t end = out.find('\n', pos);
+        if (end == std::string::npos) end = out.size();
+        std::string line = RosTrim(out.substr(pos, end - pos));
+        pos = end + 1;
+        if (line.empty()) continue;
+        if (line.rfind("[WARN]", 0) == 0 || line.rfind("[INFO]", 0) == 0) continue;
+        line = Utf8Prefix(line, 200);
+        last[0] = last[1];
+        last[1] = last[2];
+        last[2] = line;
+        if (count < 3) ++count;
+    }
+    std::string joined;
+    for (int i = 3 - count; i < 3; ++i) {
+        if (last[i].empty()) continue;
+        if (!joined.empty()) joined += " | ";
+        joined += last[i];
+    }
+    return joined;
+}
+
+// 从操作点位 payload 里取 /rl_real/command 的命令字（如 {"data":"probe_motors"}）
+static std::string RosCommandText(const std::string &payload) {
+    auto j = nlohmann::json::parse(payload, nullptr, false);
+    if (j.is_discarded() || !j.is_object()) return {};
+    auto it = j.find("data");
+    if (it == j.end() || !it->is_string()) return {};
+    return it->get<std::string>();
+}
+
+// 运控回执形如 "command accepted: probe_motors" / "command rejected: probe_motors
+// (can not init)"。只有明确 rejected 才算失败，其余一律视为未判定。
+static bool RosFeedbackVerdict(const std::string &text, const std::string &cmd,
+                               bool &rejected) {
+    if (cmd.empty() || text.find(cmd) == std::string::npos) return false;
+    const bool rej = text.find("rejected") != std::string::npos;
+    const bool acc = text.find("accepted") != std::string::npos;
+    if (!rej && !acc) return false;
+    rejected = rej;
+    return true;
+}
+
+// 需要电机/CAN 才能执行运控命令：这类命令在 can_ready=false 时必须判失败，
+// 不能“发出去就算成功”，否则任务列表里永远看不到失败记录。
+static bool RosCommandNeedsMotors(const std::string &cmd) {
+    return cmd == "probe_motors" || cmd == "getup" || cmd == "safe_getup"
+        || cmd == "getdown" || cmd == "locomotion" || cmd == "check_stand"
+        || cmd == "check_standing" || cmd == "zero";
+}
+
+// 操作点位：发布一次 ROS 话题（ros2 CLI，与任务执行同环境）。
+// 失败按步骤失败处理；发布成功后可选等待 wait_s 秒。
+// 播报类（/rl_briefing/play）发布成功还不算完 —— 必须等播放结束。
+// 运控只有动作类命令才回 "command accepted: <cmd>"（getup/getdown/locomotion/passive…），
+// probe_motors / check_stand / zero 这类只回 "executing" 或把结果发到别的话题，
+// 等满 12s 纯属空耗（2026-11-10 R04：4 步 34s 里有 24s 耗在这两步的空等上）。
+static bool RosCommandHasAck(const std::string &cmd) {
+    static const char *const kNamed[] = {
+        "getup", "stand", "up", "getdown", "down", "lie", "sit",
+        "locomotion", "rl", "walk", "move", "passive", "stop", "safe_stop",
+    };
+    for (const char *name : kNamed) {
+        if (cmd == name) return true;
+    }
+    return cmd.rfind("safe_getup", 0) == 0;
+}
+
+// 等运控姿态到位：RLFSMStateGetUp 站稳后 posture 变 standing，
+// RLFSMStateGetDown 趴完后变 lying。只看 1s 内的新鲜样本，
+// 避免读到上一动作的残留姿态而提前放行。
+DogPlanExecutor::Outcome DogPlanExecutor::wait_posture(const std::string& target,
+                                                       double timeout_s) {
+    const auto t0 = std::chrono::steady_clock::now();
+    rclcpp::Rate rate(kControlHz);
+    std::string seen = "未知";
+    bool got = false;
+    int posture_hits = 0;
+    while (rclcpp::ok()) {
+        if (abort_) { last_error_ = "操作员急停"; return Outcome::Failed; }
+        std::string posture;
+        double age_s = 0.0;
+        if (channel_.posture_state(posture, age_s) && age_s <= 1.0) {
+            auto pj = nlohmann::json::parse(posture, nullptr, false);
+            if (pj.is_object() && pj.contains("posture") && pj["posture"].is_string()) {
+                got = true;
+                seen = pj["posture"].get<std::string>();
+                // 收紧判定：posture 翻转可能早于动作真正完成（现场 getup 只用
+                // 2.5s 就报 standing）。要求 settled=true 且连续 3 帧一致才认。
+                const bool settled_now = pj.value("settled", false);
+                if (seen == target && settled_now) {
+                    if (++posture_hits >= 3) {
+                        RCLCPP_INFO(logger_, "[任务] 姿态已到位：%s（settled，连续 %d 帧）",
+                                    target.c_str(), posture_hits);
+                        return Outcome::Ok;
+                    }
+                } else {
+                    posture_hits = 0;
+                }
+            }
+        }
+        if (!got && seconds_since(t0) > kPostureMissingS) {
+            RCLCPP_WARN(logger_, "[任务] 运控没有上报姿态，无法确认动作完成，按已发布继续");
+            return Outcome::Ok;
+        }
+        if (seconds_since(t0) > timeout_s) {
+            last_error_ = "动作未在 " +
+                          std::to_string(static_cast<long>(std::lround(timeout_s))) +
+                          "s 内到位（当前姿态 " + seen + "，目标 " + target + "）";
+            RCLCPP_ERROR(logger_, "[任务] %s", last_error_.c_str());
+            return Outcome::Failed;
+        }
+        rate.sleep();
+    }
+    last_error_ = "节点已关闭";
+    return Outcome::Failed;
+}
+
+DogPlanExecutor::Outcome DogPlanExecutor::do_ros_pub(const MissionStep& st) {
+    RCLCPP_INFO(logger_, "[任务] 操作点位：发布 %s (%s)",
+                st.ros_topic.c_str(), st.ros_msg_type.c_str());
+    if (abort_) { last_error_ = "操作员急停"; return Outcome::Failed; }
+
+    // 播报要走“等结果”的路径：先记下当前状态序号，只认发布之后到达的状态
+    const bool is_briefing = st.ros_topic == "/rl_briefing/play";
+    uint64_t brief_seq = 0;
+    if (is_briefing) {
+        std::string ignore;
+        (void)channel_.briefing_status(ignore, brief_seq);
+    }
+    // 运控命令同样是“发完即走”：记下命令字与当前回执序号，发布后等 accepted/rejected
+    const std::string command_text = RosCommandText(st.ros_payload);
+    const bool wait_ack = st.ros_topic == "/rl_real/command" && !command_text.empty();
+    uint64_t command_seq = 0;
+    if (wait_ack) {
+        std::string ignore;
+        (void)channel_.command_feedback(ignore, command_seq);
+    }
+
+    // 电机类命令前置检查：CAN 无反馈时命令根本不会执行，直接判失败并带上原因，
+    // 让平台任务记录出现 failed（而不是发完就显示 done）。
+    if (wait_ack && RosCommandNeedsMotors(command_text)) {
+        std::string posture;
+        double age_s = 0.0;
+        if (channel_.posture_state(posture, age_s) && age_s <= 3.0) {
+            auto pj = nlohmann::json::parse(posture, nullptr, false);
+            if (pj.is_object() && pj.contains("can_ready")
+                    && pj["can_ready"].is_boolean() && !pj["can_ready"].get<bool>()) {
+                std::string reason = pj.value("stand_reason", std::string());
+                reason = Utf8Prefix(reason, 160);
+                last_error_ = "运控未就绪（can_ready=false）：" + command_text + " 未执行";
+                if (!reason.empty()) last_error_ += "；" + reason;
+                RCLCPP_ERROR(logger_, "[任务] %s", last_error_.c_str());
+                return Outcome::Failed;
+            }
+        }
+    }
+
+    const std::string cmd = "timeout -k 1s 20s ros2 topic pub --once -w 1 " +
+                            RosShellQuote(st.ros_topic) + " " +
+                            RosShellQuote(st.ros_msg_type) + " " +
+                            RosShellQuote(st.ros_payload) + " 2>&1";
+    std::string out;
+    FILE* fp = ::popen(cmd.c_str(), "r");
+    if (!fp) { last_error_ = "无法执行 ros2 topic pub"; return Outcome::Failed; }
+    char buf[256];
+    while (std::fgets(buf, sizeof(buf), fp)) {
+        out += buf;
+        // 不能中途 break：ros2 还在往管道里写，提前 pclose 会让它吃 SIGPIPE，
+        // 表现为“发布失败”，其实命令根本没走到发布（DDS 告警刷屏时必现）。
+        // 只保留末尾 8KB，内存可控。
+        if (out.size() > 16384) out.erase(0, out.size() - 8192);
+    }
+    const int rc = ::pclose(fp);
+    if (rc != 0 && out.find("publishing #") == std::string::npos) {
+        std::string msg = RosErrorSummary(out);
+        if (msg.empty()) {
+            // 输出里只有 WARN/INFO（典型是 CycloneDDS 发现告警），按返回码给结论
+            msg = (rc == 124)
+                ? "20s 内没有订阅者匹配，ros2 topic pub -w 1 超时"
+                : ("ros2 topic pub 执行失败(rc=" + std::to_string(rc) + ")");
+        }
+        last_error_ = "ROS 话题发布失败：" + msg;
+        return Outcome::Failed;
+    }
+    RCLCPP_INFO(logger_, "[任务] 操作点位已发布：%s", st.ros_topic.c_str());
+
+    if (wait_ack) {
+        // 探针是异步长任务：236 先回 "probe motors: executing"，扫完 16 个电机
+        // （约 12~15s）才回 "probe motors: all N motors controllable" /
+        // "... N motors not responding"。必须等最终结果，否则下一步 getup 会被
+        // "command rejected: getup, probe in progress" 拒掉（2026-11-10 R08）。
+        const bool is_probe = command_text == "probe_motors" || command_text == "probe"
+                || command_text.rfind("probe_motor ", 0) == 0
+                || command_text.rfind("probe_leg ", 0) == 0;
+        if (is_probe) {
+            const auto pt0 = std::chrono::steady_clock::now();
+            rclcpp::Rate probe_rate(kControlHz);
+            bool got = false, bad = false;
+            std::string result_text;
+            while (rclcpp::ok() && seconds_since(pt0) < kProbeWaitS) {
+                if (abort_) { last_error_ = "操作员急停"; return Outcome::Failed; }
+                uint64_t seq = 0;
+                std::string fb;
+                if (channel_.command_feedback(fb, seq) && seq != command_seq
+                        && fb.find("probe") != std::string::npos) {
+                    command_seq = seq;
+                    result_text = fb;
+                    if (fb.find("executing") == std::string::npos) {
+                        got = true;
+                        bad = fb.find("not responding") != std::string::npos
+                                || fb.find("fail") != std::string::npos;
+                        break;
+                    }
+                }
+                probe_rate.sleep();
+            }
+            if (!got) {
+                last_error_ = "电机探针未在 " +
+                              std::to_string(static_cast<long>(kProbeWaitS)) +
+                              "s 内返回结果（运控可能仍在扫描电机）";
+                RCLCPP_ERROR(logger_, "[任务] %s", last_error_.c_str());
+                return Outcome::Failed;
+            }
+            if (bad) {
+                last_error_ = "电机探针失败：" + result_text;
+                RCLCPP_ERROR(logger_, "[任务] %s", last_error_.c_str());
+                return Outcome::Failed;
+            }
+            RCLCPP_INFO(logger_, "[任务] 电机探针通过：%s", result_text.c_str());
+            return Outcome::Ok;
+        }
+        // check_stand / check_standing 以前只走 236 内部 emit，狗端拿不到结果，
+        // 只能"发出去就算完成"；现在 236 回 "check_stand: ready" / "not ready"，
+        // 这里按真实结果判定（2026-11-10 TASK-0007 记录成功但没执行）。
+        const bool is_check = command_text == "check_stand" || command_text == "check"
+                || command_text == "standcheck" || command_text == "stand_check"
+                || command_text == "check_standing" || command_text == "standingcheck"
+                || command_text == "standing_check";
+        if (is_check) {
+            const auto ct0 = std::chrono::steady_clock::now();
+            rclcpp::Rate check_rate(kControlHz);
+            bool got = false, bad = false;
+            std::string check_text;
+            while (rclcpp::ok() && seconds_since(ct0) < kCheckWaitS) {
+                if (abort_) { last_error_ = "操作员急停"; return Outcome::Failed; }
+                uint64_t seq = 0;
+                std::string fb;
+                if (channel_.command_feedback(fb, seq) && seq != command_seq
+                        && fb.find("check_stand") != std::string::npos) {
+                    command_seq = seq;
+                    check_text = fb;
+                    got = true;
+                    bad = fb.find("not ") != std::string::npos;
+                    break;
+                }
+                check_rate.sleep();
+            }
+            if (!got) {
+                last_error_ = "姿态检测未在 " +
+                              std::to_string(static_cast<long>(kCheckWaitS)) +
+                              "s 内返回结果（运控可能没执行检测）";
+                RCLCPP_ERROR(logger_, "[任务] %s", last_error_.c_str());
+                return Outcome::Failed;
+            }
+            if (bad) {
+                last_error_ = "姿态检测未通过：" + check_text;
+                RCLCPP_ERROR(logger_, "[任务] %s", last_error_.c_str());
+                return Outcome::Failed;
+            }
+            RCLCPP_INFO(logger_, "[任务] 姿态检测通过：%s", check_text.c_str());
+            return Outcome::Ok;
+        }
+        // 等运控回执：明确 rejected 才判失败；超时按“无回执”放行，
+        // 保持和旧版“发完即走”的行为兼容（老固件、非白名单命令不会误判）。
+        const auto t0 = std::chrono::steady_clock::now();
+        // 有 accepted 回执的动作类命令给满 12s；只回 "executing" 的探针/自查类 3s 就放行。
+        const double ack_wait_s =
+            RosCommandHasAck(command_text) ? kCommandAckWaitS : kQuickAckWaitS;
+        rclcpp::Rate rate(kControlHz);
+        bool judged = false, rejected = false;
+        std::string text;
+        while (rclcpp::ok() && seconds_since(t0) < ack_wait_s) {
+            if (abort_) { last_error_ = "操作员急停"; return Outcome::Failed; }
+            uint64_t seq = 0;
+            if (channel_.command_feedback(text, seq) && seq != command_seq
+                    && RosFeedbackVerdict(text, command_text, rejected)) {
+                judged = true;
+                break;
+            }
+            rate.sleep();
+        }
+        if (judged && rejected) {
+            std::string reason = RosErrorSummary(text);
+            if (reason.empty()) reason = text;
+            last_error_ = "运控拒绝执行 " + command_text + "：" + reason;
+            RCLCPP_ERROR(logger_, "[任务] %s 被运控拒绝：%s", command_text.c_str(), reason.c_str());
+            return Outcome::Failed;
+        }
+        if (!judged) {
+            RCLCPP_WARN(logger_, "[任务] %s 未在 %.0fs 内收到运控回执，按已发布继续",
+                        command_text.c_str(), ack_wait_s);
+        }
+    }
+
+    if (wait_ack) {
+
+        // 动作型运控命令：accepted 只代表运控收下命令，必须等姿态真正到位再进下一步，
+        // 否则紧跟的 getdown 会在 getup 途中把起立动作掐断（2026-11-10 R04 现场）。
+        const std::string target =
+            (command_text == "getup" || command_text == "safe_getup" ||
+             command_text == "stand") ? "standing"
+            : (command_text == "getdown" || command_text == "down" ||
+               command_text == "lie" || command_text == "sit") ? "lying" : "";
+        if (!target.empty()) {
+            const Outcome oc = wait_posture(target, kPostureWaitS);
+            if (oc != Outcome::Ok) return oc;
+        }
+    }
+
+    if (is_briefing) {
+        // 交底作业：播放是长任务，等它报 done 再进下一步。
+        // 多个操作点位连排时，只有这样才不会“发完就都算完成、声音叠成一团”。
+        // 等待上限由音频长度决定，不看 wait_s（那段时长在平台上是给普通话题用的）。
+        return wait_briefing_done(kBriefingWaitS, brief_seq);
+    }
+
+    if (st.ros_wait_s > 0.0) {
+        const auto t0 = std::chrono::steady_clock::now();
+        rclcpp::Rate rate(kControlHz);
+        while (rclcpp::ok() && seconds_since(t0) < st.ros_wait_s) {
+            if (abort_) { last_error_ = "操作员急停"; return Outcome::Failed; }
+            rate.sleep();
+        }
+    }
+    return Outcome::Ok;
+}
+
+// 等播报结果：/rl_briefing/status 就是 feedback + result（Action 的语义）。
+//   playing: X   → 正在播，继续等
+//   done: X      → 播完，本步成功
+//   nothing played / interrupted / stopped → 失败（操作员能看出原因）
+DogPlanExecutor::Outcome DogPlanExecutor::wait_briefing_done(double timeout_s,
+                                                             uint64_t since_seq) {
+    const auto t0 = std::chrono::steady_clock::now();
+    rclcpp::Rate rate(kControlHz);
+    uint64_t seq = since_seq;
+    bool started = false;
+    while (rclcpp::ok()) {
+        if (abort_) {
+            last_error_ = "操作员急停";
+            return Outcome::Failed;
+        }
+        std::string status;
+        uint64_t cur = seq;
+        if (channel_.briefing_status(status, cur) && cur != seq) {
+            seq = cur;
+            if (status.rfind("playing:", 0) == 0) {
+                started = true;
+                RCLCPP_INFO(logger_, "[任务] 播报中：%s", status.c_str());
+            } else if (status.rfind("done:", 0) == 0) {
+                RCLCPP_INFO(logger_, "[任务] 播报完成：%s", status.c_str());
+                return Outcome::Ok;
+            } else if (status.rfind("nothing played:", 0) == 0) {
+                last_error_ = "播报没有播放任何音频（" + status + "）";
+                return Outcome::Failed;
+            } else if (status.rfind("interrupted:", 0) == 0 || status == "stopped") {
+                last_error_ = "播报被中断（" + status + "）";
+                return Outcome::Failed;
+            } else if (status.rfind("audio open failed", 0) == 0 ||
+                       status.rfind("audio_dir not found", 0) == 0) {
+                // 声卡/目录这类整条链路的问题：后面不会再有 done，直接失败
+                last_error_ = "播报失败（" + status + "）";
+                return Outcome::Failed;
+            }
+            // 单段缺文件（not found / wav load failed）不打断：播报节点会接着播剩下的，
+            // 最后用 done / nothing played 汇报整体结果。
+        }
+        if (!started && seconds_since(t0) > kBriefingStartS) {
+            last_error_ = "播报节点没有响应（未收到 playing 状态，检查 briefing_player 是否在运行）";
+            return Outcome::Failed;
+        }
+        if (seconds_since(t0) > timeout_s) {
+            last_error_ = "播报未在 " +
+                          std::to_string(static_cast<long>(std::lround(timeout_s))) +
+                          "s 内播放完成";
+            return Outcome::Failed;
+        }
+        rate.sleep();
+    }
+    last_error_ = "节点已关闭";
+    return Outcome::Failed;
+}
+
 DogPlanExecutor::Outcome DogPlanExecutor::do_drone_mission(const MissionStep& st) {
     drone_waiting_ = true;
     struct ResetWaiting { std::atomic<bool>& flag; ~ResetWaiting() { flag = false; } } reset{drone_waiting_};
@@ -886,6 +1376,7 @@ std::string DogPlanExecutor::step_label(const MissionStep& st) const {
             return buf;
         case StepType::GetDown:    return "趴下";
         case StepType::DroneMission: return "指挥无人机："+st.preset_name;
+        case StepType::RosPub:     return "操作点位：" + st.ros_topic;
     }
     return "未知步骤";
 }
@@ -893,6 +1384,11 @@ std::string DogPlanExecutor::step_label(const MissionStep& st) const {
 std::string DogPlanExecutor::gate_prompt(const MissionStep& st) const {
     char buf[224];
     switch (st.type) {
+        case StepType::RosPub:
+            std::snprintf(buf, sizeof(buf),
+                          "即将发布 ROS 话题 %s（%s）。确认该操作安全后点「继续」",
+                          st.ros_topic.c_str(), st.ros_msg_type.c_str());
+            return buf;
         case StepType::DroneMission:
             return "将自动准备无人机定位并真实起飞，预设："+st.preset_name+"，版本："+st.preset_revision.substr(0,12)+"。确认环境安全、遥控就绪后继续；等待飞机完成上锁。";
         case StepType::GetUp:

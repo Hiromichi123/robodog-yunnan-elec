@@ -35,6 +35,7 @@ enum class StepType {
     Wait,         // 原地等
     DroneMission, // 执行飞机已保存预设（只引用，不编辑航线）
     GetDown,      // 平滑趴下（RLLocomotion → GetDown）
+    RosPub,       // 操作点位：发布一条 ROS 话题（topic/msg_type/payload）
 };
 
 /** 确认闸门模式：每个危险步骤都问 / 一次都不问。 */
@@ -91,6 +92,12 @@ struct MissionStep {
     double y{0.0};
     double yaw{0.0};              // 仅 goto_pose 使用，JSON 必须显式提供
     double goto_timeout_s{120.0};  // 到点闭环的总超时
+
+    // ros_pub（操作点位）：执行到该步时发布一次 ROS 话题
+    std::string ros_topic;      // /rl_briefing/play
+    std::string ros_msg_type;   // std_msgs/String（pkg/Msg）
+    std::string ros_payload;    // JSON 文本，直接交给 ros2 topic pub
+    double ros_wait_s{0.0};     // 发布后等待秒数
 };
 
 struct MissionPlan {

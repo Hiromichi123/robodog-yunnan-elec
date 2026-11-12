@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <cstdio>
+#include <cctype>
 #include <string>
 #include <algorithm>
 
@@ -16,6 +17,15 @@ using nlohmann::json;
 // ── 取值的几个小工具 ─────────────────────────────────────────────────────
 // 为什么不用 json::at() + try/catch：报错信息要能说清"是缺字段还是字段类型不对"，
 // 异常里那句话对操作员没用（网页上要显示中文原因）。
+
+// 按字节上限截断，但不切断 UTF-8 多字节字符 —— 错误信息里常是中文，
+// 按字节 substr 会切出半个字符，nlohmann::json 序列化时直接抛 316 异常。
+static std::string Utf8Prefix(const std::string &s, std::size_t max_bytes) {
+    if (s.size() <= max_bytes) return s;
+    std::size_t cut = max_bytes;
+    while (cut > 0 && (static_cast<unsigned char>(s[cut]) & 0xC0) == 0x80) --cut;
+    return s.substr(0, cut);
+}
 
 enum class FieldState { Missing, Ok, WrongType };
 
@@ -40,7 +50,7 @@ std::string brief(const json& obj, const char* key) {
     const auto it = obj.find(key);
     if (it == obj.end()) return "缺";
     std::string s = it->dump();
-    if (s.size() > 40) s = s.substr(0, 40) + "…";
+    if (s.size() > 40) s = Utf8Prefix(s, 40) + "…";
     return s;
 }
 
@@ -74,6 +84,7 @@ const char* to_string(StepType t) {
         case StepType::Wait:       return "wait";
         case StepType::GetDown:    return "getdown";
         case StepType::DroneMission: return "drone_mission";
+        case StepType::RosPub:     return "ros_pub";
     }
     return "unknown";
 }
@@ -88,6 +99,7 @@ bool step_type_from_string(const std::string& s, StepType& out) {
     if (s == "wait")        { out = StepType::Wait;       return true; }
     if (s == "getdown")     { out = StepType::GetDown;    return true; }
     if (s == "drone_mission") { out = StepType::DroneMission; return true; }
+    if (s == "ros_pub")    { out = StepType::RosPub;     return true; }
     return false;
 }
 
@@ -100,6 +112,7 @@ bool is_dangerous_step(StepType t) {
         case StepType::GotoPose:
         case StepType::GetDown:
         case StepType::DroneMission:
+        case StepType::RosPub:
             return true;
         case StepType::CheckStand:
         case StepType::Wait:
@@ -207,7 +220,7 @@ ParseResult parse_mission_json(const std::string& text) {
         }
         if (!step_type_from_string(type_s, st.type)) {
             r.error = where + "不认识的 type=" + type_s +
-                      "（可用：check_stand / getup / locomotion / move / goto / goto_pose / wait / getdown）";
+                      "（可用：check_stand / getup / locomotion / move / goto / goto_pose / wait / getdown / ros_pub）";
             return r;
         }
 
@@ -271,6 +284,18 @@ ParseResult parse_mission_json(const std::string& text) {
                     r.error=where+"无人机模块仅允许预设引用，禁止航线覆写"; return r;
                 }
             }
+        }
+        if (st.type == StepType::RosPub) {
+            if (read_string(js, "topic", st.ros_topic) != FieldState::Ok) {
+                r.error = where + "ros_pub 必须提供 topic 字符串"; return r;
+            }
+            if (read_string(js, "msg_type", st.ros_msg_type) != FieldState::Ok) {
+                r.error = where + "ros_pub 必须提供 msg_type 字符串"; return r;
+            }
+            if (read_string(js, "payload", st.ros_payload) != FieldState::Ok) {
+                r.error = where + "ros_pub 必须提供 payload（JSON 字符串）"; return r;
+            }
+            rd.num("wait_s", st.ros_wait_s);
         }
         if (!rd.ok) return r;
 
@@ -359,6 +384,41 @@ std::string validate_plan(const MissionPlan& plan) {
                 if (!finite(st.prepare_timeout_s) || st.prepare_timeout_s<10 || st.prepare_timeout_s>300 ||
                     !finite(st.flight_timeout_s) || st.flight_timeout_s<30 || st.flight_timeout_s>3600)
                     return where+"无人机准备/飞行超时超出范围";
+                break;
+            }
+            case StepType::RosPub: {
+                const auto ok_topic = [](const std::string& s) {
+                    if (s.empty() || s.size() > 64 || s[0] != '/') return false;
+                    for (char c : s) {
+                        if (!(std::isalnum(static_cast<unsigned char>(c)) || c == '_' || c == '/'))
+                            return false;
+                    }
+                    return true;
+                };
+                const auto part = [](const std::string& s) {
+                    if (s.empty()) return false;
+                    for (char c : s) {
+                        if (!(std::isalnum(static_cast<unsigned char>(c)) || c == '_')) return false;
+                    }
+                    return true;
+                };
+                if (!ok_topic(st.ros_topic)) {
+                    return where + "topic 必须以 / 开头且只含字母数字下划线（≤64 字节）";
+                }
+                std::size_t slash = st.ros_msg_type.find('/');
+                bool type_ok = slash != std::string::npos;
+                if (type_ok) {
+                    std::string pkg = st.ros_msg_type.substr(0, slash);
+                    std::string rest = st.ros_msg_type.substr(slash + 1);
+                    if (rest.rfind("msg/", 0) == 0) rest = rest.substr(4);
+                    type_ok = part(pkg) && part(rest);
+                }
+                if (!type_ok) return where + "msg_type 格式应为 pkg/Msg";
+                if (st.ros_payload.empty()) return where + "payload 不能为空";
+                if (st.ros_payload.size() > 4096) return where + "payload 太长了（上限 4KB）";
+                if (!(st.ros_wait_s >= 0.0) || st.ros_wait_s > kMaxDuration) {
+                    return where + "wait_s 超出 0~" + fmt_num(kMaxDuration) + " s";
+                }
                 break;
             }
             case StepType::Locomotion:

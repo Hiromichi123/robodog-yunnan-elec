@@ -1,0 +1,36 @@
+/tracked_base/tracked_base_bridge:
+  ros__parameters:
+    # backend: mock | sysfs | usbgpio
+    backend: mock
+    allow_hardware: false
+    mapping_confirmed: false
+    # sysfs backend: no default pin assignment; confirm pinmux/ownership first.
+    left_chip: ""
+    right_chip: ""
+    left_channel: -1
+    right_channel: -1
+    # USB-GPIO V4 backend (GD32 CDC ACM). Pins are set as PWM by the driver.
+    # Left/right must be two distinct channels of the same group (shared period).
+    serial_port: /dev/serial/by-id/usb-GigaDevice_GD32-CDC_ACM_86906D9C0008-if00
+    serial_baud: 115200
+    pwm_group: 1
+    left_pwm_channel: 1   # P1_1 = G17
+    right_pwm_channel: 2  # P1_2 = G18
+    pwm_resolution_counts: 120  # 120 MHz / 120 = 1 us
+    pwm_period_counts: 20000    # 20,000 us = 50 Hz
+    # EXAMPLE geometry and ESC map, not hardware calibration.
+    track_width_m: 0.4
+    max_track_speed_mps: 0.5
+    max_vx_mps: 0.5
+    max_wz_rps: 1.0
+    timeout_s: 0.5
+    left_reverse_us: 1000
+    left_neutral_us: 1500
+    left_forward_us: 2000
+    left_inverted: false
+    left_deadband: 0.02
+    right_reverse_us: 1000
+    right_neutral_us: 1500
+    right_forward_us: 2000
+    right_inverted: false
+    right_deadband: 0.02

@@ -15,6 +15,40 @@
 `not found: xxx`、`wav load failed: xxx`、`audio open failed: <device>`、
 `audio list: elevator forklift …`
 
+## 离线语音转写（ASR，只听不控）
+
+`scripts/asr_node.py` 用 A311 那块 USB 声卡**自带的麦克风**采集，Vosk 离线中文模型
+流式识别。**没有接入任何动作控制**：识别文本只发话题/网页显示。
+
+| 话题 | 方向 | 类型 | 内容 |
+|---|---|---|---|
+| `/rl_asr/control` | web → 节点 | `std_msgs/String` | `start` / `stop` / `status` |
+| `/rl_asr/text` | 节点 → web | `std_msgs/String` | 一句话的最终转写（空结果不发） |
+| `/rl_asr/partial` | 节点 → web | `std_msgs/String` | 实时中间结果；最终结果后发空串 |
+| `/rl_asr/status` | 节点 → web | `std_msgs/String` | `listening` / `stopped` / `error: <原因>`，0.5s 心跳 |
+
+- **模型不在包里**：默认 `~/asr_models/vosk-model-small-cn-0.22`
+  （[vosk-model-small-cn-0.22.zip](https://alphacephei.com/vosk/models/vosk-model-small-cn-0.22.zip)，约 42MB）。
+- **依赖**：`micromamba run -n ros pip install vosk`（已装在 ros 环境）。
+- **麦克风音量**：A311 的 `Mic` 采集出厂是 0%，节点启动时会尝试 `amixer -c A311 sset Mic 100%`；
+  系统级持久化在 `deploy/brain/bin/a311-pcm-max.sh`（udev 每次插卡触发）。
+- **起法**：
+  - 常驻：`jxg-asr.service`（enabled，开机自启，`auto_start=true` 直接聆听）。
+    服务文件和部署说明见 `deploy/brain/systemd/jxg-asr.service`。
+  - 调试：`ros2 launch rl_briefing asr_node.launch.py`。
+  - 临时随播报一起起：`ros2 launch rl_briefing briefing_player.launch.py enable_asr:=true`
+    （默认 `false` —— 常驻服务已经占着麦克风，节点有单实例锁，重复实例会安静退出）。
+- 网页面板在「真机 ROS 命令」区底部（语音转写框），可开始/停止聆听、清空记录。
+- **单实例锁**：`/tmp/rl_asr_node.lock`。dog_web / 手动 launch / 服务同时拉起时，
+  只有第一个实例真正采集，其余打一行日志后 exit 0，不会抢麦克风。
+
+```bash
+~/rosrun.sh 'ros2 launch rl_briefing asr_node.launch.py'
+~/rosrun.sh 'ros2 topic pub --once /rl_asr/control std_msgs/msg/String "{data: stop}"'
+~/rosrun.sh 'ros2 topic echo /rl_asr/text'
+systemctl status jxg-asr.service
+```
+
 ## 场景与音频
 
 - 场景定义（id / 中文名 / 关键词 / 逐句稿子）在 `config/safety_briefings.yaml`：

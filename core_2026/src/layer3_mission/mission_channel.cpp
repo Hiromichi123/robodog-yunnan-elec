@@ -29,6 +29,8 @@ DogMissionChannel::DogMissionChannel() : Node("dog_mission_node") {
         "mission_status_topic", "/dog/mission_status");
 
     status_pub_ = this->create_publisher<std_msgs::msg::String>(status_topic, 10);
+    // 语音提醒：狗端直接用这个发布器播固定名字的 wav，不走 ros2 topic pub 子进程
+    briefing_pub_ = create_publisher<std_msgs::msg::String>("/rl_briefing/play", 10);
     doc_sub_    = this->create_subscription<std_msgs::msg::String>(
         doc_topic, 10,
         [this](std_msgs::msg::String::SharedPtr m) { this->on_doc(m); });
@@ -41,6 +43,37 @@ DogMissionChannel::DogMissionChannel() : Node("dog_mission_node") {
         [this](std_msgs::msg::String::SharedPtr m) {
             std::lock_guard<std::mutex> lock(mutex_);
             drone_status_=m->data; drone_at_=std::chrono::steady_clock::now();
+        });
+    // 播报节点的 feedback/result 通道：狗端发布 /rl_briefing/play 后等它报 done，
+    // 否则“发完就算完成”，多条交底会叠在一起、看起来像一次性全播完。
+    briefing_sub_ = create_subscription<std_msgs::msg::String>(
+        "/rl_briefing/status", 10,
+        [this](std_msgs::msg::String::SharedPtr m) {
+            // "idle" 是播报节点的 2Hz 空闲心跳，不能写进通道：它会在 done 之后
+            // 0.5s 内把 done 覆盖掉，任务线程稍慢一点就永远等不到“播报结束”
+            // （2026-11-10 现场：forklift 播完，狗端仍停在第 2 步直到超时）。
+            if (m->data == "idle") return;
+            std::lock_guard<std::mutex> lock(mutex_);
+            briefing_status_ = m->data;
+            ++briefing_seq_;
+        });
+    // 运控回执：/rl_real/command 是发完即走，任务要判断"命令被接受还是被拒绝"
+    // 必须靠这条反馈（CAN/姿态异常时 rl_real 会回 command rejected: xxx）。
+    feedback_sub_ = create_subscription<std_msgs::msg::String>(
+        "/rl_real/feedback", 10,
+        [this](std_msgs::msg::String::SharedPtr m) {
+            std::lock_guard<std::mutex> lock(mutex_);
+            command_feedback_ = m->data;
+            ++command_feedback_seq_;
+        });
+    // 姿态/就绪状态（8Hz JSON）：can_ready / probe_done / probe_ready / stand_reason
+    posture_sub_ = create_subscription<std_msgs::msg::String>(
+        "/rl_real/posture", 10,
+        [this](std_msgs::msg::String::SharedPtr m) {
+            std::lock_guard<std::mutex> lock(mutex_);
+            posture_ = m->data;
+            ++posture_seq_;
+            posture_at_ = std::chrono::steady_clock::now();
         });
     takeoff_enabled_ = declare_parameter<bool>("enable_takeoff_getdown", false);
     const bool web_mode = declare_parameter<bool>("wait_for_mission", false);
@@ -117,6 +150,47 @@ void DogMissionChannel::set_abort_hook(std::function<void()> hook) {
     abort_hook_ = std::move(hook);
 }
 
+bool DogMissionChannel::briefing_status(std::string& out, uint64_t& seq) const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (briefing_seq_ == 0) return false;
+    out = briefing_status_;
+    seq = briefing_seq_;
+    return true;
+}
+
+bool DogMissionChannel::command_feedback(std::string& out, uint64_t& seq) const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (command_feedback_seq_ == 0) return false;
+    out = command_feedback_;
+    seq = command_feedback_seq_;
+    return true;
+}
+
+bool DogMissionChannel::posture_state(std::string& out, double& age_s) const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (posture_seq_ == 0) return false;
+    age_s = std::chrono::duration<double>(
+        std::chrono::steady_clock::now() - posture_at_).count();
+    out = posture_;
+    return true;
+}
+
+void DogMissionChannel::announce(const std::string& scene) {
+    if (!briefing_pub_) return;
+    std_msgs::msg::String message;
+    message.data = scene;
+    briefing_pub_->publish(message);
+}
+
+void DogMissionChannel::stop_announce() {
+    // 交底音频动辄几分钟（forklift.wav 约 3 分 20 秒）：急停后如果不停播，
+    // 现场听到声音还在放，会以为任务根本没停。
+    if (!briefing_pub_) return;
+    std_msgs::msg::String message;
+    message.data = "stop";
+    briefing_pub_->publish(message);
+}
+
 void DogMissionChannel::set_doc_accepting(bool on) {
     std::lock_guard<std::mutex> lock(mutex_);
     doc_accepting_ = on;
@@ -131,6 +205,8 @@ void DogMissionChannel::on_doc(const std_msgs::msg::String::SharedPtr msg) {
                     msg->data.size());
         return;
     }
+    // 收到平台任务就播报“收到平台下发任务”，执行线程会在开始前等它播完
+    announce("mission_recv");
     pending_doc_ = msg->data;
     has_doc_     = true;
     RCLCPP_INFO(this->get_logger(), "[任务通道] 收到任务（%zu 字节），等主线程取走",
@@ -219,7 +295,7 @@ void DogMissionChannel::publish_status_now() {
     }
 
     auto msg = std_msgs::msg::String();
-    msg.data = j.dump();
+    msg.data = j.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
     status_pub_->publish(msg);
 }
 

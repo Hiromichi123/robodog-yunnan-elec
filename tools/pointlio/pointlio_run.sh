@@ -12,7 +12,7 @@ for option in "$@"; do
 done
 exec 9>"$HOME/.fastlivo.lock"
 flock -n 9 || { echo 'A SLAM stack is already running.' >&2; exit 1; }
-# Freeze once before any sensor is started; Web already supplies its owned snapshot.
+# Freeze once before any SLAM process is started; Web already supplies its owned snapshot.
 ROBODOG_SAFETY_SNAPSHOT=$(python3 "$HOME/ros2_ws/install/lib/core_2026/start_local_safety.py" --prepare)
 export ROBODOG_SAFETY_SNAPSHOT
 export MAMBA_ROOT_PREFIX="${MAMBA_ROOT_PREFIX:-$HOME/micromamba}"

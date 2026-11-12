@@ -9,11 +9,12 @@ from launch_ros.substitutions import FindPackageShare
 def generate_launch_description():
     return LaunchDescription([
         SetEnvironmentVariable('RMW_IMPLEMENTATION', 'rmw_cyclonedds_cpp'),
+        SetEnvironmentVariable('CYCLONEDDS_URI', 'file:///home/jinjiao/ros2_ws/config/jxg_web_dds.xml'),
         DeclareLaunchArgument('port', default_value='9090'),
         DeclareLaunchArgument('address', default_value='0.0.0.0'),
         IncludeLaunchDescription(
             AnyLaunchDescriptionSource(PathJoinSubstitution([
-                FindPackageShare('rosbridge_server'), 'launch', 'rosbridge_websocket_launch.xml'])),
+                FindPackageShare('core_2026'), 'rosbridge_guarded_launch.xml'])),
             launch_arguments={'port': LaunchConfiguration('port'),
                               'address': LaunchConfiguration('address')}.items()),
     ])

@@ -1,0 +1,22 @@
+[Unit]
+Description=JXG persistent Livox MID360 driver (independent of SLAM)
+Wants=network-online.target
+After=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=jinjiao
+Group=jinjiao
+Environment=HOME=/home/jinjiao
+Environment=PYTHONUNBUFFERED=1
+WorkingDirectory=/home/jinjiao
+ExecStart=/home/jinjiao/lidar_driver_run.sh
+Restart=always
+RestartSec=5
+KillSignal=SIGINT
+KillMode=control-group
+TimeoutStopSec=20
+
+[Install]
+WantedBy=multi-user.target

@@ -81,15 +81,20 @@ DogSystem::~DogSystem() {
 }
 
 void DogSystem::run() {
-    if (!wait_for_lidar()) return;
-
     if (hal_->get_wait_for_mission()) {
-        // 网页驱动：预检交出去，变成任务里的步骤（操作员在网页上看得见、可编排）
+        // 网页驱动：预检交出去，变成任务里的步骤（操作员在网页上看得见、可编排）。
+        // 定位不能在这里堵死任务通道 —— 操作点位（ROS 话题）不需要定位，
+        // 需要定位的导航步骤会自己校验位姿并给出失败原因。
+        if (!hal_->has_state()) {
+            RCLCPP_WARN(hal_->get_logger(),
+                        "[PreFlight] 未收到 lidar_data 定位数据 —— 仍接受任务，导航类步骤会自行拒绝");
+        }
         run_mission_loop();
         return;
     }
 
     // ── 旧路径：固定流程 + 终端回车闸门（一字不改）────────────────────
+    if (!wait_for_lidar()) return;
     if (!pre_flight_checks()) {
         RCLCPP_ERROR(hal_->get_logger(),
                      "[DogSystem] 预检未通过，不执行任务（狗按安全流程处置）");

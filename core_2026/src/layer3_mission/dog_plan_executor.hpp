@@ -70,6 +70,16 @@ private:
     Outcome do_wait(const MissionStep& st);
     Outcome do_getdown(const MissionStep& st);
     Outcome do_drone_mission(const MissionStep& st);
+    Outcome do_ros_pub(const MissionStep& st);
+    /**
+     * 播报类话题的“等结果”（Action 的 wait-for-result）：
+     * 发布 /rl_briefing/play 后一直等到 briefing_player 报 done / 失败。
+     * since_seq 是发布前记下的状态序号，只认这之后到达的状态。
+     */
+    Outcome wait_briefing_done(double timeout_s, uint64_t since_seq);
+    // 动作型运控命令（起立/趴下）：accepted 只说明运控收下了命令，
+    // 还要等 /rl_real/posture 真正到位，否则下一条命令会在动作途中把它掐断。
+    Outcome wait_posture(const std::string& target, double timeout_s);
 
     /** 危险步骤前的人工闸门（终端回车那道闸门的网页版）。 */
     Gate confirm_gate(StepType type, const std::string& prompt,
